@@ -1,3 +1,7 @@
+// ─── API KEY ──────────────────────────────────────────────────────────────────
+// Pega aquí tu token de GitHub Models o OpenAI para no tener que introducirlo cada vez:
+const DEFAULT_API_KEY = '';
+
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 
@@ -885,6 +889,10 @@ $(function() {
   });
 
   document.getElementById('ai-perval-btn').addEventListener('click', analyzePerval);
+
+  if (DEFAULT_API_KEY) {
+    document.getElementById('ai-apikey').value = DEFAULT_API_KEY;
+  }
 
   updateUI();
 });

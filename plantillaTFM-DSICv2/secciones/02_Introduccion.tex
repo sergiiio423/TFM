@@ -57,25 +57,32 @@ Este proyecto se alinea con los siguientes Objetivos de Desarrollo Sostenible (O
 \section{Metodología}
 %%---------------------------------------------------------
 
-La metodología seguida en este trabajo combina un enfoque de desarrollo iterativo de software con un diseño de investigación empírica. En la fase de desarrollo, la herramienta se ha construido de forma incremental, definiendo en cada iteración los requisitos funcionales, implementando las funcionalidades y evaluando los resultados obtenidos.
+La metodología seguida en este trabajo combina el desarrollo de una herramienta software con el diseño y ejecución de un estudio empírico. El trabajo se estructura en tres fases diferenciadas.
 
-Para el estudio empírico, se ha seguido un diseño basado en la comparación entre el analista automatizado (la herramienta desarrollada) y un analista experto humano. El caso de estudio empleado es un proceso de compra en línea inspirado en escenarios reales de comercio electrónico, sobre el cual se han realizado diversas iteraciones de modelado y análisis de valor.
+En la primera fase se lleva a cabo un estudio del estado del arte, revisando la literatura existente sobre modelado de procesos de negocio con BPMN, el uso de LLMs para la generación de artefactos software, la clasificación PERVAL para la identificación del valor del cliente y las herramientas de modelado disponibles, con especial atención a bpmn.io.
 
-La validación de los modelos BPMN generados se ha realizado mediante la comparación estructural y semántica con los modelos elaborados por el experto, mientras que la validación de los valores identificados se ha llevado a cabo mediante comparación con la clasificación PERVAL aplicada de forma manual.
+En la segunda fase se diseña e implementa la herramienta: una extensión sobre una versión local de bpmn.io que integra un LLM para permitir la generación y el análisis de modelos BPMN a partir de descripciones en lenguaje natural, así como la identificación de los valores asociados al cliente según la clasificación PERVAL.
+
+En la tercera fase se diseña y ejecuta el estudio empírico. Se emplea como caso de estudio un proceso de compra en línea inspirado en escenarios reales de comercio electrónico, sobre el cual se realizan diversas iteraciones de modelado y análisis de valor. Los modelos BPMN y los valores identificados automáticamente por la herramienta se comparan con los generados por un analista experto humano, con el objetivo de evaluar hasta qué punto la herramienta es capaz de aproximarse al criterio humano.
 
 %%---------------------------------------------------------
 \section{Estructura}
 %%---------------------------------------------------------
 
-La estructura de este TFM ha sido diseñada para guiar al lector a lo largo del proceso de desarrollo e investigación llevado a cabo. A continuación, se describe brevemente el contenido de cada capítulo y los anexos.
+La estructura de este TFM ha sido diseñada para guiar al lector a lo largo del proceso de investigación y desarrollo llevado a cabo. A continuación, se describe brevemente el contenido de cada capítulo y los anexos.
 
 \begin{itemize}
-    \item[$\bullet$] \textbf{Introducción:} en este apartado se contextualiza el proyecto, incluyendo la motivación, los objetivos y el impacto esperado. También se expone la metodología aplicada y las convenciones adoptadas.
-    \item[$\bullet$] \textbf{Desarrollo:} en este apartado se describe el diseño e implementación de la herramienta, incluyendo la arquitectura del sistema, la integración con bpmn.io y el módulo de análisis de valor basado en LLMs.
-    \item[$\bullet$] \textbf{Resultados:} se presentan los resultados del estudio empírico, comparando los modelos BPMN y los valores identificados automáticamente con los generados por el analista experto.
-    \item[$\bullet$] \textbf{Conclusiones:} se resumen los principales hallazgos del trabajo, se discuten las limitaciones encontradas y se proponen líneas de trabajo futuro.
-    \item[$\bullet$] \textbf{Bibliografía:} se recogen todas las fuentes de información consultadas durante la realización del TFM, incluyendo artículos académicos, documentación técnica y recursos digitales relevantes para el desarrollo del proyecto.
-    \item[$\bullet$] \textbf{Anexos:} contienen información complementaria al cuerpo principal del documento.
+    \item[$\bullet$] \textbf{Introducción:} en este capítulo se contextualiza el proyecto, explicando la motivación que lo origina, los objetivos planteados y el impacto esperado. También se describe la metodología seguida, la estructura del documento y las convenciones tipográficas adoptadas.
+
+    \item[$\bullet$] \textbf{Desarrollo:} este capítulo constituye el núcleo del trabajo y se organiza en varias partes. En primer lugar, se presenta el marco teórico, donde se revisan los conceptos fundamentales sobre modelado de procesos de negocio con BPMN, el funcionamiento y capacidades de los LLMs, la clasificación PERVAL para la identificación del valor del cliente y la herramienta bpmn.io como base tecnológica. A continuación, se describe el diseño de la solución propuesta, detallando la arquitectura de la extensión desarrollada y su integración con bpmn.io. Se explica el módulo de generación de modelos BPMN a partir de descripciones en lenguaje natural mediante un LLM, así como el módulo de análisis y clasificación del valor del cliente según PERVAL. Finalmente, se presenta el diseño del estudio empírico, incluyendo la definición del caso de estudio basado en un proceso de compra en línea, el procedimiento de ejecución de las iteraciones de modelado y análisis, y las métricas y criterios de comparación utilizados para evaluar los resultados de la herramienta frente al criterio del analista experto.
+
+    \item[$\bullet$] \textbf{Resultados:} en este capítulo se presentan y analizan los resultados obtenidos en el estudio empírico. Se comparan los modelos BPMN generados automáticamente con los elaborados por el analista experto, así como los valores identificados por la herramienta con los clasificados manualmente según PERVAL. Se discute el grado de alineamiento entre ambos enfoques y se interpretan las diferencias encontradas.
+
+    \item[$\bullet$] \textbf{Conclusiones:} en este capítulo se recogen las principales conclusiones del trabajo, valorando en qué medida se han alcanzado los objetivos planteados. Se reflexiona sobre las limitaciones de la herramienta y del estudio empírico, y se proponen posibles líneas de trabajo futuro que permitan ampliar o mejorar los resultados obtenidos.
+
+    \item[$\bullet$] \textbf{Bibliografía:} se recogen todas las fuentes de información consultadas durante la realización del TFM, incluyendo artículos de investigación, publicaciones académicas, documentación técnica y recursos digitales que han sido relevantes para el desarrollo del proyecto.
+
+    \item[$\bullet$] \textbf{Anexos:} contienen información complementaria al cuerpo principal del documento, incluyendo material de apoyo al estudio empírico y otros recursos adicionales que facilitan la comprensión del trabajo realizado.
 \end{itemize}
 
 %%---------------------------------------------------------

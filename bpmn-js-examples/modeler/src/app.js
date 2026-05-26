@@ -70,6 +70,7 @@ var interviewHistory = [];
 var preguntaCount = 0;
 var MAX_PREGUNTAS = 10;
 var diagramaGenerado = false;
+var pervalAnalisado = false;
 
 
 // ─── HELPERS DEL CHAT ────────────────────────────────────────────────────────
@@ -194,25 +195,32 @@ function addQuestionWithOptions(questionText, options, multiselect = false) {
 }
 
 function updateUI() {
-  const btn      = document.getElementById('ai-send');
-  const textarea = document.getElementById('ai-scenario');
+  const btn       = document.getElementById('ai-send');
+  const textarea  = document.getElementById('ai-scenario');
   const inputArea = document.getElementById('ai-free-input');
+  const pervalBtn = document.getElementById('ai-perval-btn');
 
   if (fase === 'interview') {
     btn.textContent = '➤ Enviar respuesta libre';
     btn.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
     textarea.placeholder = 'O escribe libremente si ninguna opción encaja...';
     if (inputArea) inputArea.style.display = 'flex';
+    if (pervalBtn) pervalBtn.style.display = 'none';
   } else if (fase === 'diagram' && !diagramaGenerado) {
     btn.textContent = '✦ Generar diagrama BPMN';
     btn.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
     textarea.placeholder = 'Pulsa generar o añade algo más antes...';
     if (inputArea) inputArea.style.display = 'flex';
+    if (pervalBtn) pervalBtn.style.display = 'none';
   } else {
     btn.textContent = '✦ Modificar diagrama';
     btn.style.background = 'linear-gradient(135deg, #059669, #0d9488)';
     textarea.placeholder = 'Ej: Añade un gateway antes del pago, renombra el lane de logística...';
     if (inputArea) inputArea.style.display = 'flex';
+    if (pervalBtn) {
+      pervalBtn.style.display = 'block';
+      pervalBtn.textContent = pervalAnalisado ? '🔄 Re-analizar PERVAL' : '🔍 Analizar valor PERVAL';
+    }
   }
 }
 
@@ -341,6 +349,188 @@ ${currentXML}
 Aplica la siguiente modificación y devuelve el XML completo actualizado:
 
 "${instruction}"`;
+}
+
+
+// ─── PERVAL ───────────────────────────────────────────────────────────────────
+
+function extractTasksFromXML(xml) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const ns = 'http://www.omg.org/spec/BPMN/20100524/MODEL';
+    const types = ['task', 'userTask', 'serviceTask', 'sendTask', 'receiveTask', 'manualTask', 'scriptTask', 'businessRuleTask'];
+    const tasks = [];
+    types.forEach(type => {
+      Array.from(doc.getElementsByTagNameNS(ns, type)).forEach(el => {
+        const name = el.getAttribute('name');
+        if (name && name.trim()) tasks.push(name.trim());
+      });
+    });
+    return [...new Set(tasks)];
+  } catch (e) {
+    console.error('Error extrayendo tareas:', e);
+    return [];
+  }
+}
+
+function buildPervalSystemPrompt() {
+  return `Eres un experto en análisis del valor percibido por el cliente según la clasificación PERVAL (Sweeney y Soutar, 2001), aplicada a procesos de comercio electrónico.
+
+La escala PERVAL evalúa el valor percibido a través de 4 dimensiones:
+
+CALIDAD (Quality): Utilidad derivada de la calidad percibida y el desempeño del proceso.
+Atributos: rendimiento consistente del sistema, proceso de selección intuitivo, seguridad y privacidad de datos, satisfacción del cliente, proactividad en resolución de problemas, flexibilidad y adaptabilidad del servicio.
+
+PRECIO (Price): Utilidad derivada de la reducción de costos percibidos a corto y largo plazo.
+Atributos: transparencia en el desglose de precios y tarifas, relación calidad-precio, posibilidad de ahorros financieros (descuentos, cupones, ofertas, precios competitivos).
+
+EMOCIONAL (Emotional): Utilidad derivada de los sentimientos o estados afectivos generados al interactuar con el proceso.
+Atributos: conveniencia y facilidad de uso, compensación por inconvenientes sufridos, personalización del servicio al cliente, atención a las necesidades específicas, bienestar y disfrute de la experiencia de compra.
+
+SOCIAL (Social): Utilidad derivada de la mejora de la autopercepción social del cliente.
+Atributos: cobertura extensa de entrega, flexibilidad en los métodos de entrega, flexibilidad en los métodos de pago, accesibilidad del servicio para distintos perfiles de usuario.
+
+TAREA: Analiza el modelo BPMN de e-commerce proporcionado. Para cada tarea, identifica qué dimensión(es) PERVAL genera valor al cliente cuando este interactúa con dicha actividad. Las tareas puramente internas sin impacto en el cliente clasifícalas como "Interno".
+
+REGLAS:
+- Una tarea puede pertenecer a una o varias dimensiones
+- Sé específico en la justificación, citando qué atributo PERVAL concreto aplica
+- Considera tanto el impacto directo (el cliente ejecuta la tarea) como el indirecto (la tarea genera un resultado que el cliente percibe)
+
+RESPONDE ÚNICAMENTE con JSON válido con esta estructura exacta:
+{
+  "tareas": [
+    {
+      "nombre": "nombre exacto de la tarea",
+      "dimensiones": ["Quality"],
+      "valor": "descripción breve del valor que aporta al cliente",
+      "justificacion": "atributo PERVAL específico que aplica"
+    }
+  ],
+  "resumen": {
+    "Quality": "síntesis del valor de calidad generado en el proceso",
+    "Price": "síntesis del valor económico generado",
+    "Emotional": "síntesis del valor emocional generado",
+    "Social": "síntesis del valor social generado"
+  },
+  "valorGeneral": "evaluación global del alineamiento entre el valor modelado por la organización y el valor potencialmente percibido por el cliente"
+}`;
+}
+
+function buildPervalUserMessage(xml, tasks) {
+  return `Analiza el siguiente modelo BPMN de proceso de compra en línea y clasifica cada tarea según las dimensiones PERVAL.
+
+TAREAS IDENTIFICADAS EN EL PROCESO:
+${tasks.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+XML DEL MODELO BPMN:
+${xml}
+
+Devuelve el análisis PERVAL completo en formato JSON.`;
+}
+
+function showPervalResults(data) {
+  const dim = {
+    Quality:   { bg: 'rgba(59,130,246,0.15)',  border: 'rgba(59,130,246,0.35)',  text: '#93c5fd', icon: '🔵', label: 'Calidad'   },
+    Price:     { bg: 'rgba(34,197,94,0.15)',   border: 'rgba(34,197,94,0.35)',   text: '#86efac', icon: '🟢', label: 'Precio'    },
+    Emotional: { bg: 'rgba(249,115,22,0.15)',  border: 'rgba(249,115,22,0.35)',  text: '#fdba74', icon: '🟠', label: 'Emocional' },
+    Social:    { bg: 'rgba(168,85,247,0.15)',  border: 'rgba(168,85,247,0.35)',  text: '#d8b4fe', icon: '🟣', label: 'Social'    },
+    Interno:   { bg: 'rgba(107,114,128,0.12)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af', icon: '⚪', label: 'Interno'   }
+  };
+
+  const taskRows = (data.tareas || []).map(t => {
+    const badges = (t.dimensiones || []).map(d => {
+      const c = dim[d] || dim.Interno;
+      return `<span class="pv-badge" style="background:${c.bg};border:1px solid ${c.border};color:${c.text}">${c.icon} ${c.label}</span>`;
+    }).join('');
+    return `<div class="pv-row">
+      <div class="pv-name">${t.nombre}</div>
+      <div class="pv-badges">${badges}</div>
+      <div class="pv-desc">${t.valor || ''}</div>
+    </div>`;
+  }).join('');
+
+  const summaryCards = Object.entries(data.resumen || {}).map(([d, text]) => {
+    const c = dim[d] || dim.Interno;
+    return `<div class="pv-sum-card" style="background:${c.bg};border:1px solid ${c.border}">
+      <div class="pv-sum-title" style="color:${c.text}">${c.icon} ${c.label}</div>
+      <div class="pv-sum-text">${text}</div>
+    </div>`;
+  }).join('');
+
+  const generalHtml = data.valorGeneral
+    ? `<div class="pv-general"><span class="pv-general-lbl">Valoración global · </span>${data.valorGeneral}</div>`
+    : '';
+
+  const html = `<div class="pv-results">
+    <div class="pv-header">📊 Análisis PERVAL del Proceso</div>
+    <div class="pv-section-lbl">Clasificación por tarea</div>
+    <div class="pv-tasks">${taskRows}</div>
+    <div class="pv-section-lbl" style="margin-top:10px">Resumen por dimensión</div>
+    <div class="pv-summary">${summaryCards}</div>
+    ${generalHtml}
+  </div>`;
+
+  const messages = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble pv-bubble">${html}</div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function analyzePerval() {
+  const apiKey = document.getElementById('ai-apikey').value.trim();
+  if (!apiKey) {
+    addMessage('⚠️ Introduce tu API Key antes de continuar.', 'ai', 'err');
+    return;
+  }
+
+  const pervalBtn = document.getElementById('ai-perval-btn');
+  pervalBtn.disabled = true;
+  addTyping();
+  addMessage('🔍 Extrayendo tareas del modelo y analizando valor PERVAL...', 'ai');
+
+  try {
+    const { xml: currentXML } = await modeler.saveXML({ format: true });
+    const tasks = extractTasksFromXML(currentXML);
+
+    if (tasks.length === 0) {
+      removeTyping();
+      addMessage('⚠️ No se encontraron tareas en el diagrama. Genera el diagrama primero.', 'ai', 'err');
+      return;
+    }
+
+    const rawResponse = await callAPI(
+      apiKey,
+      buildPervalSystemPrompt(),
+      [{ role: 'user', content: buildPervalUserMessage(currentXML, tasks) }]
+    );
+
+    removeTyping();
+
+    let data;
+    try {
+      const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+      data = JSON.parse(jsonMatch ? jsonMatch[0] : rawResponse);
+    } catch (e) {
+      addMessage('❌ No se pudo procesar la respuesta del análisis PERVAL.', 'ai', 'err');
+      console.error('PERVAL parse error:', e, rawResponse);
+      return;
+    }
+
+    showPervalResults(data);
+    pervalAnalisado = true;
+
+  } catch (err) {
+    removeTyping();
+    addMessage(`❌ Error en el análisis PERVAL: ${err.message}`, 'ai', 'err');
+    console.error(err);
+  } finally {
+    pervalBtn.disabled = false;
+    updateUI();
+  }
 }
 
 
@@ -680,6 +870,7 @@ $(function() {
     fase = 'interview';
     interviewHistory = [];
     diagramaGenerado = false;
+    pervalAnalisado = false;
     preguntaCount = 0;
     document.getElementById('ai-messages').innerHTML = `
       <div class="msg ai">
@@ -692,6 +883,8 @@ $(function() {
     updateUI();
     createNewDiagram();
   });
+
+  document.getElementById('ai-perval-btn').addEventListener('click', analyzePerval);
 
   updateUI();
 });

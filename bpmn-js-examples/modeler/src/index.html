@@ -275,6 +275,59 @@
       color: rgba(120,120,160,0.5);
       text-align: center;
     }
+
+    /* ── Botón PERVAL ── */
+    #ai-perval-btn {
+      display: none;
+      width: 100%;
+      padding: 9px;
+      background: linear-gradient(135deg, #0f766e, #0369a1);
+      border: none; border-radius: 10px;
+      color: white; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    #ai-perval-btn:hover:not(:disabled) { opacity:.88; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6,182,212,0.35); }
+    #ai-perval-btn:disabled { opacity:.35; cursor: not-allowed; transform: none; }
+
+    /* ── Resultados PERVAL ── */
+    .pv-bubble { max-width: 100% !important; width: 100%; box-sizing: border-box; padding: 0 !important; overflow: hidden; }
+    .pv-results { font-size: 12px; }
+    .pv-header {
+      padding: 10px 12px;
+      background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(59,130,246,0.08));
+      border-bottom: 1px solid rgba(6,182,212,0.2);
+      font-weight: 700; font-size: 13px; color: #7dd3fc;
+    }
+    .pv-section-lbl {
+      padding: 6px 12px 3px;
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.7px; color: rgba(120,120,180,0.6);
+    }
+    .pv-tasks { padding: 0 8px; display: flex; flex-direction: column; gap: 4px; }
+    .pv-row {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px; padding: 7px 9px;
+    }
+    .pv-name { font-weight: 600; color: #e0e0ff; margin-bottom: 4px; font-size: 12px; }
+    .pv-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    .pv-badge {
+      border-radius: 6px; padding: 2px 7px;
+      font-size: 10px; font-weight: 600; white-space: nowrap;
+    }
+    .pv-desc { font-size: 11px; color: rgba(160,160,200,0.7); line-height: 1.4; }
+    .pv-summary { padding: 0 8px 8px; display: flex; flex-direction: column; gap: 5px; }
+    .pv-sum-card { border-radius: 8px; padding: 8px 10px; }
+    .pv-sum-title { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+    .pv-sum-text { font-size: 11px; color: rgba(200,200,230,0.75); line-height: 1.4; }
+    .pv-general {
+      margin: 4px 8px 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px; padding: 8px 10px;
+      font-size: 11px; color: rgba(180,180,220,0.8); line-height: 1.5;
+    }
+    .pv-general-lbl { font-weight: 700; color: #cbd5e1; }
   </style>
 </head>
 <body>
@@ -322,8 +375,8 @@
           </svg>
         </div>
         <div>
-          <div class="ai-title">BPMN AI Generator</div>
-          <div class="ai-subtitle">powered by ChatGPT</div>
+          <div class="ai-title">BPMN AI + PERVAL</div>
+          <div class="ai-subtitle">Generación y análisis de valor</div>
         </div>
       </div>
       <div class="ai-header-actions">
@@ -350,6 +403,7 @@
       <textarea id="ai-scenario" rows="2"
         placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
       <button id="ai-send">➤ Enviar</button>
+      <button id="ai-perval-btn">🔍 Analizar valor PERVAL</button>
       <div class="hint">Ctrl+Enter para enviar · ↺ para nueva conversación</div>
     </div>
   </div>

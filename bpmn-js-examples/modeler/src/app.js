@@ -1,6 +1,6 @@
 // ─── API KEY ──────────────────────────────────────────────────────────────────
 // Pega aquí tu token de GitHub Models o OpenAI para no tener que introducirlo cada vez:
-const DEFAULT_API_KEY = '';
+const DEFAULT_API_KEY = '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';
 
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
@@ -194,6 +194,7 @@ function addQuestionWithOptions(questionText, options, multiselect = false) {
 
     // Mostrar respuesta del usuario y continuar
     addMessage(finalAnswer, 'user');
+    interviewHistory.push({ role: 'user', content: finalAnswer });
     processInterviewAnswer(finalAnswer);
   });
 }
@@ -234,96 +235,121 @@ function updateUI() {
 function buildInterviewSystemPrompt() {
   return `Eres un experto en modelado de procesos de negocio BPMN 2.0, especializado en comercio electrónico (e-commerce).
 
-Tu objetivo es recopilar información para crear un diagrama BPMN completo con pools y lanes correctos.
+Tu objetivo es recopilar información suficiente para crear un diagrama BPMN completo y profesional.
 
-INSTRUCCIONES:
-- Haz como máximo 10 preguntas en total. Llevas {{COUNT}} preguntas hechas.
-- Haz UNA sola pregunta a la vez.
-- SIEMPRE que sea posible, ofrece opciones predefinidas en formato JSON al final de tu pregunta.
-- El formato de tu respuesta debe ser SIEMPRE uno de estos dos:
+══ DETECCIÓN AUTOMÁTICA DE DESCRIPCIÓN COMPLETA ══
+Evalúa PRIMERO si el mensaje inicial ya contiene toda la información necesaria. Una descripción es COMPLETA si incluye:
+  ✓ Participantes/actores externos identificados (cliente, proveedor, pasarela de pago, etc.)
+  ✓ Departamentos o áreas internas identificadas (serán los lanes)
+  ✓ Secuencia de pasos del proceso (flujo principal)
+  ✓ Al menos una decisión o condición descrita
+Si se cumplen los 4 criterios → emite INMEDIATAMENTE [READY_TO_GENERATE] sin hacer ninguna pregunta.
 
-FORMATO A - Pregunta con opciones:
+══ SI LA DESCRIPCIÓN ES INCOMPLETA ══
+Haz preguntas para cubrir lo que falta, en este orden de prioridad:
+  1. Actores externos (pools): clientes, proveedores, pasarelas de pago, transportistas
+  2. Departamentos internos (lanes): cada área será un carril
+  3. Flujo principal: pasos ordenados del proceso
+  4. Decisiones clave: condiciones que bifurcan el flujo
+  5. Excepciones y casos especiales (cancelaciones, errores, timeouts)
+  6. Comunicaciones entre actores (mensajes, emails, notificaciones)
+  7. Restricciones temporales (timers, plazos)
+
+LÍMITE: máximo {{COUNT}} de 8 preguntas en total. Cuando tengas actores, lanes, flujo y decisiones cubiertos → [READY_TO_GENERATE].
+
+══ FORMATO DE RESPUESTA ══
+
+Si la descripción es completa (criterios ✓ cumplidos):
+[READY_TO_GENERATE]
+
+Si necesitas más información — pregunta con opciones siempre que sea posible:
 PREGUNTA: [texto de la pregunta]
 OPCIONES: ["opción1", "opción2", "opción3", "opción4"]
 MULTISELECT: true/false
 
-FORMATO B - Pregunta abierta (solo si no tiene sentido dar opciones):
-PREGUNTA: [texto de la pregunta]
-
-FORMATO C - Cuando tengas suficiente información (actores externos, departamentos, flujo principal, decisiones):
-[READY_TO_GENERATE]
-
-TEMAS A CUBRIR en orden:
-1. Tipo de proceso de negocio (si no está claro del contexto inicial)
-2. Actores EXTERNOS: clientes, proveedores, pasarelas de pago, transportistas
-3. Valor que recibe el cliente externo al final
-4. Departamentos/áreas INTERNAS (cada uno será un lane)
-5. Sub-departamentos si los hay
-6. Decisiones o condiciones clave que bifurcan el proceso
-7. Notificaciones o comunicaciones con actores externos
-8. Sistemas tecnológicos implicados
-9. Restricciones temporales o de negocio relevantes
-10. Cualquier caso especial o excepción importante
-
-Si ya tienes información clara sobre actores, departamentos, flujo principal y decisiones clave, emite [READY_TO_GENERATE] aunque no hayas hecho las 10 preguntas.`;
+Si no tiene sentido dar opciones:
+PREGUNTA: [texto de la pregunta]`;
 }
 
 function buildGenerationSystemPrompt() {
-  return `Eres un experto en modelado de procesos BPMN 2.0 especializado en e-commerce.
+  return `Eres un experto BPMN 2.0. Devuelve SOLO XML válido, sin texto ni markdown.
 
-Genera diagramas BPMN complejos y detallados, similares en riqueza visual a los diagramas profesionales con múltiples pools, lanes, gateways y message flows.
+══ CATÁLOGO DE ELEMENTOS ══
 
-REGLAS ESTRICTAS - devuelve ÚNICAMENTE XML válido:
-1. Empieza con <?xml version="1.0" encoding="UTF-8"?>
-2. El elemento raíz <definitions> con estos namespaces obligatorios:
-   xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-   targetNamespace="http://bpmn.io/schema/bpmn"
-   id="Definitions_1"
+EVENTOS DE INICIO (usa el adecuado según contexto):
+  <startEvent id="SE_1" name="Proceso iniciado"/>                                              ← simple
+  <startEvent id="SE_1" name="Pedido recibido"><messageEventDefinition/></startEvent>         ← inicia por mensaje externo
+  <startEvent id="SE_1" name="Programado"><timerEventDefinition/></startEvent>                ← inicia por tiempo
 
-3. ESTRUCTURA OBLIGATORIA:
-   a) Un <collaboration id="Collaboration_1"> con:
-      - Un <participant> por cada actor externo (Cliente, Pasarela de Pago, Mensajería, etc.)
-      - Un <participant> para el proceso principal (Servicio de Catering)
-      - <messageFlow> entre participants para mostrar comunicaciones entre ellos
-   b) Un <process> por cada participant con sus elementos internos
-   c) El proceso principal debe tener <laneSet> con un <lane> por cada departamento
-   d) Cada flowElement referenciado en un lane mediante <flowNodeRef>
+EVENTOS INTERMEDIOS EN EL FLUJO:
+  <intermediateCatchEvent id="ICE_1" name="Esperar confirmación"><messageEventDefinition/></intermediateCatchEvent>  ← recibir mensaje
+  <intermediateCatchEvent id="ICE_1" name="Esperar 24h"><timerEventDefinition/></intermediateCatchEvent>            ← espera tiempo
+  <intermediateThrowEvent id="ITE_1" name="Enviar notificación"><messageEventDefinition/></intermediateThrowEvent>  ← lanzar mensaje
 
-4. TIPOS DE ELEMENTOS a usar según contexto:
-   - startEvent con messageEventDefinition para inicio por mensaje externo
-   - endEvent con messageEventDefinition para envío de mensaje al finalizar
-   - userTask para tareas manuales del usuario
-   - serviceTask para tareas automáticas del sistema
-   - sendTask para envío de notificaciones o emails
-   - receiveTask para espera de confirmaciones externas
-   - exclusiveGateway para decisiones SI/NO
-   - parallelGateway para tareas en paralelo
-   - intermediateCatchEvent con timerEventDefinition para esperas de tiempo
-   - boundaryEvent para eventos que interrumpen una tarea
+BOUNDARY EVENTS (sobre tareas, para excepciones/timeouts):
+  <boundaryEvent id="BE_1" attachedToRef="T_1"><timerEventDefinition/></boundaryEvent>                     ← timeout (interrumpe)
+  <boundaryEvent id="BE_1" attachedToRef="T_1"><errorEventDefinition/></boundaryEvent>                     ← error (interrumpe)
+  <boundaryEvent id="BE_1" cancelActivity="false" attachedToRef="T_1"><timerEventDefinition/></boundaryEvent> ← timeout (no interrumpe)
+  Waypoints del BoundaryEvent en DI: task.x + task.width/2 - 18,  task.y + task.height - 18
 
-5. COORDENADAS Y TAMAÑO:
-   - Pool principal (empresa): x=30, y=30, width=1400, height=500 (ajustar según lanes)
-   - Cada lane interno: height=160, width igual al pool
-   - Actors externos (pools): encima o debajo del pool principal, height=160
-   - Primer lane en y=80 relativo al pool, siguiente en y=240, siguiente en y=400, etc.
-   - Elementos: x empieza en 180 dentro del lane, incrementa 160 por elemento
-   - y de cada elemento centrado en su lane
-   - Tasks: width=100 height=80
-   - Eventos: width=36 height=36
-   - Gateways: width=50 height=50
-   - messageFlow representado con BPMNEdge entre los elementos que se comunican
+EVENTOS DE FIN:
+  <endEvent id="EE_1" name="Fin"/>
+  <endEvent id="EE_1" name="Error"><errorEventDefinition/></endEvent>
+  <endEvent id="EE_1" name="Proceso cancelado"><terminateEventDefinition/></endEvent>
+  <endEvent id="EE_1" name="Confirmación enviada"><messageEventDefinition/></endEvent>
 
-6. RIQUEZA DEL DIAGRAMA:
-   - Incluye TODOS los pasos del proceso descritos en la entrevista
-   - No simplifiques: si hay 15 tareas, dibuja 15 tareas
-   - Incluye todos los gateways necesarios para las decisiones
-   - Incluye messageFlow para TODAS las comunicaciones entre pools
-   - Incluye eventos de timer cuando haya restricciones de tiempo
+TAREAS (elige siempre el tipo correcto):
+  <userTask       id="T_1" name="Revisar pedido"/>           ← acción manual de usuario
+  <serviceTask    id="T_1" name="Validar pago"/>             ← tarea automática del sistema
+  <sendTask       id="T_1" name="Enviar email confirmación"/> ← enviar mensaje/email/notificación
+  <receiveTask    id="T_1" name="Esperar respuesta banco"/>  ← esperar respuesta externa
+  <manualTask     id="T_1" name="Empaquetar pedido"/>        ← tarea física sin sistema
+  <businessRuleTask id="T_1" name="Calcular descuento"/>     ← aplicar regla de negocio
+  <scriptTask     id="T_1" name="Actualizar inventario"/>    ← script automático
 
-7. Tu respuesta empieza por <?xml y termina por </definitions>. Nada más.`;
+COMPUERTAS:
+  <exclusiveGateway  id="GW_1" name="¿Pago aprobado?"/>     ← XOR: solo un camino
+  <parallelGateway   id="GW_1" name=""/>                    ← AND: todos los caminos a la vez
+  <inclusiveGateway  id="GW_1" name="¿Descuentos?"/>        ← OR: uno o varios caminos
+  <eventBasedGateway id="GW_1" name=""/>                    ← espera al primer evento que ocurra
+
+COLABORACIÓN (usa cuando hay actores externos: cliente, pasarela pago, transportista…):
+  <collaboration id="Collab_1">
+    <participant id="Part_Ext" name="[Actor externo]" processRef="Proc_Ext"/>
+    <participant id="Part_Main" name="[Empresa]" processRef="Proc_Main"/>
+    <messageFlow id="MF_1" name="[mensaje]" sourceRef="[elem_origen]" targetRef="[elem_destino]"/>
+  </collaboration>
+  El BPMNPlane.bpmnElement debe ser el ID de la colaboración, NO del proceso.
+  El proceso externo es simple (sin lanes). El proceso principal tiene laneSet.
+
+══ COORDENADAS ══
+
+Sin colaboración (solo proceso con lanes), N = nº lanes:
+  Pool:    x=30  y=30  width=1600  height=(N*180+60)
+  Lane[i]: x=60  y=(90+i*180)  width=1540  height=180
+  cy[i] = 90 + i*180 + 90  (centro vertical del lane i)
+
+Con colaboración (actor externo arriba + proceso principal abajo), N = nº lanes del principal:
+  Pool externo:   x=30  y=30   width=1600  height=160
+  Pool principal: x=30  y=220  width=1600  height=(N*180+60)
+  Lane[i]:        x=60  y=(280+i*180)  width=1540  height=180
+  cy[i] = 280 + i*180 + 90
+  Elementos del proceso externo: centrados en y=110 (30+80)
+
+Tamaños fijos:
+  startEvent/endEvent/intermediate*Event: width=36 height=36  →  y = cy - 18
+  *Task (todo tipo):                       width=100 height=80  →  y = cy - 40
+  *Gateway:                                width=50  height=50  →  y = cy - 25
+  X inicial: 150, incremento por elemento: 160
+
+══ REGLAS OBLIGATORIAS ══
+1. TODOS los flowNode de un proceso con lanes → en su <flowNodeRef> (incluyendo boundaryEvents)
+2. CADA elemento → su <bpmndi:BPMNShape> en el DI
+3. CADA sequenceFlow y messageFlow → su <bpmndi:BPMNEdge> con ≥2 <di:waypoint>
+4. BoundaryEvent: NO añadir a flowNodeRef; el BPMNShape lleva isHorizontal="false"
+5. IDs únicos y descriptivos
+6. Incluye TODOS los pasos, decisiones, notificaciones y excepciones de la entrevista
+7. Respuesta: empieza con <?xml y termina con </definitions>, nada más`;
 }
 
 function buildGenerationUserMessage(history) {
@@ -331,18 +357,20 @@ function buildGenerationUserMessage(history) {
     .map(m => `${m.role === 'user' ? 'Usuario' : 'Asistente'}: ${m.content}`)
     .join('\n');
 
-  return `Basándote en la siguiente entrevista, genera un diagrama BPMN 2.0 COMPLETO y DETALLADO en XML:
+  return `Genera un diagrama BPMN 2.0 COMPLETO basado en esta entrevista:
 
 --- ENTREVISTA ---
 ${resumen}
 --- FIN ENTREVISTA ---
 
-IMPORTANTE:
-- Crea un pool separado por cada actor externo identificado
-- Crea un lane por cada departamento interno identificado
-- Incluye messageFlow entre pools para todas las comunicaciones
-- No omitas ningún paso, decisión o notificación mencionada
-- El diagrama debe ser rico visualmente con todos los elementos necesarios`;
+INSTRUCCIONES:
+1. Si hay actores externos (clientes, pasarelas de pago, transportistas…) → usa <collaboration> con <participant> y <messageFlow>
+2. Un <lane> por cada departamento/área interna identificada
+3. Usa el tipo de tarea correcto: userTask para acciones de usuario, serviceTask para procesos automáticos, sendTask para notificaciones/emails, receiveTask para esperas de confirmación, businessRuleTask para cálculos/reglas
+4. Usa el tipo de evento correcto: messageEventDefinition para inicio/fin por mensaje, timerEventDefinition para esperas, boundaryEvent timer para timeouts sobre tareas
+5. Usa el tipo de gateway correcto: exclusiveGateway para decisiones SI/NO, parallelGateway para acciones simultáneas, eventBasedGateway antes de intermediate events alternativos
+6. Incluye boundary events de error en tareas críticas (pago, validación)
+7. No omitas ningún paso, decisión ni notificación de la entrevista`;
 }
 
 function buildRefinementMessage(instruction, currentXML) {
@@ -554,7 +582,7 @@ async function callAPI(apiKey, systemPrompt, messages) {
         ...messages
       ],
       temperature: 0.3,
-      max_tokens: 4096
+      max_tokens: 16000
     })
   });
 
@@ -584,6 +612,20 @@ function cleanXML(raw) {
   if (!xml.startsWith('<?xml')) {
     const defIdx = xml.indexOf('<definitions');
     if (defIdx > -1) xml = xml.substring(defIdx);
+  }
+
+  // Si el XML está truncado (sin cierre), intentar cerrar el tag abierto
+  if (!xml.includes('</definitions>')) {
+    console.warn('XML parece truncado, intentando cerrar...');
+    // Cerrar posibles tags abiertos y añadir cierre de definitions
+    if (!xml.endsWith('</definitions>')) {
+      xml = xml + '\n</definitions>';
+    }
+  }
+
+  // Validar que tiene sección de diagrama DI
+  if (!xml.includes('bpmndi:BPMNDiagram') && !xml.includes('BPMNDiagram')) {
+    throw new Error('El modelo generó el proceso pero sin sección de diagrama visual. Vuelve a intentarlo — a veces ocurre por la longitud del diagrama.');
   }
 
   return xml;
@@ -721,7 +763,14 @@ async function handleSend() {
       addMessage('✅ ¡Diagrama generado con pools y lanes! Edítalo manualmente o pídeme cambios.', 'ai', 'ok');
     } catch (err) {
       removeTyping();
-      addMessage(`❌ Error: ${err.message}`, 'ai', 'err');
+      const msg = err.message || 'Error desconocido';
+      if (msg.includes('no diagram') || msg.includes('sección de diagrama')) {
+        addMessage(`❌ ${msg}<br><br>💡 <b>Pulsa Enviar de nuevo</b> para regenerar el diagrama.`, 'ai', 'err');
+        // Resetear para permitir regenerar
+        diagramaGenerado = false;
+      } else {
+        addMessage(`❌ Error: ${msg}`, 'ai', 'err');
+      }
       console.error(err);
     } finally {
       sendBtn.disabled = false;
@@ -777,7 +826,7 @@ async function startInterview(initialInput) {
   addTyping();
 
   try {
-    const systemPrompt = buildInterviewSystemPrompt().replace('{{COUNT}}', 0);
+    const systemPrompt = buildInterviewSystemPrompt().replace('{{COUNT}}', '0');
     const reply = await callAPI(apiKey, systemPrompt, interviewHistory);
     removeTyping();
     interviewHistory.push({ role: 'assistant', content: reply });
@@ -787,7 +836,7 @@ async function startInterview(initialInput) {
     if (parsed.type === 'ready') {
       fase = 'diagram';
       updateUI();
-      addMessage('✅ ¡Tengo toda la información! Pulsa el botón para generar el diagrama.', 'ai', 'ok');
+      addMessage('✅ Descripción completa detectada. Pulsa <b>Generar diagrama BPMN</b> para continuar.', 'ai', 'ok');
     } else if (parsed.type === 'options') {
       addQuestionWithOptions(parsed.pregunta, parsed.opciones, parsed.multiselect);
     } else {

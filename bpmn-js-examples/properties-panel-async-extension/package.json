@@ -1,0 +1,55 @@
+{
+  "name": "bpmn-js-example-properties-panel-async-extension",
+  "version": "0.0.0",
+  "description": "A properties panel async extension example",
+  "scripts": {
+    "all": "run-s build",
+    "build": "webpack --mode production",
+    "build:watch": "webpack-dev-server --static=public --open",
+    "dev": "run-p build:watch serve",
+    "start": "npm run dev",
+    "serve": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bpmn-io/bpmn-js-examples",
+    "directory": "properties-panel-async-extension"
+  },
+  "keywords": [
+    "bpmnjs-example",
+    "bpmn-js-properties-panel"
+  ],
+  "author": {
+    "name": "Maciej Barelkowski",
+    "url": "https://github.com/barmac"
+  },
+  "contributors": [
+    {
+      "name": "bpmn.io contributors",
+      "url": "https://github.com/bpmn-io"
+    }
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "copy-webpack-plugin": "^13.0.1",
+    "css-loader": "^7.1.2",
+    "less": "^4.5.1",
+    "less-loader": "^12.3.0",
+    "npm-run-all2": "^8.0.4",
+    "raw-loader": "^4.0.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  },
+  "dependencies": {
+    "@bpmn-io/properties-panel": "^3.35.1",
+    "bpmn-js": "^18.12.0",
+    "bpmn-js-properties-panel": "^5.45.0",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "htm": "^3.1.1",
+    "jquery": "^4.0.0",
+    "min-dash": "^5.0.0"
+  }
+}

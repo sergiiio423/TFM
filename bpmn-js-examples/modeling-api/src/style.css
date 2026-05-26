@@ -1,0 +1,177 @@
+:root {
+  --color-grey-225-10-15: hsl(225, 10%, 15%);
+  --color-grey-225-10-35: hsl(225, 10%, 35%);
+  --color-grey-225-10-55: hsl(225, 10%, 55%);
+  --color-grey-225-10-75: hsl(225, 10%, 75%);
+  --color-grey-225-10-80: hsl(225, 10%, 80%);
+  --color-grey-225-10-85: hsl(225, 10%, 85%);
+  --color-grey-225-10-90: hsl(225, 10%, 90%);
+  --color-grey-225-10-95: hsl(225, 10%, 95%);
+  --color-grey-225-10-97: hsl(225, 10%, 97%);
+
+  --color-blue-205-100-40: hsl(205, 100%, 40%);
+  --color-blue-205-100-45: hsl(205, 100%, 45%);
+  --color-blue-205-100-50: hsl(205, 100%, 50%);
+  --color-blue-205-100-95: hsl(205, 100%, 95%);
+
+  --color-green-150-86-44: hsl(150, 86%, 44%);
+
+  --color-red-360-100-40: hsl(360, 100%, 40%);
+  --color-red-360-100-45: hsl(360, 100%, 45%);
+  --color-red-360-100-92: hsl(360, 100%, 92%);
+  --color-red-360-100-97: hsl(360, 100%, 97%);
+
+  --color-yellow-47-88-53: hsl(47, 88%, 53%);
+  --color-yellow-47-86-91: hsl(47, 86%, 91%);
+
+  --color-orange-20-98-52: hsl(20, 98%, 52%);
+
+  --color-white: hsl(0, 0%, 100%);
+  --color-white-opacity-80: hsla(0, 0%, 100%, 80%);
+  --color-black: hsl(0, 0%, 0%);
+  --color-black-opacity-10: hsla(0, 0%, 0%, 10%);
+  --color-black-opacity-30: hsla(0, 0%, 0%, 30%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: Arial, sans-serif;
+
+  font-size: 12px;
+
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-grey-225-10-15);
+}
+
+body {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+.snippets {
+  width: 15%;
+  overflow-y: auto;
+}
+
+.snippets__list {
+  margin: 0;
+  padding: 0;
+}
+
+.snippets__list-item {
+  list-style: none;
+  padding: 10px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.snippets__list-item-name {
+  margin: 0;
+  font-size: 16px;
+}
+
+.snippets__list-item-description {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.snippets__list-item:hover,
+.snippets__list-item--active {
+  border-right: solid 3px var(--color-blue-205-100-45);
+  padding-right: calc(10px - 3px)
+}
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  color: var(--color-grey-225-10-15);
+  background-color: var(--color-grey-225-10-97);
+  padding: 10px;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--color-grey-225-10-55);
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+  color: var(--color-blue-205-100-45);
+}
+
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+  color: var(--color-blue-205-100-45);
+}
+
+.hljs-attribute {
+  color: var(--color-blue-205-100-45);
+}
+
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+  color: var(--color-blue-205-100-45);
+}
+
+.hljs-title,
+.hljs-section {
+  color: var(--color-blue-205-100-45);
+}
+
+.hljs-keyword,
+.hljs-selector-tag {
+  color: var(--color-blue-205-100-45);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.snippet {
+  width: 40%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  font-size: 0;
+}
+
+.snippet__code {
+  height: 100%;
+  padding: 20px;
+  font-size: 14px;
+}
+
+.modeler {
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+}

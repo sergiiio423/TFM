@@ -1,0 +1,40 @@
+{
+  "name": "bpmn-js-example-overlay-api",
+  "version": "0.0.0",
+  "description": "An example how to use the Overlay API",
+  "scripts": {
+    "all": "run-s build",
+    "build": "webpack --mode production",
+    "dev": "webpack-dev-server --static=public --open",
+    "start": "run-s dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bpmn-io/bpmn-js-examples"
+  },
+  "keywords": [
+    "bpmnjs-example"
+  ],
+  "author": {
+    "name": "Joerg Dotzki",
+    "url": "https://github.com/ISO50"
+  },
+  "contributors": [
+    {
+      "name": "bpmn.io contributors",
+      "url": "https://github.com/bpmn-io"
+    }
+  ],
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bpmn-js": "^18.12.0",
+    "min-dash": "^5.0.0"
+  }
+}

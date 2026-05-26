@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+}
+
+body, html {
+  padding: 0;
+  margin: 0;
+}
+
+figure {
+  margin: 30px 0;
+}
+
+figcaption {
+  margin-top: .85em;
+  text-align: center;
+}
+
+:focus {
+  outline-color: cornflowerblue;
+}
+
+.container {
+  width: 80%;
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+}
+
+.diagram-grid {
+  display: flex;
+  flex-direction: row;
+}
+
+.diagram-grid:not(.single) {
+  margin-left: -30px;
+  margin-right: -30px;
+}
+
+.canvas {
+  height: 400px;
+  width: 100%;
+  border-radius: 5px;
+  border: solid 3px #eee;
+}
+
+.diagram-grid > * {
+  flex: 1;
+}
+
+.diagram-grid > * + * {
+  margin-left: 2em;
+}
+
+hr {
+  margin: 30px 0;
+}

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>bpmn-js modeler demo</title>
+  <style>
+    /* ── Botón flotante ── */
+    #ai-fab {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1e1e2e, #2d2b55);
+      border: 1px solid rgba(99,102,241,0.5);
+      cursor: pointer;
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    #ai-fab:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 8px 32px rgba(99,102,241,0.5);
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 4px 24px rgba(99,102,241,0.3), 0 0 0 0 rgba(99,102,241,0.3); }
+      50%      { box-shadow: 0 4px 24px rgba(99,102,241,0.4), 0 0 0 8px rgba(99,102,241,0); }
+    }
+    #ai-fab svg { width: 26px; height: 26px; }
+
+    /* ── Panel ── */
+    #ai-panel {
+      position: fixed;
+      bottom: 100px;
+      right: 32px;
+      width: 390px;
+      background: #0f0f1a;
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 20px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #ai-panel.open {
+      display: flex;
+      animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(16px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    /* Header */
+    .ai-header {
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1));
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ai-header-left { display: flex; align-items: center; gap: 10px; }
+    .ai-logo {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-title { color: #f0f0ff; font-size: 15px; font-weight: 700; }
+    .ai-subtitle { color: rgba(160,160,200,0.6); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
+    .ai-header-actions { display: flex; gap: 6px; }
+    .ai-reset {
+      background: rgba(255,255,255,0.05);
+      border: none; border-radius: 8px;
+      width: 28px; height: 28px;
+      color: rgba(160,160,200,0.6);
+      cursor: pointer; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .ai-reset:hover { background: rgba(234,179,8,0.15); color: #eab308; }
+    .ai-close {
+      background: rgba(255,255,255,0.05);
+      border: none; border-radius: 8px;
+      width: 28px; height: 28px;
+      color: rgba(160,160,200,0.6);
+      cursor: pointer; font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .ai-close:hover { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+    /* Chat */
+    #ai-messages {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(99,102,241,0.3) transparent;
+    }
+    .msg { display: flex; gap: 8px; animation: msgIn 0.25s ease forwards; }
+    .msg.user { flex-direction: row-reverse; }
+    @keyframes msgIn {
+      from { opacity:0; transform: translateY(6px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .msg-av {
+      width: 28px; height: 28px; border-radius: 8px;
+      flex-shrink: 0; display: flex; align-items: center;
+      justify-content: center; font-size: 13px;
+    }
+    .msg.ai .msg-av { background: linear-gradient(135deg,#6366f1,#a855f7); }
+    .msg.user .msg-av { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); }
+    .msg-bubble {
+      max-width: 88%; padding: 9px 12px;
+      border-radius: 12px; font-size: 13px; line-height: 1.5;
+    }
+    .msg.ai .msg-bubble {
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      color: #d0d0f0; border-bottom-left-radius: 3px;
+    }
+    .msg.user .msg-bubble {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e0e0f0; border-bottom-right-radius: 3px;
+    }
+    .msg-bubble.ok  { background: rgba(34,197,94,0.1);  border-color: rgba(34,197,94,0.25);  color: #86efac; }
+    .msg-bubble.err { background: rgba(239,68,68,0.1);  border-color: rgba(239,68,68,0.25);  color: #fca5a5; }
+
+    /* Pregunta con opciones */
+    .question-bubble {
+      max-width: 100% !important;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .question-text {
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #e0e0ff;
+    }
+    .options-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .opt-btn {
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 8px;
+      padding: 5px 10px;
+      color: #c0c0f0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .opt-btn:hover:not(:disabled) {
+      background: rgba(99,102,241,0.25);
+      border-color: rgba(99,102,241,0.6);
+      color: #fff;
+    }
+    .opt-btn.selected {
+      background: rgba(99,102,241,0.35);
+      border-color: #6366f1;
+      color: #fff;
+    }
+    .opt-btn:disabled {
+      cursor: default;
+    }
+    .multiselect-hint {
+      font-size: 10px;
+      color: rgba(120,120,160,0.6);
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    .custom-option-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .custom-opt-input {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 6px 9px;
+      color: #d0d0f0;
+      font-size: 12px;
+      font-family: 'Segoe UI', sans-serif;
+      outline: none;
+    }
+    .custom-opt-input:focus { border-color: rgba(99,102,241,0.5); }
+    .custom-opt-input::placeholder { color: rgba(120,120,160,0.4); }
+    .confirm-opts-btn {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      border: none; border-radius: 8px;
+      padding: 6px 12px;
+      color: white; font-size: 12px;
+      cursor: pointer; font-family: 'Segoe UI', sans-serif;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .confirm-opts-btn:hover:not(:disabled) { opacity: 0.85; }
+    .confirm-opts-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* Typing */
+    .typing { display:flex; gap:4px; padding: 3px 0; }
+    .typing span {
+      width:6px; height:6px; border-radius:50%;
+      background: rgba(99,102,241,0.7);
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: .2s; }
+    .typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%,60%,100% { transform:translateY(0); opacity:.4; }
+      30%          { transform:translateY(-6px); opacity:1; }
+    }
+
+    /* Config */
+    .ai-config {
+      padding: 10px 14px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .ai-label { font-size: 10px; color: rgba(120,120,160,0.7); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+    .ai-config input {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 7px 10px;
+      color: #c0c0e0; font-size: 12px; font-family: monospace;
+      outline: none; transition: border-color .2s;
+    }
+    .ai-config input:focus { border-color: rgba(99,102,241,0.5); }
+    .ai-config input::placeholder { color: rgba(120,120,160,0.4); }
+
+    /* Input area */
+    .ai-input-area { padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; }
+    .ai-input-area textarea {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 12px;
+      color: #d0d0f0; font-size: 13px;
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.5; resize: none; outline: none;
+      transition: border-color .2s;
+    }
+    .ai-input-area textarea:focus { border-color: rgba(99,102,241,0.5); }
+    .ai-input-area textarea::placeholder { color: rgba(120,120,160,0.4); }
+    #ai-send {
+      width: 100%; padding: 10px;
+      background: linear-gradient(135deg,#6366f1,#a855f7);
+      border: none; border-radius: 10px;
+      color: white; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    #ai-send:hover:not(:disabled) { opacity:.88; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+    #ai-send:disabled { opacity:.35; cursor: not-allowed; transform: none; }
+    .hint {
+      font-size: 10px;
+      color: rgba(120,120,160,0.5);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="content" id="js-drop-zone">
+    <div class="message intro">
+      <div class="note">
+        Drop BPMN diagram from your desktop or <a id="js-create-diagram" href>create a new diagram</a> to get started.
+      </div>
+    </div>
+    <div class="message error">
+      <div class="note">
+        <p>Ooops, we could not display the BPMN 2.0 diagram.</p>
+        <div class="details">
+          <span>cause of the problem</span>
+          <pre></pre>
+        </div>
+      </div>
+    </div>
+    <div class="canvas" id="js-canvas"></div>
+  </div>
+
+  <ul class="buttons">
+    <li>download</li>
+    <li><a id="js-download-diagram" href title="download BPMN diagram">BPMN diagram</a></li>
+    <li><a id="js-download-svg" href title="download as SVG image">SVG image</a></li>
+  </ul>
+
+  <!-- Botón flotante IA -->
+  <div id="ai-fab" title="Generar BPMN con IA">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" fill="rgba(99,102,241,0.3)"/>
+      <rect x="14" y="3" width="7" height="7" rx="1.5" fill="rgba(99,102,241,0.3)"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.5" fill="rgba(99,102,241,0.3)"/>
+      <path d="M17.5 14v7M14 17.5h7" stroke="#a78bfa" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <!-- Panel IA -->
+  <div id="ai-panel">
+    <div class="ai-header">
+      <div class="ai-header-left">
+        <div class="ai-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ai-title">BPMN AI Generator</div>
+          <div class="ai-subtitle">powered by ChatGPT</div>
+        </div>
+      </div>
+      <div class="ai-header-actions">
+        <button class="ai-reset" id="ai-reset" title="Nueva conversación">↺</button>
+        <button class="ai-close" id="ai-close">✕</button>
+      </div>
+    </div>
+
+    <div id="ai-messages">
+      <div class="msg ai">
+        <div class="msg-av">🤖</div>
+        <div class="msg-bubble">
+          ¡Hola! Cuéntame brevemente el proceso de negocio que quieres modelar y te haré algunas preguntas con opciones para crear el mejor diagrama BPMN posible.
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-config">
+      <div class="ai-label">API Key</div>
+      <input type="password" id="ai-apikey" placeholder="Token de GitHub Models o sk- de OpenAI" />
+    </div>
+
+    <div class="ai-input-area" id="ai-free-input">
+      <textarea id="ai-scenario" rows="2"
+        placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
+      <button id="ai-send">➤ Enviar</button>
+      <div class="hint">Ctrl+Enter para enviar · ↺ para nueva conversación</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

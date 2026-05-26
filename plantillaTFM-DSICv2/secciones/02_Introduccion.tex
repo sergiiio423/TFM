@@ -5,23 +5,85 @@
 
 \chapter{Introducción}
 %%---------------------------------------------------------
-La introducción del TFM debe servir para que los miembros del tribunal que evalúan el trabajo puedan comprender el contexto en el que se realiza el mismo, y los objetivos que se plantean.
 
-Esta plantilla muestra una estructura básica de una posible memoria final de TFM. Esta estructura es recomendable pero puede ser modificada según el tipo de TFM.
+En el contexto actual de la transformación digital, el modelado de procesos de negocio se ha convertido en una herramienta esencial para las organizaciones que desean comprender, documentar y mejorar la forma en que entregan valor a sus clientes. El estándar \textit{Business Process Model and Notation} (BPMN) es ampliamente utilizado para representar estos procesos de forma gráfica y estructurada. Sin embargo, la creación manual de modelos BPMN requiere conocimientos especializados y supone un esfuerzo considerable, especialmente cuando se trata de procesos complejos o cuando se desea incorporar un análisis del valor percibido por el cliente.
 
-El esquema básico de una memoria final de TFM sería el siguiente:
-\begin{itemize}
-\item[•] Resumen en valenciano, español e inglés (máximo 2 páginas cada uno)
-\item[•] Tabla de contenidos
-\item[•] Introducción (con los objetivos del TFM)
-\item[•] Desarrollo
-\item[•] Resultados 
-\item[•] Conclusiones
-\item[•] Bibliografía (publicaciones utilizadas en el estudio y desarrollo del trabajo)
-\item[•] Anexo (es opcional y se pueden incluir tantos como se requieran)
-\end{itemize}
+En este contexto, los modelos de lenguaje de gran escala (\textit{Large Language Models}, LLMs) ofrecen nuevas posibilidades para automatizar la generación y el análisis de modelos de procesos. Su capacidad para interpretar descripciones en lenguaje natural y generar artefactos estructurados los convierte en aliados prometedores para asistir a analistas y profesionales en la construcción de modelos BPMN.
 
-En cualquier caso, es el/la director/a del TFM quien indicará al estudiante la estructura de memoria final que mejor se ajuste al trabajo desarrollado.
-
+Este Trabajo de Fin de Máster (TFM) aborda el desarrollo de una extensión de la herramienta bpmn.io que integra un LLM para la generación y análisis automático de modelos BPMN a partir de descripciones textuales o conversacionales. La herramienta permite, de forma iterativa, construir modelos de procesos de negocio e identificar los valores asociados al cliente según la clasificación PERVAL. Para validar su utilidad, se diseña y ejecuta un estudio empírico en el que se comparan los resultados de la herramienta con los de un analista experto.
 
 %%---------------------------------------------------------
+\section{Motivación}
+%%---------------------------------------------------------
+
+La motivación de este trabajo surge de la observación de un doble desafío en el ámbito del análisis de procesos de negocio orientados al valor. Por un lado, la construcción de modelos BPMN de calidad es una tarea técnicamente exigente que requiere conocimiento del estándar, comprensión del dominio y experiencia en análisis de procesos. Por otro lado, los procesos de comercio electrónico están diseñados para entregar valor al cliente mediante atributos como la calidad, el precio y los elementos emocionales y sociales, pero no siempre el valor modelado por la organización corresponde al valor percibido por los usuarios durante la interacción real con el proceso.
+
+Este desalineamiento entre el valor diseñado y el valor percibido puede tener un impacto directo en la experiencia del cliente y en la eficacia del proceso. Sin embargo, su identificación y corrección requieren de un análisis sistemático que, en la práctica, suele ser manual y costoso en tiempo y recursos.
+
+Los avances recientes en LLMs ofrecen una oportunidad para abordar estos desafíos de forma más eficiente. Su capacidad para comprender lenguaje natural y generar artefactos estructurados los convierte en candidatos idóneos para asistir en la generación de modelos BPMN y en la identificación del valor para el cliente.
+
+La realización de este TFM ha permitido aplicar de forma práctica los conocimientos adquiridos durante el máster universitario, en especial en las áreas de ingeniería del software, modelado de procesos y tecnologías de inteligencia artificial.
+
+%%---------------------------------------------------------
+\section{Objetivos}
+%%---------------------------------------------------------
+
+El objetivo principal de este trabajo es desarrollar una herramienta basada en LLMs que permita generar y analizar modelos BPMN de forma automática a partir de descripciones textuales o conversacionales, integrada como extensión sobre una versión local de bpmn.io, y validar su utilidad mediante un estudio empírico.
+
+A partir de este objetivo principal, se definen los siguientes objetivos secundarios:
+
+\begin{itemize}
+    \item[$\bullet$] diseñar e implementar una extensión funcional sobre bpmn.io que permita la generación iterativa de modelos BPMN mediante interacción en lenguaje natural con un LLM,
+    \item[$\bullet$] incorporar en la herramienta la capacidad de identificar y clasificar los valores asociados al cliente según la clasificación PERVAL,
+    \item[$\bullet$] diseñar y ejecutar un estudio empírico que permita comparar los modelos BPMN y los valores identificados por la herramienta con los generados por un analista experto de forma manual,
+    \item[$\bullet$] analizar y evaluar el grado de alineamiento entre los resultados de la herramienta y el criterio humano experto tanto en la construcción del modelo como en la identificación del valor, y
+    \item[$\bullet$] extraer conclusiones sobre la viabilidad y las limitaciones del uso de LLMs para el modelado de procesos de negocio orientado al valor.
+\end{itemize}
+
+%%---------------------------------------------------------
+\section{Impacto Esperado}
+%%---------------------------------------------------------
+
+El impacto esperado de este trabajo es doble. En primer lugar, desde un punto de vista tecnológico, se espera demostrar la viabilidad de integrar LLMs en herramientas de modelado de procesos de negocio estándar, abriendo una línea de trabajo orientada a la asistencia inteligente en el modelado BPMN. En segundo lugar, desde un punto de vista metodológico, el estudio empírico aportará evidencia sobre el grado en que las herramientas basadas en LLMs pueden aproximarse al juicio de un analista humano experto, tanto en la calidad del modelo generado como en la identificación del valor para el cliente.
+
+Este proyecto se alinea con los siguientes Objetivos de Desarrollo Sostenible (ODS):
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{ODS 9: industria, innovación e infraestructura.} El uso de LLMs para la automatización del modelado de procesos contribuye al avance de soluciones tecnológicas innovadoras aplicadas a la ingeniería del software y a la mejora de las herramientas de análisis empresarial.
+    \item[$\bullet$] \textbf{ODS 12: producción y consumo responsables.} Al facilitar la identificación del valor percibido por el cliente en los procesos de comercio electrónico, la herramienta desarrollada contribuye a un diseño de procesos más eficiente y ajustado a las necesidades reales del usuario, reduciendo el desperdicio de recursos en actividades que no generan valor.
+\end{itemize}
+
+%%---------------------------------------------------------
+\section{Metodología}
+%%---------------------------------------------------------
+
+La metodología seguida en este trabajo combina un enfoque de desarrollo iterativo de software con un diseño de investigación empírica. En la fase de desarrollo, la herramienta se ha construido de forma incremental, definiendo en cada iteración los requisitos funcionales, implementando las funcionalidades y evaluando los resultados obtenidos.
+
+Para el estudio empírico, se ha seguido un diseño basado en la comparación entre el analista automatizado (la herramienta desarrollada) y un analista experto humano. El caso de estudio empleado es un proceso de compra en línea inspirado en escenarios reales de comercio electrónico, sobre el cual se han realizado diversas iteraciones de modelado y análisis de valor.
+
+La validación de los modelos BPMN generados se ha realizado mediante la comparación estructural y semántica con los modelos elaborados por el experto, mientras que la validación de los valores identificados se ha llevado a cabo mediante comparación con la clasificación PERVAL aplicada de forma manual.
+
+%%---------------------------------------------------------
+\section{Estructura}
+%%---------------------------------------------------------
+
+La estructura de este TFM ha sido diseñada para guiar al lector a lo largo del proceso de desarrollo e investigación llevado a cabo. A continuación, se describe brevemente el contenido de cada capítulo y los anexos.
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Introducción:} en este apartado se contextualiza el proyecto, incluyendo la motivación, los objetivos y el impacto esperado. También se expone la metodología aplicada y las convenciones adoptadas.
+    \item[$\bullet$] \textbf{Desarrollo:} en este apartado se describe el diseño e implementación de la herramienta, incluyendo la arquitectura del sistema, la integración con bpmn.io y el módulo de análisis de valor basado en LLMs.
+    \item[$\bullet$] \textbf{Resultados:} se presentan los resultados del estudio empírico, comparando los modelos BPMN y los valores identificados automáticamente con los generados por el analista experto.
+    \item[$\bullet$] \textbf{Conclusiones:} se resumen los principales hallazgos del trabajo, se discuten las limitaciones encontradas y se proponen líneas de trabajo futuro.
+    \item[$\bullet$] \textbf{Bibliografía:} se recogen todas las fuentes de información consultadas durante la realización del TFM, incluyendo artículos académicos, documentación técnica y recursos digitales relevantes para el desarrollo del proyecto.
+    \item[$\bullet$] \textbf{Anexos:} contienen información complementaria al cuerpo principal del documento.
+\end{itemize}
+
+%%---------------------------------------------------------
+\section{Convenciones}
+%%---------------------------------------------------------
+
+En este TFM se adoptará una convención específica para el marcado de términos en lenguas extranjeras. La primera vez que aparezca un término técnico o una palabra que no pertenezca al idioma principal del documento, se destacará en cursiva. Posteriormente, podrá utilizarse sin cursiva si ya ha sido introducido previamente.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Final de la introducción
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

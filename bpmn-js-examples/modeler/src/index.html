@@ -25,29 +25,38 @@
       50%      { box-shadow: 0 4px 24px rgba(6,182,212,0.32), 0 0 0 8px rgba(14,165,233,0); }
     }
     #ai-fab svg { width: 26px; height: 26px; }
+    /* Ocultar FAB cuando el panel está abierto */
+    #ai-panel.open ~ #ai-fab,
+    body.panel-open #ai-fab { display: none; }
 
-    /* ── Panel ── */
+    /* ══ PANEL — DRAWER LATERAL COMPLETO ══ */
     #ai-panel {
-      position: fixed; bottom: 100px; right: 32px; width: 480px;
+      position: fixed;
+      top: 0; right: 0;
+      height: 100vh;
+      width: 420px;
       background: #07111f;
-      border: 1px solid rgba(14,165,233,0.18);
-      border-radius: 22px;
-      box-shadow: 0 28px 90px rgba(0,0,0,0.8), 0 0 0 1px rgba(14,165,233,0.04);
-      z-index: 9999; display: none; flex-direction: column; overflow: hidden;
+      border-left: 1px solid rgba(14,165,233,0.18);
+      box-shadow: -12px 0 48px rgba(0,0,0,0.65);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
     }
-    #ai-panel.open { display: flex; animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-    @keyframes slideUp {
-      from { opacity:0; transform: translateY(16px) scale(0.97); }
-      to   { opacity:1; transform: translateY(0) scale(1); }
+    #ai-panel.open {
+      transform: translateX(0);
     }
 
-    /* Header */
+    /* ── Header ── */
     .ai-header {
       padding: 16px 18px;
       background: linear-gradient(135deg, rgba(14,165,233,0.1), rgba(6,182,212,0.05));
       border-bottom: 1px solid rgba(14,165,233,0.1);
       display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
     }
     .ai-header-left { display: flex; align-items: center; gap: 11px; }
     .ai-logo {
@@ -56,8 +65,9 @@
       border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 14px rgba(14,165,233,0.28);
+      flex-shrink: 0;
     }
-    .ai-title { color: #bae6fd; font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+    .ai-title    { color: #bae6fd; font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
     .ai-subtitle { color: rgba(125,211,252,0.42); font-size: 10px; text-transform: uppercase; letter-spacing: 1.1px; margin-top: 2px; }
     .ai-header-actions { display: flex; gap: 6px; }
     .ai-reset, .ai-close {
@@ -67,15 +77,33 @@
       display: flex; align-items: center; justify-content: center; transition: all 0.2s;
     }
     .ai-reset { font-size: 13px; }
-    .ai-close { font-size: 15px; }
+    .ai-close  { font-size: 15px; }
     .ai-reset:hover { background: rgba(250,204,21,0.1); color: #fde047; border-color: rgba(250,204,21,0.2); }
     .ai-close:hover  { background: rgba(239,68,68,0.1);  color: #fca5a5; border-color: rgba(239,68,68,0.18); }
 
-    /* Chat */
+    /* ── Fase indicator ── */
+    .ai-phase-bar {
+      display: flex; gap: 0;
+      border-bottom: 1px solid rgba(14,165,233,0.08);
+      flex-shrink: 0;
+    }
+    .phase-step {
+      flex: 1; padding: 7px 4px; text-align: center;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.3px;
+      color: rgba(100,160,210,0.28); border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .phase-step.active  { color: #7dd3fc; border-bottom-color: #0ea5e9; }
+    .phase-step.done    { color: rgba(100,160,210,0.5); }
+
+    /* ── Chat messages (flex-grow para ocupar espacio) ── */
     #ai-messages {
-      padding: 14px; display: flex; flex-direction: column; gap: 10px;
-      max-height: 460px; overflow-y: auto;
+      flex: 1;
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto;
       scrollbar-width: thin; scrollbar-color: rgba(14,165,233,0.2) transparent;
+      min-height: 0; /* necesario para que flex-1 funcione con overflow */
     }
     .msg { display: flex; gap: 8px; animation: msgIn 0.25s ease forwards; }
     .msg.user { flex-direction: row-reverse; }
@@ -95,37 +123,7 @@
     .msg-bubble.ok  { background: rgba(16,185,129,0.09); border-color: rgba(16,185,129,0.22); color: #6ee7b7; }
     .msg-bubble.err { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.2);   color: #fca5a5; }
 
-    /* Opciones */
-    .question-bubble { max-width: 100% !important; width: 100%; box-sizing: border-box; }
-    .question-text { margin-bottom: 10px; font-weight: 600; color: #bae6fd; }
-    .options-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-    .opt-btn {
-      background: rgba(14,165,233,0.07); border: 1px solid rgba(14,165,233,0.2);
-      border-radius: 8px; padding: 5px 11px; color: #7dd3fc; font-size: 12px;
-      cursor: pointer; transition: all 0.2s; font-family: inherit;
-    }
-    .opt-btn:hover:not(:disabled) { background: rgba(14,165,233,0.18); border-color: rgba(14,165,233,0.48); color: #e0f2fe; }
-    .opt-btn.selected { background: rgba(14,165,233,0.24); border-color: #0ea5e9; color: #e0f2fe; }
-    .opt-btn:disabled { cursor: default; }
-    .multiselect-hint { font-size: 10px; color: rgba(100,160,210,0.45); margin-bottom: 8px; font-style: italic; }
-    .custom-option-row { display: flex; gap: 6px; margin-top: 6px; }
-    .custom-opt-input {
-      flex: 1; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(14,165,233,0.12); border-radius: 8px;
-      padding: 6px 9px; color: #cce8f6; font-size: 12px; font-family: inherit; outline: none;
-    }
-    .custom-opt-input:focus { border-color: rgba(14,165,233,0.42); }
-    .custom-opt-input::placeholder { color: rgba(100,160,210,0.32); }
-    .confirm-opts-btn {
-      background: linear-gradient(135deg, #0369a1, #0e7490);
-      border: none; border-radius: 8px; padding: 6px 13px;
-      color: white; font-size: 12px; cursor: pointer; font-family: inherit;
-      transition: opacity 0.2s; white-space: nowrap;
-    }
-    .confirm-opts-btn:hover:not(:disabled) { opacity: 0.84; }
-    .confirm-opts-btn:disabled { opacity: 0.38; cursor: default; }
-
-    /* Typing */
+    /* ── Typing indicator ── */
     .typing { display:flex; gap:4px; padding: 3px 0; }
     .typing span {
       width:6px; height:6px; border-radius:50%;
@@ -135,8 +133,85 @@
     .typing span:nth-child(3) { animation-delay: .4s; }
     @keyframes bounce { 0%,60%,100% { transform:translateY(0); opacity:.4; } 30% { transform:translateY(-6px); opacity:1; } }
 
-    /* Config */
-    .ai-config { padding: 10px 14px; border-top: 1px solid rgba(14,165,233,0.07); border-bottom: 1px solid rgba(14,165,233,0.07); }
+    /* ── Tarjeta de estructura ── */
+    .structure-bubble {
+      max-width: 100% !important;
+      width: 100%;
+      padding: 12px 14px !important;
+    }
+    .struct-row {
+      display: flex; gap: 12px; margin-bottom: 12px;
+    }
+    .struct-col { flex: 1; min-width: 0; }
+    .struct-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+      color: rgba(100,160,210,0.45); font-weight: 600; margin-bottom: 6px;
+    }
+    .struct-main-name {
+      font-size: 13px; font-weight: 700; color: #bae6fd; margin-bottom: 6px;
+    }
+    .struct-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .struct-chip {
+      padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    }
+    .ext-chip  { background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.25); color: #fdba74; }
+    .lane-chip { background: rgba(14,165,233,0.10); border: 1px solid rgba(14,165,233,0.22); color: #7dd3fc; }
+    .none-chip { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2); color: #9ca3af; font-style: italic; }
+    .struct-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-confirm-struct {
+      flex: 1; background: linear-gradient(135deg, #065f46, #0f766e);
+      border: none; border-radius: 9px; padding: 8px 12px;
+      color: #6ee7b7; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: opacity 0.2s;
+    }
+    .btn-confirm-struct:hover:not(:disabled) { opacity: 0.85; }
+    .btn-confirm-struct:disabled { opacity: 0.4; cursor: default; }
+    .btn-modify-struct {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(14,165,233,0.15);
+      border-radius: 9px; padding: 8px 12px;
+      color: #7dd3fc; font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-modify-struct:hover:not(:disabled) { background: rgba(14,165,233,0.1); }
+    .btn-modify-struct:disabled { opacity: 0.4; cursor: default; }
+    .modify-area {
+      margin-top: 10px; display: none; flex-direction: column; gap: 6px;
+    }
+    .modify-input {
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(14,165,233,0.12); border-radius: 8px;
+      padding: 8px 10px; color: #cce8f6; font-size: 12px;
+      font-family: inherit; resize: none; outline: none;
+    }
+    .modify-input:focus { border-color: rgba(14,165,233,0.42); }
+    .modify-input::placeholder { color: rgba(100,160,210,0.32); }
+
+    /* ── Opciones (por si se usan en futuro) ── */
+    .options-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .opt-btn {
+      background: rgba(14,165,233,0.07); border: 1px solid rgba(14,165,233,0.2);
+      border-radius: 8px; padding: 5px 11px; color: #7dd3fc; font-size: 12px;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .opt-btn:hover:not(:disabled) { background: rgba(14,165,233,0.18); border-color: rgba(14,165,233,0.48); color: #e0f2fe; }
+    .opt-btn.selected { background: rgba(14,165,233,0.24); border-color: #0ea5e9; color: #e0f2fe; }
+    .opt-btn:disabled { cursor: default; }
+    .confirm-opts-btn {
+      background: linear-gradient(135deg, #0369a1, #0e7490);
+      border: none; border-radius: 8px; padding: 6px 13px;
+      color: white; font-size: 12px; cursor: pointer; font-family: inherit;
+      transition: opacity 0.2s; white-space: nowrap;
+    }
+    .confirm-opts-btn:hover:not(:disabled) { opacity: 0.84; }
+    .confirm-opts-btn:disabled { opacity: 0.38; cursor: default; }
+
+    /* ── Config (API key) ── */
+    .ai-config {
+      padding: 10px 14px;
+      border-top: 1px solid rgba(14,165,233,0.07);
+      border-bottom: 1px solid rgba(14,165,233,0.07);
+      flex-shrink: 0;
+    }
     .ai-label { font-size: 10px; color: rgba(100,160,210,0.55); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 5px; font-weight: 500; }
     .ai-config input {
       width: 100%; background: rgba(255,255,255,0.03);
@@ -147,8 +222,12 @@
     .ai-config input:focus { border-color: rgba(14,165,233,0.42); }
     .ai-config input::placeholder { color: rgba(100,160,210,0.3); }
 
-    /* Input area */
-    .ai-input-area { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    /* ── Input area (fija en el fondo) ── */
+    .ai-input-area {
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+      border-top: 1px solid rgba(14,165,233,0.07);
+      flex-shrink: 0;
+    }
     .ai-input-area textarea {
       width: 100%; background: rgba(255,255,255,0.03);
       border: 1px solid rgba(14,165,233,0.11); border-radius: 11px; padding: 10px 12px;
@@ -157,37 +236,123 @@
     }
     .ai-input-area textarea:focus { border-color: rgba(14,165,233,0.38); }
     .ai-input-area textarea::placeholder { color: rgba(100,160,210,0.32); }
-    #ai-send {
+
+    .btn-send {
       width: 100%; padding: 10px;
-      background: linear-gradient(135deg, #0369a1, #0e7490);
       border: none; border-radius: 11px; color: white;
       font-size: 13px; font-weight: 600; cursor: pointer;
       transition: all .2s; font-family: inherit; letter-spacing: 0.15px;
     }
-    #ai-send:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,0.28); }
-    #ai-send:disabled { opacity:.32; cursor: not-allowed; transform: none; }
+    .btn-blue  { background: linear-gradient(135deg, #0369a1, #0e7490); }
+    .btn-green { background: linear-gradient(135deg, #059669, #0d9488); }
+    .btn-send:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,0.28); }
+    .btn-send:disabled { opacity:.32; cursor: not-allowed; transform: none; }
 
     #ai-perval-btn {
       display: none; width: 100%; padding: 9px;
       background: linear-gradient(135deg, #065f46, #0f766e);
       border: none; border-radius: 11px; color: #6ee7b7;
       font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: all .2s; font-family: inherit; letter-spacing: 0.15px;
+      transition: all .2s; font-family: inherit;
     }
-    #ai-perval-btn:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.28); }
+    #ai-perval-btn:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); }
     #ai-perval-btn:disabled { opacity:.32; cursor: not-allowed; transform: none; }
 
     .hint { font-size: 10px; color: rgba(100,160,210,0.38); text-align: center; letter-spacing: 0.2px; }
 
-    /* PERVAL results */
+    /* ── Value mapping card ── */
+    .value-bubble {
+      max-width: 100% !important; width: 100%; padding: 12px 14px !important;
+    }
+    .val-header {
+      font-size: 13px; font-weight: 700; color: #bae6fd;
+      margin-bottom: 4px;
+    }
+    .val-subtitle {
+      font-size: 11px; color: rgba(125,211,252,0.45); margin-bottom: 12px;
+      padding-bottom: 10px; border-bottom: 1px solid rgba(14,165,233,0.1);
+      line-height: 1.45;
+    }
+    .val-actor-block {
+      margin-bottom: 12px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(14,165,233,0.07);
+    }
+    .val-actor-name {
+      font-size: 12px; font-weight: 600; color: #fdba74; margin-bottom: 7px;
+    }
+    .val-chips-area {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; min-height: 24px;
+    }
+    .val-chip {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 7px; border-radius: 8px; font-size: 11px;
+    }
+    .val-chip-dim { font-weight: 600; flex-shrink: 0; }
+    .val-chip-desc { flex: 1; min-width: 0; opacity: 0.88; }
+    .val-chip-remove {
+      background: none; border: none; color: inherit; cursor: pointer;
+      font-size: 14px; padding: 0 1px; opacity: 0.55; line-height: 1;
+      flex-shrink: 0;
+    }
+    .val-chip-remove:hover:not(:disabled) { opacity: 1; }
+    .val-chip-remove:disabled { cursor: default; }
+    .val-empty { font-size: 11px; color: rgba(100,160,210,0.38); font-style: italic; }
+    .val-add-row { display: flex; gap: 5px; align-items: center; }
+    .val-dim-select {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(14,165,233,0.15);
+      border-radius: 7px; padding: 5px 7px; color: #7dd3fc; font-size: 11px;
+      font-family: inherit; outline: none; cursor: pointer; flex-shrink: 0;
+    }
+    .val-desc-input {
+      flex: 1; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(14,165,233,0.12); border-radius: 7px;
+      padding: 5px 8px; color: #cce8f6; font-size: 11px;
+      font-family: inherit; outline: none;
+    }
+    .val-desc-input:focus { border-color: rgba(14,165,233,0.38); }
+    .val-desc-input::placeholder { color: rgba(100,160,210,0.32); }
+    .val-add-btn {
+      background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.22);
+      border-radius: 7px; padding: 5px 10px; color: #7dd3fc;
+      font-size: 15px; cursor: pointer; font-family: inherit;
+      transition: all 0.2s; flex-shrink: 0; line-height: 1;
+    }
+    .val-add-btn:hover:not(:disabled) { background: rgba(14,165,233,0.2); }
+    .val-add-btn:disabled { opacity: 0.4; cursor: default; }
+    .val-confirm-row { margin-top: 12px; }
+    .val-actor-sub { font-size: 10px; color: rgba(100,160,210,0.45); font-weight: 400; }
+
+    /* ── Filas de entrega con selector de lane ── */
+    .del-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 8px; font-size: 11px;
+      background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2);
+      margin-bottom: 4px; flex-wrap: wrap;
+    }
+    .del-chip-icon { flex-shrink: 0; }
+    .del-chip-name { font-weight: 600; color: #bae6fd; flex: 1; min-width: 80px; }
+    .del-lane-sel {
+      font-size: 10px; background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.25);
+      color: #7dd3fc; border-radius: 5px; padding: 2px 4px; cursor: pointer; max-width: 130px;
+    }
+    .del-row-remove {
+      background: none; border: none; color: rgba(125,211,252,0.4); cursor: pointer;
+      font-size: 14px; padding: 0 2px; line-height: 1; flex-shrink: 0;
+    }
+    .del-row-remove:hover:not(:disabled) { color: #fca5a5; }
+    .del-row-remove:disabled { cursor: default; }
+    .del-name-input { font-size: 11px; }
+    /* compat: mantener del-chip por si se usa en otros sitios */
+    .del-chip {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 8px; border-radius: 8px; font-size: 11px;
+      background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2);
+    }
+
+    /* ── PERVAL results ── */
     .pv-bubble { max-width: 100% !important; width: 100%; padding: 0 !important; overflow: hidden; }
     .pv-results { font-size: 12px; font-family: inherit; }
-    .pv-header {
-      padding: 10px 13px;
-      background: linear-gradient(135deg, rgba(6,182,212,0.09), rgba(16,185,129,0.05));
-      border-bottom: 1px solid rgba(6,182,212,0.13);
-      font-weight: 700; font-size: 13px; color: #67e8f9; letter-spacing: -0.15px;
-    }
+    .pv-header { padding: 10px 13px; background: linear-gradient(135deg, rgba(6,182,212,0.09), rgba(16,185,129,0.05)); border-bottom: 1px solid rgba(6,182,212,0.13); font-weight: 700; font-size: 13px; color: #67e8f9; }
     .pv-section-lbl { padding: 7px 13px 3px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.9px; color: rgba(100,160,210,0.48); font-weight: 500; }
     .pv-tasks { padding: 0 8px; display: flex; flex-direction: column; gap: 4px; }
     .pv-row { background: rgba(14,165,233,0.04); border: 1px solid rgba(14,165,233,0.09); border-radius: 9px; padding: 7px 10px; }
@@ -199,12 +364,7 @@
     .pv-sum-card { border-radius: 9px; padding: 8px 11px; }
     .pv-sum-title { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
     .pv-sum-text { font-size: 11px; color: rgba(186,230,253,0.62); line-height: 1.45; }
-    .pv-general {
-      margin: 4px 8px 8px;
-      background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.1);
-      border-radius: 9px; padding: 8px 11px;
-      font-size: 11px; color: rgba(186,230,253,0.72); line-height: 1.5;
-    }
+    .pv-general { margin: 4px 8px 8px; background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.1); border-radius: 9px; padding: 8px 11px; font-size: 11px; color: rgba(186,230,253,0.72); line-height: 1.5; }
     .pv-general-lbl { font-weight: 700; color: #7dd3fc; }
   </style>
 </head>
@@ -233,18 +393,10 @@
     <li><a id="js-download-svg" href title="download as SVG image">SVG image</a></li>
   </ul>
 
-  <!-- Botón flotante IA -->
-  <div id="ai-fab" title="Generar BPMN con IA">
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1.5" fill="rgba(14,165,233,0.3)"/>
-      <rect x="14" y="3" width="7" height="7" rx="1.5" fill="rgba(14,165,233,0.3)"/>
-      <rect x="3" y="14" width="7" height="7" rx="1.5" fill="rgba(14,165,233,0.3)"/>
-      <path d="M17.5 14v7M14 17.5h7" stroke="#67e8f9" stroke-width="2"/>
-    </svg>
-  </div>
-
-  <!-- Panel IA -->
+  <!-- Panel IA (drawer lateral) -->
   <div id="ai-panel">
+
+    <!-- Header -->
     <div class="ai-header">
       <div class="ai-header-left">
         <div class="ai-logo">
@@ -254,7 +406,7 @@
         </div>
         <div>
           <div class="ai-title">BPMN AI + PERVAL</div>
-          <div class="ai-subtitle">Generación y análisis de valor</div>
+          <div class="ai-subtitle">Generación iterativa de procesos</div>
         </div>
       </div>
       <div class="ai-header-actions">
@@ -263,29 +415,71 @@
       </div>
     </div>
 
+    <!-- Indicador de fase -->
+    <div class="ai-phase-bar" id="ai-phase-bar">
+      <div class="phase-step active" id="phase-1">1·Describir</div>
+      <div class="phase-step" id="phase-2">2·Estructura</div>
+      <div class="phase-step" id="phase-3">3·Valores</div>
+      <div class="phase-step" id="phase-4">4·Diagrama</div>
+    </div>
+
+    <!-- Mensajes -->
     <div id="ai-messages">
       <div class="msg ai">
         <div class="msg-av">🤖</div>
         <div class="msg-bubble">
-          ¡Hola! Cuéntame brevemente el proceso de negocio que quieres modelar y te haré algunas preguntas con opciones para crear el mejor diagrama BPMN posible.
+          ¡Hola! Describe brevemente el proceso de negocio que quieres modelar.<br><br>
+          Identificaré los <b>participantes (pools)</b> y <b>departamentos (lanes)</b>, los dibujaré en el lienzo para que los confirmes y, una vez aprobados, generaré el diagrama completo.
         </div>
       </div>
     </div>
 
+    <!-- API Key -->
     <div class="ai-config">
       <div class="ai-label">API Key</div>
       <input type="password" id="ai-apikey" placeholder="Token de GitHub Models o sk- de OpenAI" />
     </div>
 
+    <!-- Input + botones -->
     <div class="ai-input-area" id="ai-free-input">
       <textarea id="ai-scenario" rows="2"
         placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
-      <button id="ai-send">➤ Enviar</button>
+      <button id="ai-send" class="btn-send btn-blue">→ Identificar estructura</button>
       <button id="ai-perval-btn">🔍 Analizar valor PERVAL</button>
-      <div class="hint">Ctrl+Enter para enviar · ↺ para nueva conversación</div>
+      <div class="hint" id="ai-hint">Ctrl+Enter para enviar</div>
     </div>
   </div>
 
+  <!-- Botón flotante IA -->
+  <div id="ai-fab" title="Abrir asistente IA">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" fill="rgba(14,165,233,0.3)"/>
+      <rect x="14" y="3" width="7" height="7" rx="1.5" fill="rgba(14,165,233,0.3)"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.5" fill="rgba(14,165,233,0.3)"/>
+      <path d="M17.5 14v7M14 17.5h7" stroke="#67e8f9" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <script>
+    // Ocultar FAB cuando el panel está abierto
+    const panel = document.getElementById('ai-panel');
+    const fab   = document.getElementById('ai-fab');
+    const obs   = new MutationObserver(() => {
+      fab.style.display = panel.classList.contains('open') ? 'none' : 'flex';
+    });
+    obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
+
+    // Actualizar indicador de fase
+    window.updatePhaseBar = function(fase) {
+      const steps = ['phase-1','phase-2','phase-3','phase-4'];
+      const faseMap = { describe: 0, confirm_structure: 1, actor_delivery: 2, refine: 3 };
+      const current = faseMap[fase] ?? 0;
+      steps.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el) el.className = 'phase-step ' + (i < current ? 'done' : i === current ? 'active' : '');
+      });
+    };
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

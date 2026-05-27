@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <collaboration id="Collab_1">
+    <participant id="Part_Ext1" name="Cliente" processRef="Proc_Ext1"/>
+    <participant id="Part_Ext2" name="Pasarela de Pago" processRef="Proc_Ext2"/>
+    <participant id="Part_Ext3" name="Mensajería" processRef="Proc_Ext3"/>
+    <participant id="Part_Main" name="Servicio de Catering" processRef="Proc_Main"/>
+  </collaboration>
+  <process id="Proc_Ext1" isExecutable="false"/>
+  <process id="Proc_Ext2" isExecutable="false"/>
+  <process id="Proc_Ext3" isExecutable="false"/>
+  <process id="Proc_Main" isExecutable="false">
+    <laneSet id="LaneSet_1">
+      <lane id="Lane1" name="Dpto Comercial"/>
+      <lane id="Lane2" name="Dpto Envíos"/>
+      <lane id="Lane3" name="Cocina"/>
+      <lane id="Lane4" name="Almacén"/>
+    </laneSet>
+    <startEvent id="SE1" name="Pedido recibido">
+      <messageEventDefinition/>
+    </startEvent>
+    <userTask id="T1" name="Gestionar pedido"/>
+    <serviceTask id="T2" name="Validar pago"/>
+    <exclusiveGateway id="GW1" name="¿Tipo alimento?"/>
+    <sendTask id="T3" name="Enviar confirmación"/>
+    <sendTask id="T4" name="Enviar cuestionario de calidad"/>
+    <sendTask id="T5" name="Instrucciones de entrega"/>
+    <endEvent id="EE1" name="Fin con msg">
+      <messageEventDefinition/>
+    </endEvent>
+    <boundaryEvent id="BE1" attachedToRef="T1">
+      <timerEventDefinition/>
+    </boundaryEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collab_1">
+      <bpmndi:BPMNShape id="Shape_Part_Ext1" bpmnElement="Part_Ext1" isHorizontal="true"><dc:Bounds x="30" y="30" width="1600" height="160"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Part_Ext2" bpmnElement="Part_Ext2" isHorizontal="true"><dc:Bounds x="30" y="210" width="1600" height="160"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Part_Ext3" bpmnElement="Part_Ext3" isHorizontal="true"><dc:Bounds x="30" y="390" width="1600" height="160"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Part_Main" bpmnElement="Part_Main" isHorizontal="true"><dc:Bounds x="30" y="570" width="1600" height="780"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane1" bpmnElement="Lane1" isHorizontal="true"><dc:Bounds x="60" y="630" width="1570" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane2" bpmnElement="Lane2" isHorizontal="true"><dc:Bounds x="60" y="810" width="1570" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane3" bpmnElement="Lane3" isHorizontal="true"><dc:Bounds x="60" y="990" width="1570" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane4" bpmnElement="Lane4" isHorizontal="true"><dc:Bounds x="60" y="1170" width="1570" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SE1" bpmnElement="SE1" isHorizontal="true"><dc:Bounds x="150" y="702" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T1" bpmnElement="T1" isHorizontal="true"><dc:Bounds x="310" y="680" width="100" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T2" bpmnElement="T2" isHorizontal="true"><dc:Bounds x="470" y="680" width="100" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GW1" bpmnElement="GW1" isHorizontal="true"><dc:Bounds x="630" y="695" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T3" bpmnElement="T3" isHorizontal="true"><dc:Bounds x="790" y="680" width="100" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T4" bpmnElement="T4" isHorizontal="true"><dc:Bounds x="790" y="1040" width="100" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T5" bpmnElement="T5" isHorizontal="true"><dc:Bounds x="310" y="860" width="100" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EE1" bpmnElement="EE1" isHorizontal="true"><dc:Bounds x="950" y="702" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_BE1" bpmnElement="BE1" isHorizontal="false"><dc:Bounds x="310" y="762" width="36" height="36"/></bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <sequenceFlow id="Flow1" sourceRef="SE1" targetRef="T1"/>
+  <sequenceFlow id="Flow2" sourceRef="T1" targetRef="T2"/>
+  <sequenceFlow id="Flow3" sourceRef="T2" targetRef="GW1"/>
+  <sequenceFlow id="Flow4" sourceRef="GW1" targetRef="T3" />
+  <sequenceFlow id="Flow5" sourceRef="GW1" targetRef="T4" />
+  <sequenceFlow id="Flow6" sourceRef="T3" targetRef="EE1"/>
+  <sequenceFlow id="Flow7" sourceRef="T4" targetRef="EE1"/>
+  <sequenceFlow id="Flow8" sourceRef="T5" targetRef="EE1"/>
+  <messageFlow id="MessageFlow1" sourceRef="T2" targetRef="Part_Ext2"/>
+  <messageFlow id="MessageFlow2" sourceRef="T3" targetRef="Part_Ext1"/>
+  <messageFlow id="MessageFlow3" sourceRef="T4" targetRef="Part_Ext1"/>
+  <messageFlow id="MessageFlow4" sourceRef="T5" targetRef="Part_Ext3"/>
+</definitions>

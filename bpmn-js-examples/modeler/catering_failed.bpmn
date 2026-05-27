@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <collaboration id="Collab_1">
+    <participant id="Part_Ext1" name="Cliente" processRef="Proc_Ext1"/>
+    <participant id="Part_Ext2" name="Pasarela de Pago" processRef="Proc_Ext2"/>
+    <participant id="Part_Ext3" name="Mensajería" processRef="Proc_Ext3"/>
+    <participant id="Part_Main" name="Catering Online" processRef="Proc_Main"/>
+    <messageFlow id="MF1" name="Email de confirmación" sourceRef="T_SendConf" targetRef="Part_Ext1"/>
+    <messageFlow id="MF2" name="Cuestionario de calidad" sourceRef="T_SendSurvey" targetRef="Part_Ext1"/>
+    <messageFlow id="MF3" name="Autorización de pago" sourceRef="T_SendPago" targetRef="Part_Ext2"/>
+    <messageFlow id="MF4" name="Instrucciones de entrega" sourceRef="T_SendDelivery" targetRef="Part_Ext3"/>
+  </collaboration>
+  <process id="Proc_Ext1" isExecutable="false"/>
+  <process id="Proc_Ext2" isExecutable="false"/>
+  <process id="Proc_Ext3" isExecutable="false"/>
+
+  <process id="Proc_Main" isExecutable="false">
+    <laneSet id="LaneSet_1">
+      <lane id="Lane1" name="Dpto Comercial">
+        <flowNodeRef>SE1</flowNodeRef>
+        <flowNodeRef>T1</flowNodeRef>
+        <flowNodeRef>T2</flowNodeRef>
+        <flowNodeRef>GW1</flowNodeRef>
+        <flowNodeRef>T_SendConf</flowNodeRef>
+        <flowNodeRef>T_SendSurvey</flowNodeRef>
+        <flowNodeRef>EE1</flowNodeRef>
+      </lane>
+      <lane id="Lane2" name="Dpto Envíos">
+        <flowNodeRef>T3</flowNodeRef>
+        <flowNodeRef>T_SendDelivery</flowNodeRef>
+      </lane>
+      <lane id="Lane3" name="Cocina">
+        <flowNodeRef>T4</flowNodeRef>
+      </lane>
+      <lane id="Lane4" name="Almacén">
+        <flowNodeRef>T5</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="SE1" name="Inicio"/>
+    <userTask id="T1" name="Revisar pedido"/>
+    <serviceTask id="T2" name="Validar pago"/>
+    <exclusiveGateway id="GW1" name="¿Pago OK?"/>
+    <sendTask id="T_SendConf" name="Enviar confirmación"/>
+    <sendTask id="T_SendSurvey" name="Enviar cuestionario de calidad"/>
+    <sendTask id="T_SendPago" name="Enviar solicitud de pago"/>
+    <sendTask id="T_SendDelivery" name="Enviar instrucciones de entrega"/>
+    <userTask id="T3" name="Coordinar entrega"/>
+    <userTask id="T4" name="Preparar alimentos calientes"/>
+    <userTask id="T5" name="Preparar alimentos fríos"/>
+    <endEvent id="EE1" name="Fin"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collab_1">
+      <bpmndi:BPMNShape id="Shape_SE1" bpmnElement="SE1">
+        <dc:Bounds x="150" y="630" width="36" height="36/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T1" bpmnElement="T1">
+        <dc:Bounds x="310" y="630" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T2" bpmnElement="T2">
+        <dc:Bounds x="490" y="630" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GW1" bpmnElement="GW1">
+        <dc:Bounds x="670" y="630" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SendConf" bpmnElement="T_SendConf">
+        <dc:Bounds x="790" y="630" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SendSurvey" bpmnElement="T_SendSurvey">
+        <dc:Bounds x="790" y="720" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SendPago" bpmnElement="T_SendPago">
+        <dc:Bounds x="310" y="720" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SendDelivery" bpmnElement="T_SendDelivery">
+        <dc:Bounds x="790" y="810" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T3" bpmnElement="T3">
+        <dc:Bounds x="310" y="810" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T4" bpmnElement="T4">
+        <dc:Bounds x="490" y="810" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T5" bpmnElement="T5">
+        <dc:Bounds x="670" y="810" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EE1" bpmnElement="EE1">
+        <dc:Bounds x="950" y="810" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MFEdge_MF1" bpmnElement="MF1">
+        <di:waypoint x="840" y="670"/>
+        <di:waypoint x="840" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MFEdge_MF2" bpmnElement="MF2">
+        <di:waypoint x="840" y="750"/>
+        <di:waypoint x="840" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MFEdge_MF3" bpmnElement="MF3">
+        <di:waypoint x="360" y="670"/>
+        <di:waypoint x="360" y="210"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MFEdge_MF4" bpmnElement="MF4">
+        <di:waypoint x="840" y="810"/>
+        <di:waypoint x="840" y="390"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SE1_T1" bpmnElement="SE1">
+        <di:waypoint x="186" y="648"/>
+        <di:waypoint x="310" y="648"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_T1_T2" bpmnElement="T1">
+        <di:waypoint x="410" y="670"/>
+        <di:waypoint x="490" y="670"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_T2_GW1" bpmnElement="T2">
+        <di:waypoint x="590" y="670"/>
+        <di:waypoint x="670" y="670"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_GW1_T_SendConf" bpmnElement="GW1">
+        <di:waypoint x="720" y="655"/>
+        <di:waypoint x="790" y="655"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_GW1_T_SendSurvey" bpmnElement="GW1">
+        <di:waypoint x="720" y="705"/>
+        <di:waypoint x="790" y="705"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_T_SendConf_EE1" bpmnElement="T_SendConf">
+        <di:waypoint x="890" y="670"/>
+        <di:waypoint x="950" y="670"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_T_SendSurvey_EE1" bpmnElement="T_SendSurvey">
+        <di:waypoint x="890" y="750"/>
+        <di:waypoint x="950" y="750"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_T_SendPago_T3" bpmnElement="T_SendPago">
+        <di:waypoint x="410" y="750"/>
+        <di:waypoint x="310" y="750"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_T_SendDelivery_T3" bpmnElement="T_SendDelivery">
+        <di:waypoint x="890" y="810"/>
+        <di:waypoint x="950" y="390"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

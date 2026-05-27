@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  26 MAY 2026 15:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  27 MAY 2026 18:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -543,7 +543,7 @@ Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 ))
 \c@lstlisting=\count344
  (include/Portada.tex
-<include/logo-upv.png, id=59, 136.8312pt x 158.2713pt>
+<include/logo-upv.png, id=75, 136.8312pt x 158.2713pt>
 File: include/logo-upv.png Graphic file (type png)
 <use include/logo-upv.png>
 Package pdftex.def Info: include/logo-upv.png  used on input line 12.
@@ -572,7 +572,7 @@ LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/l/n' tried instead on input line 18.
 LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/db/n' tried instead on input line 18.
-<include/DSIC.png, id=61, 92.7465pt x 64.3203pt>
+<include/DSIC.png, id=77, 92.7465pt x 64.3203pt>
 File: include/DSIC.png Graphic file (type png)
 <use include/DSIC.png>
 Package pdftex.def Info: include/DSIC.png  used on input line 22.
@@ -624,51 +624,76 @@ LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <10.95> not available
 
 ] (secciones/02_Introduccion.tex
 Cap\'{\i }tulo 1.
-LaTeX Font Info:    Trying to load font information for TS1+pbk on input line 14.
-(C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1pbk.fd
-File: ts1pbk.fd 2001/06/04 font definitions for TS1/pbk.
-)
-LaTeX Font Info:    Font shape `TS1/pbk/m/n' in size <10.95> not available
-(Font)              Font shape `TS1/pbk/l/n' tried instead on input line 14.
-) (secciones/03_Desarrollo.tex
+LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <10.95> not available
+(Font)              Font shape `T1/pbk/l/it' tried instead on input line 9.
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1 \chapter
-            {Desarrollo} [1
+l.22 
+      [1
 
 ]
+LaTeX Info: Redefining \. on input line 53.
+LaTeX Info: Redefining \% on input line 53.
+Package babel Info: 'spanish' activates 'spanish' shorthands.
+(babel)             Reported on input line 53.
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1 \chapter
-            {Desarrollo} [2
+l.53     \item[$\bullet$]
+                          \textbf{ODS 12: producción y consumo responsables... [2]
+LaTeX Info: Redefining \. on input line 73.
+LaTeX Info: Redefining \% on input line 73.
+ [3]
+LaTeX Info: Redefining \. on input line 83.
+LaTeX Info: Redefining \% on input line 83.
+ [4]) (secciones/03_EstadoDelArte.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [5] [6
 
 ]
 Cap\'{\i }tulo 2.
-LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <12> not available
-(Font)              Font shape `T1/pbk/db/n' tried instead on input line 10.
-) (secciones/04_Resultados.tex [3] [4
+) (secciones/04_AnalisisProblema.tex [7] [8
 
 ]
 Cap\'{\i }tulo 3.
-) (secciones/05_Conclusiones.tex [5] [6
+) (secciones/05_DisenoSolucion.tex [9] [10
 
 ]
 Cap\'{\i }tulo 4.
-) [7] [8
+) (secciones/06_DesarrolloImplementacion.tex [11] [12
 
-] (secciones/06_Bibliografia.tex
-LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <10.95> not available
-(Font)              Font shape `T1/pbk/l/it' tried instead on input line 4.
-) [9
+]
+Cap\'{\i }tulo 5.
+) (secciones/07_EjecucionFuncionamiento.tex [13] [14
 
-] (secciones/AnexoI.tex [10
+]
+Cap\'{\i }tulo 6.
+) (secciones/08_EstudioEmpirico.tex [15] [16
+
+]
+Cap\'{\i }tulo 7.
+) (secciones/09_Resultados.tex [17] [18
+
+]
+Cap\'{\i }tulo 8.
+) (secciones/10_Conclusiones.tex [19] [20
+
+]
+Cap\'{\i }tulo 9.
+) [21] [22
+
+] (secciones/06_Bibliografia.tex) [23
+
+] (secciones/AnexoI.tex [24
 
 
-]) (secciones/AnexoII.tex [11] [12
+]) (secciones/AnexoII.tex [25] [26
 
-]) [13] (plantilla_TFM.aux
+]) [27] (plantilla_TFM.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 )
@@ -677,20 +702,20 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-06>
  ***********
 Package rerunfilecheck Info: File `plantilla_TFM.out' has not changed.
-(rerunfilecheck)             Checksum: D3EB2127401A949EC093102C3AAED448;2081.
+(rerunfilecheck)             Checksum: 8DA42CF730A712BBAA2A034DBF738D6D;2364.
  ) 
 Here is how much of TeX's memory you used:
- 15426 strings out of 467871
- 244169 string characters out of 5417408
- 664075 words of memory out of 5000000
- 43981 multiletter control sequences out of 15000+600000
- 652404 words of font info for 89 fonts, out of 8000000 for 9000
+ 15463 strings out of 467871
+ 246034 string characters out of 5417408
+ 669078 words of memory out of 5000000
+ 43990 multiletter control sequences out of 15000+600000
+ 650583 words of font info for 86 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 80i,7n,82p,618b,544s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb>
-Output written on plantilla_TFM.pdf (23 pages, 127998 bytes).
+ 80i,11n,82p,1052b,647s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb>
+Output written on plantilla_TFM.pdf (37 pages, 163088 bytes).
 PDF statistics:
- 208 PDF objects out of 1000 (max. 8388607)
- 41 named destinations out of 1000 (max. 500000)
- 123 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 297 PDF objects out of 1000 (max. 8388607)
+ 59 named destinations out of 1000 (max. 500000)
+ 155 words of extra memory for PDF output out of 10000 (max. 10000000)
 

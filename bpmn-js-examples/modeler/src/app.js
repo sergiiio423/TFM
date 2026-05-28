@@ -427,7 +427,7 @@ function disableCard(div) {
 }
 
 // ─── LLAMADA A LA API ─────────────────────────────────────────────────────────
-async function callAPI(apiKey, systemPrompt, messages) {
+async function callOpenAI(apiKey, systemPrompt, messages) {
   const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
@@ -438,9 +438,37 @@ async function callAPI(apiKey, systemPrompt, messages) {
       max_tokens: 8000
     })
   });
-  if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || 'Error en la API'); }
+  if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || 'Error en la API de OpenAI'); }
   const data = await response.json();
   return data.choices[0].message.content.trim();
+}
+
+async function callClaude(apiKey, systemPrompt, messages) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-7',
+      max_tokens: 8000,
+      system: systemPrompt,
+      messages: messages,
+      temperature: 0.3
+    })
+  });
+  if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || 'Error en la API de Claude'); }
+  const data = await response.json();
+  return data.content[0].text.trim();
+}
+
+async function callAPI(apiKey, systemPrompt, messages) {
+  const provider = window.currentProvider || 'openai';
+  if (provider === 'claude') return callClaude(apiKey, systemPrompt, messages);
+  return callOpenAI(apiKey, systemPrompt, messages);
 }
 
 function cleanXML(raw) {

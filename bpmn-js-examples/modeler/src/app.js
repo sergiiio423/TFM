@@ -12,6 +12,7 @@ import diagramXML from '../resources/newDiagram.bpmn';
 
 var container = $('#js-drop-zone');
 var modeler   = new BpmnModeler({ container: '#js-canvas' });
+window._modeler = modeler;
 
 function createNewDiagram() { openDiagram(diagramXML); }
 async function openDiagram(xml) {
@@ -28,13 +29,16 @@ if (!window.FileList || !window.FileReader) { window.alert('Usa Chrome o Firefox
 else { registerFileDrop(container, openDiagram); }
 
 // ─── ESTADO ───────────────────────────────────────────────────────────────────
-// Fases: 'describe' → 'confirm_structure' → 'actor_delivery' (x N actores) → 'refine'
+// Fases: 'describe' → 'confirm_structure' → 'describe_process' → 'lane_tasks' (xN) → 'actor_delivery' (xM) → 'refine'
 var fase = 'describe';
-var processDescription = '';
-var confirmedStructure = null;
-var currentActorIdx    = 0;   // índice del actor externo que se está configurando
-var diagramState       = { sendTasks: [] }; // acumula las sendTasks programáticas
-var pervalAnalisado    = false;
+var processDescription     = '';
+var processFlowDescription = '';
+var confirmedStructure  = null;
+var currentActorIdx     = 0;
+var currentLaneTaskIdx  = 0;
+var _currentLaneTasks   = [];
+var diagramState        = { laneTasks: [], sendTasks: [] };
+var pervalAnalisado     = false;
 
 // ─── HELPERS CHAT ─────────────────────────────────────────────────────────────
 function addMessage(text, type = 'ai', style = '') {
@@ -50,27 +54,46 @@ function addTyping()   { const m = document.getElementById('ai-messages'); const
 function removeTyping(){ const t = document.getElementById('ai-typing'); if (t) t.remove(); }
 
 function updateUI() {
-  const btn       = document.getElementById('ai-send');
-  const textarea  = document.getElementById('ai-scenario');
-  const pervalBtn = document.getElementById('ai-perval-btn');
-  const hint      = document.getElementById('ai-hint');
+  const btn           = document.getElementById('ai-send');
+  const confirmActs   = document.getElementById('ai-confirm-actions');
+  const textarea      = document.getElementById('ai-scenario');
+  const pervalBtn     = document.getElementById('ai-perval-btn');
+  const hint          = document.getElementById('ai-hint');
 
   textarea.disabled = false;
   btn.disabled      = false;
 
+  // Por defecto muestra el botón principal y oculta los de confirmación
+  btn.style.display         = '';
+  if (confirmActs) confirmActs.style.display = 'none';
+
   if (fase === 'describe') {
     btn.textContent = '→ Identificar participantes';
     btn.className   = 'btn-send btn-blue';
-    textarea.placeholder = 'Describe el proceso de e-commerce que quieres modelar...';
+    textarea.placeholder = '¿Quiénes participan en tu proceso? Ej: clientes, proveedores, tu empresa y sus departamentos...';
     if (pervalBtn) pervalBtn.style.display = 'none';
     if (hint) hint.textContent = 'Ctrl+Enter para enviar';
 
   } else if (fase === 'confirm_structure') {
-    btn.textContent = '✏️ Modificar estructura';
-    btn.className   = 'btn-send btn-blue';
-    textarea.placeholder = 'O escribe aquí los cambios que quieras hacer...';
+    btn.style.display = 'none';
+    if (confirmActs) confirmActs.style.display = 'flex';
+    textarea.placeholder = 'Escribe aquí los cambios que quieres aplicar...';
     if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Usa los botones de la tarjeta o escribe cambios aquí';
+    if (hint) hint.textContent = 'Escribe un cambio y pulsa ✏️ Modificar, o confirma directamente';
+
+  } else if (fase === 'describe_process') {
+    btn.textContent = '→ Continuar con las tareas';
+    btn.className   = 'btn-send btn-blue';
+    textarea.placeholder = 'Describe el flujo completo: qué hace cada departamento, decisiones (gateways), mensajes a actores externos...';
+    if (pervalBtn) pervalBtn.style.display = 'none';
+    if (hint) hint.textContent = 'Describe el proceso con tanto detalle como quieras y pulsa Continuar';
+
+  } else if (fase === 'lane_tasks') {
+    btn.style.display = 'none';
+    if (confirmActs) confirmActs.style.display = 'flex';
+    textarea.placeholder = 'Escribe cambios para las tareas de este departamento...';
+    if (pervalBtn) pervalBtn.style.display = 'none';
+    if (hint) hint.textContent = 'Edita las tareas en la tarjeta o escribe un cambio aquí';
 
   } else if (fase === 'actor_delivery') {
     btn.textContent   = '→ Editar en la tarjeta';
@@ -145,99 +168,150 @@ function buildRefinementMessage(instruction, currentXML) {
 }
 
 // ─── GENERACIÓN PROGRAMÁTICA DEL DIAGRAMA ────────────────────────────────────
-/**
- * Genera el XML BPMN completo desde cero, sin LLM.
- * state.sendTasks = [{ id, name, laneIdx, participantIdx }]
- */
 function renderDiagramFromState(structure, state) {
   const ext   = structure.poolExterno || [];
   const lanes = structure.poolPrincipal.lanes || [];
-  const N = lanes.length;
-  const PW = 1600, LH = 180, EH = 160, EG = 20;
+  const N     = lanes.length;
+  const LH    = 180, EH = 160, EG = 20;
+  const X0    = 150, DX = 160;
 
-  // Coordenadas
+  // Ordered tasks: for each lane → [lane tasks, send tasks], then next lane
+  const ordered = [];
+  lanes.forEach((_, li) => {
+    (state.laneTasks || []).filter(t => t.laneIdx === li)
+      .forEach(t => ordered.push({ ...t, kind: 'task' }));
+    (state.sendTasks || []).filter(t => t.laneIdx === li)
+      .forEach(t => ordered.push({ ...t, kind: 'send' }));
+  });
+  ordered.forEach((t, i) => { t._x = X0 + i * DX; });
+  const endX = X0 + ordered.length * DX;
+
+  // Pool width: enough to fit all elements + margin
+  const PW = Math.max(1200, endX + 300);
+
   const extY   = i => 30 + i * (EH + EG);
-  const extCY  = i => extY(i) + EH / 2;              // centro-y pool externo i
+  const extCY  = i => extY(i) + EH / 2;
   const mainY  = ext.length > 0 ? 30 + ext.length * (EH + EG) : 30;
-  const laneCY = j => mainY + 60 + j * LH + LH / 2;  // centro-y lane j
+  const laneCY = j => mainY + 60 + j * LH + LH / 2;
   const mainH  = N * LH + 60;
 
-  // Contador de tareas por lane para posicionar en X sin solaparse
-  const laneTaskCount = lanes.map(() => 0);
-
-  // ── Collaboration: participants + messageFlows ──────────────────────────
+  // ── Collaboration ──────────────────────────────────────────────────────
   let col = '';
   ext.forEach((p, i) => {
     col += `    <participant id="Part_Ext${i+1}" name="${p.nombre}" processRef="Proc_Ext${i+1}"/>\n`;
   });
   col += `    <participant id="Part_Main" name="${structure.poolPrincipal.nombre}" processRef="Proc_Main"/>\n`;
-  state.sendTasks.forEach(t => {
+  (state.sendTasks || []).forEach(t => {
     col += `    <messageFlow id="MF_${t.id}" name="${t.name}" sourceRef="${t.id}" targetRef="Part_Ext${t.participantIdx+1}"/>\n`;
   });
 
-  // ── Procesos externos vacíos ────────────────────────────────────────────
+  // ── External processes ─────────────────────────────────────────────────
   let proc = '';
   ext.forEach((p, i) => { proc += `  <process id="Proc_Ext${i+1}" isExecutable="false"/>\n`; });
 
-  // ── Proceso principal con lanes ─────────────────────────────────────────
-  // Calcular X máximo para posicionar el endEvent después de todas las tareas
-  const tasksPerLane = lanes.map((_, j) => state.sendTasks.filter(t => t.laneIdx === j).length);
-  const maxTasksPerLane = Math.max(...tasksPerLane, 0);
-  const endEventX = 150 + maxTasksPerLane * 160 + 80;
-
+  // ── Lane sets ─────────────────────────────────────────────────────────
   let laneSetXml = '';
   lanes.forEach((lane, j) => {
-    let refs = state.sendTasks
-      .filter(t => t.laneIdx === j)
-      .map(t => `        <flowNodeRef>${t.id}</flowNodeRef>`)
-      .join('\n');
-    // startEvent y endEvent van en el primer lane (Dpto Comercial)
-    if (j === 0) {
-      refs = `        <flowNodeRef>SE_Main</flowNodeRef>\n` +
-             (refs ? refs + '\n' : '') +
-             `        <flowNodeRef>EE_Main</flowNodeRef>`;
-    }
-    laneSetXml += `      <lane id="Lane${j+1}" name="${lane}">\n${refs ? refs+'\n' : ''}      </lane>\n`;
+    const refs = ordered.filter(t => t.laneIdx === j)
+      .map(t => `        <flowNodeRef>${t.id}</flowNodeRef>`).join('\n');
+    const header = j === 0
+      ? `        <flowNodeRef>SE_Main</flowNodeRef>\n` + (refs ? refs + '\n' : '') + `        <flowNodeRef>EE_Main</flowNodeRef>`
+      : refs;
+    laneSetXml += `      <lane id="Lane${j+1}" name="${lane}">\n${header ? header+'\n' : ''}      </lane>\n`;
   });
-  const taskXml = state.sendTasks.map(t => `    <sendTask id="${t.id}" name="${t.name}"/>`).join('\n');
+
+  // ── Task / gateway / event elements ─────────────────────────────────────
+  const taskXml = ordered.map(t => {
+    const tipo = t.tipo || (t.kind === 'send' ? 'sendTask' : 'task');
+    const n = t.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (tipo === 'exclusiveGateway') return `    <exclusiveGateway id="${t.id}" name="${n}"/>`;
+    if (tipo === 'parallelGateway')  return `    <parallelGateway  id="${t.id}" name="${n}"/>`;
+    if (tipo === 'intermediateCatchEvent')
+      return `    <intermediateCatchEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></intermediateCatchEvent>`;
+    if (tipo === 'intermediateThrowEvent')
+      return `    <intermediateThrowEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></intermediateThrowEvent>`;
+    if (tipo === 'sendTask') return `    <sendTask id="${t.id}" name="${n}"/>`;
+    return `    <task id="${t.id}" name="${n}"/>`;
+  }).join('\n');
+
+  // ── Sequence flows ─────────────────────────────────────────────────────
+  const flowNodes = ['SE_Main', ...ordered.map(t => t.id), 'EE_Main'];
+  const seqXml = flowNodes.slice(0, -1).map((src, i) =>
+    `    <sequenceFlow id="SF_${i}" sourceRef="${src}" targetRef="${flowNodes[i+1]}"/>`
+  ).join('\n');
+
   proc += `\n  <process id="Proc_Main" isExecutable="false">
     <laneSet id="LaneSet_1">
 ${laneSetXml}    </laneSet>
     <startEvent id="SE_Main" name="Inicio"/>
     <endEvent id="EE_Main" name="Fin"/>
-${taskXml ? taskXml+'\n' : ''}  </process>`;
+${taskXml ? taskXml+'\n' : ''}${seqXml ? seqXml+'\n' : ''}  </process>`;
 
-  // ── DI: shapes + edges ─────────────────────────────────────────────────
+  // ── DI shapes ─────────────────────────────────────────────────────────
   let shapes = '', edges = '';
 
-  // Pool externos
   ext.forEach((p, i) => {
     shapes += `      <bpmndi:BPMNShape id="Shape_Part_Ext${i+1}" bpmnElement="Part_Ext${i+1}" isHorizontal="true">
         <dc:Bounds x="30" y="${extY(i)}" width="${PW}" height="${EH}"/>
       </bpmndi:BPMNShape>\n`;
   });
-  // Pool principal
   shapes += `      <bpmndi:BPMNShape id="Shape_Part_Main" bpmnElement="Part_Main" isHorizontal="true">
         <dc:Bounds x="30" y="${mainY}" width="${PW}" height="${mainH}"/>
       </bpmndi:BPMNShape>\n`;
-  // Lanes
-  lanes.forEach((lane, j) => {
+  lanes.forEach((_, j) => {
     shapes += `      <bpmndi:BPMNShape id="Shape_Lane${j+1}" bpmnElement="Lane${j+1}" isHorizontal="true">
         <dc:Bounds x="60" y="${mainY+60+j*LH}" width="${PW-30}" height="${LH}"/>
       </bpmndi:BPMNShape>\n`;
   });
-  // SendTasks + messageFlow edges
-  state.sendTasks.forEach(t => {
-    const x  = 150 + laneTaskCount[t.laneIdx] * 160;
-    laneTaskCount[t.laneIdx]++;
-    const cy = laneCY(t.laneIdx);
-    const cy_ext = extCY(t.participantIdx);
-    shapes += `      <bpmndi:BPMNShape id="Shape_${t.id}" bpmnElement="${t.id}">
-        <dc:Bounds x="${x}" y="${cy-40}" width="100" height="80"/>
+
+  // Start / end events
+  shapes += `      <bpmndi:BPMNShape id="Shape_SE" bpmnElement="SE_Main">
+        <dc:Bounds x="112" y="${laneCY(0)-18}" width="36" height="36"/>
       </bpmndi:BPMNShape>\n`;
+  shapes += `      <bpmndi:BPMNShape id="Shape_EE" bpmnElement="EE_Main">
+        <dc:Bounds x="${endX}" y="${laneCY(0)-18}" width="36" height="36"/>
+      </bpmndi:BPMNShape>\n`;
+
+  // Task / gateway / event shapes (size depends on tipo)
+  ordered.forEach(t => {
+    const tipo = t.tipo || (t.kind === 'send' ? 'sendTask' : 'task');
+    const isGW = tipo === 'exclusiveGateway' || tipo === 'parallelGateway';
+    const isEV = tipo === 'intermediateCatchEvent' || tipo === 'intermediateThrowEvent';
+    const w = isGW ? 50 : isEV ? 36 : 100;
+    const h = isGW ? 50 : isEV ? 36 : 80;
+    const isGateway = isGW;
+    shapes += `      <bpmndi:BPMNShape id="Shape_${t.id}" bpmnElement="${t.id}"${isGateway ? ' isMarkerVisible="true"' : ''}>
+        <dc:Bounds x="${t._x-w/2}" y="${laneCY(t.laneIdx)-h/2}" width="${w}" height="${h}"/>
+      </bpmndi:BPMNShape>\n`;
+  });
+
+  // ── DI edges ──────────────────────────────────────────────────────────
+  // Center coords for each node (accounts for shape size)
+  const cx = id => {
+    if (id === 'SE_Main') return 130;
+    if (id === 'EE_Main') return endX + 18;
+    return ordered.find(t => t.id === id)?._x ?? 0;
+  };
+  const cy = id => {
+    if (id === 'SE_Main' || id === 'EE_Main') return laneCY(0);
+    return laneCY(ordered.find(t => t.id === id)?.laneIdx ?? 0);
+  };
+
+  // Sequence flow edges
+  flowNodes.slice(0, -1).forEach((src, i) => {
+    const tgt = flowNodes[i + 1];
+    edges += `      <bpmndi:BPMNEdge id="Edge_SF_${i}" bpmnElement="SF_${i}">
+        <di:waypoint x="${cx(src)}" y="${cy(src)}"/>
+        <di:waypoint x="${cx(tgt)}" y="${cy(tgt)}"/>
+      </bpmndi:BPMNEdge>\n`;
+  });
+
+  // Message flow edges (sendTasks → external pool)
+  (state.sendTasks || []).forEach(t => {
+    const srcY = laneCY(t.laneIdx) - 40; // top of sendTask shape
     edges += `      <bpmndi:BPMNEdge id="Edge_MF_${t.id}" bpmnElement="MF_${t.id}">
-        <di:waypoint x="${x+50}" y="${cy}"/>
-        <di:waypoint x="${x+50}" y="${cy_ext}"/>
+        <di:waypoint x="${t._x}" y="${srcY}"/>
+        <di:waypoint x="${t._x}" y="${extCY(t.participantIdx)}"/>
       </bpmndi:BPMNEdge>\n`;
   });
 
@@ -289,30 +363,9 @@ function showStructureCard(structure) {
           <div class="struct-chips">${laneChips}</div>
         </div>
       </div>
-      <div class="struct-actions">
-        <button class="btn-confirm-struct" id="btn-confirm-struct">✅ Confirmar</button>
-        <button class="btn-modify-struct"  id="btn-modify-struct">✏️ Modificar</button>
-      </div>
-      <div class="modify-area" id="struct-modify-area" style="display:none">
-        <textarea class="modify-input" id="struct-modify-input" rows="2"
-          placeholder="Ej: Añade un canal 'Marketplace', cambia 'Logística' por 'Almacén'..."></textarea>
-        <button class="confirm-opts-btn" id="btn-apply-struct-mod">Aplicar</button>
-      </div>
     </div>`;
 
   messages.appendChild(div); messages.scrollTop = messages.scrollHeight;
-
-  div.querySelector('#btn-confirm-struct').addEventListener('click', () => { disableCard(div); handleConfirmStructure(); });
-  div.querySelector('#btn-modify-struct').addEventListener('click', () => {
-    const a = div.querySelector('#struct-modify-area');
-    a.style.display = a.style.display === 'none' ? 'flex' : 'none';
-    if (a.style.display === 'flex') div.querySelector('#struct-modify-input').focus();
-  });
-  div.querySelector('#btn-apply-struct-mod').addEventListener('click', () => {
-    const val = div.querySelector('#struct-modify-input').value.trim();
-    if (!val) return;
-    disableCard(div); addMessage(val, 'user'); handleModifyStructure(val);
-  });
 }
 
 // ─── TARJETA ACTOR (una por cada canal externo, iterativa) ───────────────────
@@ -443,31 +496,7 @@ async function callOpenAI(apiKey, systemPrompt, messages) {
   return data.choices[0].message.content.trim();
 }
 
-async function callClaude(apiKey, systemPrompt, messages) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-opus-4-7',
-      max_tokens: 8000,
-      system: systemPrompt,
-      messages: messages,
-      temperature: 0.3
-    })
-  });
-  if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || 'Error en la API de Claude'); }
-  const data = await response.json();
-  return data.content[0].text.trim();
-}
-
-async function callAPI(apiKey, systemPrompt, messages) {
-  const provider = window.currentProvider || 'openai';
-  if (provider === 'claude') return callClaude(apiKey, systemPrompt, messages);
+function callAPI(apiKey, systemPrompt, messages) {
   return callOpenAI(apiKey, systemPrompt, messages);
 }
 
@@ -502,8 +531,7 @@ function cleanXML(raw) {
 
 // ─── PASO 1: IDENTIFICAR ESTRUCTURA ──────────────────────────────────────────
 async function handleDescribeProcess(description) {
-  const apiKey = document.getElementById('ai-apikey').value.trim();
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
+  const apiKey = DEFAULT_API_KEY;
 
   processDescription = description;
   addTyping();
@@ -533,25 +561,32 @@ async function handleDescribeProcess(description) {
   } catch(err) { removeTyping(); addMessage(`❌ Error: ${err.message}`, 'ai', 'err'); }
 }
 
-// ─── PASO 2A: CONFIRMAR → INICIAR CICLO ACTOR A ACTOR ────────────────────────
+// ─── PASO 2A: CONFIRMAR ESTRUCTURA → PEDIR DESCRIPCIÓN DEL FLUJO ─────────────
 async function handleConfirmStructure() {
-  const apiKey = document.getElementById('ai-apikey').value.trim();
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
+  addMessage('Estructura confirmada ✅', 'user');
+  diagramState = { laneTasks: [], sendTasks: [] };
+  currentLaneTaskIdx = 0;
+  processFlowDescription = '';
 
-  // Reiniciar estado del diagrama
-  diagramState = { sendTasks: [] };
-  currentActorIdx = 0;
+  const lanes = confirmedStructure.poolPrincipal.lanes.join(', ');
+  const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre).join(', ') || 'ninguno';
+  addMessage(
+    `Perfecto. Ahora cuéntame cómo funciona el proceso en detalle.<br><br>
+     Describe qué hace cada departamento (<b>${lanes}</b>), cómo se comunica con los actores externos (<b>${ext}</b>) y cualquier decisión o gateway que deba aparecer.<br><br>
+     Cuanto más detalle des, más preciso será el diagrama.`,
+    'ai'
+  );
+  fase = 'describe_process'; updateUI();
+}
 
-  const ext = confirmedStructure.poolExterno || [];
-  if (ext.length === 0) {
-    // Sin actores externos → diagrama vacío directo
-    addMessage('Estructura confirmada ✅ Sin actores externos, el diagrama está listo para editar.', 'user');
-    fase = 'refine'; updateUI();
-    return;
-  }
-
-  addMessage(`Estructura confirmada ✅<br>Ahora configuraremos actor a actor qué entrega el proceso.<br><b>${ext.length}</b> actor(es) externos detectados.`, 'user');
-  await startActorDeliveryFlow(apiKey, 0);
+async function handleDescribeProcessFlow(description) {
+  processFlowDescription = description;
+  addMessage(
+    `Descripción del flujo recibida ✅ Ahora voy a sugerir las tareas de cada departamento.<br>
+     Empezamos con <b>${confirmedStructure.poolPrincipal.lanes[0]}</b>.`,
+    'ai'
+  );
+  await startLaneTaskFlow(0);
 }
 
 /**
@@ -568,8 +603,11 @@ async function startActorDeliveryFlow(apiKey, actorIdx) {
 
   let suggestions = [];
   try {
+    const taskCtx = diagramState.laneTasks.length > 0
+      ? diagramState.laneTasks.map(t => `${lanes[t.laneIdx]}: ${t.name}`).join('; ')
+      : processDescription;
     const reply = await callAPI(apiKey, 'Eres un experto en e-commerce. Responde SOLO con JSON.',
-      [{ role: 'user', content: buildActorSuggestionsPrompt(actor.nombre, processDescription, lanes) }]);
+      [{ role: 'user', content: buildActorSuggestionsPrompt(actor.nombre, taskCtx, lanes) }]);
     removeTyping();
     const m = reply.match(/\{[\s\S]*\}/);
     const data = JSON.parse(m ? m[0] : reply);
@@ -584,8 +622,7 @@ async function startActorDeliveryFlow(apiKey, actorIdx) {
 
 // ─── PASO 2B: MODIFICAR ESTRUCTURA ───────────────────────────────────────────
 async function handleModifyStructure(modification) {
-  const apiKey = document.getElementById('ai-apikey').value.trim();
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
+  const apiKey = DEFAULT_API_KEY;
 
   addTyping();
   try {
@@ -606,10 +643,231 @@ async function handleModifyStructure(modification) {
   } catch(err) { removeTyping(); addMessage(`❌ Error: ${err.message}`, 'ai', 'err'); showStructureCard(confirmedStructure); }
 }
 
+// ─── LANE TASKS: PROMPT ──────────────────────────────────────────────────────
+function buildLaneTaskSuggestionsPrompt(laneName, lanes, externalActors) {
+  const ctx = processFlowDescription
+    ? `\nDescripción detallada del proceso:\n${processFlowDescription}\n`
+    : '';
+  return `Proceso BPMN.
+Departamentos internos: ${lanes.join(', ')}.
+Actores/canales externos: ${externalActors.length > 0 ? externalActors.join(', ') : 'ninguno'}.${ctx}
+Departamento a analizar: "${laneName}"
+
+Genera la secuencia COMPLETA de elementos BPMN para este departamento respetando EXACTAMENTE lo descrito.
+Incluye gateways donde haya decisiones, eventos de mensaje donde se envíe o espere comunicación, y tareas normales.
+
+Tipos de elementos válidos:
+- "task": tarea o actividad genérica
+- "sendTask": envío de mensaje/dato a un actor externo
+- "intermediateCatchEvent": espera de mensaje entrante del exterior
+- "intermediateThrowEvent": lanzamiento de mensaje al exterior (explícito)
+- "exclusiveGateway": gateway de decisión XOR (bifurcación o unión)
+- "parallelGateway": gateway paralelo, división o unión de flujos
+
+REGLAS:
+- Un gateway de bifurcación (split) debe ir seguido de otro del mismo tipo para la unión (join) si el flujo converge.
+- Coloca los gateways y eventos de mensaje donde la descripción los mencione explícitamente.
+- Entre 3 y 8 elementos en total.
+
+Responde SOLO con JSON (sin texto adicional):
+{"elementos": [{"tipo": "task", "nombre": "Validar pedido"}, {"tipo": "exclusiveGateway", "nombre": "¿Pago correcto?"}, {"tipo": "task", "nombre": "Confirmar pedido"}, {"tipo": "exclusiveGateway", "nombre": "Fin decisión"}, {"tipo": "sendTask", "nombre": "Enviar factura"}]}`;
+}
+
+// ─── LANE TASKS: HELPERS DE TIPO ─────────────────────────────────────────────
+function elementIcon(tipo) {
+  const icons = {
+    task:                   '📋',
+    sendTask:               '📤',
+    intermediateCatchEvent: '📩',
+    intermediateThrowEvent: '📨',
+    exclusiveGateway:       '◇',
+    parallelGateway:        '╋',
+  };
+  return icons[tipo] || '📋';
+}
+function elementLabel(tipo) {
+  const labels = {
+    task:                   'Tarea',
+    sendTask:               'Envío',
+    intermediateCatchEvent: 'Espera msg',
+    intermediateThrowEvent: 'Lanza msg',
+    exclusiveGateway:       'Gateway XOR',
+    parallelGateway:        'Gateway AND',
+  };
+  return labels[tipo] || 'Tarea';
+}
+
+// ─── LANE TASKS: TARJETA ─────────────────────────────────────────────────────
+function showLaneTaskCard(laneIdx, elementos) {
+  const messages = document.getElementById('ai-messages');
+  const old = document.getElementById('lane-task-card'); if (old) old.remove();
+
+  const lane  = confirmedStructure.poolPrincipal.lanes[laneIdx];
+  const total = confirmedStructure.poolPrincipal.lanes.length;
+
+  _currentLaneTasks = elementos.map(e => ({
+    nombre: e.nombre || e,
+    tipo:   e.tipo   || 'task'
+  }));
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg ai'; wrapper.id = 'lane-task-card';
+
+  function rowsHtml() {
+    if (_currentLaneTasks.length === 0)
+      return '<p class="val-empty">Sin elementos. Añade uno abajo.</p>';
+    return _currentLaneTasks.map((t, i) => `
+      <div class="del-row">
+        <span class="del-chip-icon" title="${elementLabel(t.tipo)}">${elementIcon(t.tipo)}</span>
+        <span class="del-chip-name">${t.nombre}</span>
+        <span class="del-chip-type" style="font-size:10px;color:#888;margin-left:4px">${elementLabel(t.tipo)}</span>
+        <button class="del-row-remove" data-idx="${i}">×</button>
+      </div>`).join('');
+  }
+
+  const TIPOS_HTML = ['task','sendTask','exclusiveGateway','parallelGateway','intermediateCatchEvent','intermediateThrowEvent']
+    .map(t => `<option value="${t}">${elementIcon(t)} ${elementLabel(t)}</option>`).join('');
+
+  wrapper.innerHTML = `
+    <div class="msg-av">🤖</div>
+    <div class="msg-bubble value-bubble">
+      <div class="val-header">📋 ${lane}
+        <span class="val-actor-sub">&nbsp;—&nbsp;dept. ${laneIdx+1}/${total}</span>
+      </div>
+      <div class="val-subtitle">Elementos BPMN para <b>${lane}</b>. Edita o añade.</div>
+      <div id="lane-task-rows">${rowsHtml()}</div>
+      <div class="val-add-row" style="margin-top:8px;gap:4px">
+        <select id="lane-task-tipo" class="val-desc-input" style="flex:0 0 auto;width:130px">${TIPOS_HTML}</select>
+        <input type="text" class="val-desc-input" id="lane-task-new" placeholder="Nombre del elemento…" style="flex:1">
+        <button class="val-add-btn" id="lane-task-add">+</button>
+      </div>
+    </div>`;
+
+  messages.appendChild(wrapper); messages.scrollTop = messages.scrollHeight;
+
+  function rebuildRows() {
+    wrapper.querySelector('#lane-task-rows').innerHTML = rowsHtml();
+    wrapper.querySelectorAll('.del-row-remove').forEach(btn =>
+      btn.addEventListener('click', () => {
+        _currentLaneTasks.splice(parseInt(btn.dataset.idx), 1);
+        rebuildRows();
+      })
+    );
+  }
+  wrapper.querySelectorAll('.del-row-remove').forEach(btn =>
+    btn.addEventListener('click', () => {
+      _currentLaneTasks.splice(parseInt(btn.dataset.idx), 1);
+      rebuildRows();
+    })
+  );
+  wrapper.querySelector('#lane-task-add').addEventListener('click', () => {
+    const inp  = wrapper.querySelector('#lane-task-new');
+    const sel  = wrapper.querySelector('#lane-task-tipo');
+    const name = inp.value.trim(); if (!name) return;
+    _currentLaneTasks.push({ nombre: name, tipo: sel.value }); inp.value = ''; rebuildRows();
+  });
+  wrapper.querySelector('#lane-task-new').addEventListener('keydown', e => {
+    if (e.key === 'Enter') wrapper.querySelector('#lane-task-add').click();
+  });
+}
+
+// ─── LANE TASKS: FLUJO ───────────────────────────────────────────────────────
+async function startLaneTaskFlow(laneIdx) {
+  const lane  = confirmedStructure.poolPrincipal.lanes[laneIdx];
+  const lanes = confirmedStructure.poolPrincipal.lanes;
+  const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre);
+
+  currentLaneTaskIdx = laneIdx;
+  fase = 'lane_tasks'; updateUI();
+
+  addMessage(`📋 <b>${lane}</b> — buscando tareas sugeridas...`, 'ai');
+  addTyping();
+  let suggestions = [];
+  try {
+    const reply = await callAPI(DEFAULT_API_KEY, 'Eres experto en modelado BPMN. Responde SOLO con JSON.',
+      [{ role: 'user', content: buildLaneTaskSuggestionsPrompt(lane, lanes, ext) }]);
+    removeTyping();
+    const m = reply.match(/\{[\s\S]*\}/);
+    const data = JSON.parse(m ? m[0] : reply);
+    // Soporta tanto el nuevo formato {elementos:[]} como el antiguo {tareas:[]}
+    if (Array.isArray(data.elementos)) {
+      suggestions = data.elementos;
+    } else if (Array.isArray(data.tareas)) {
+      suggestions = data.tareas.map(t => ({ tipo: 'task', nombre: t.nombre || t }));
+    }
+  } catch(e) { removeTyping(); suggestions = []; }
+
+  showLaneTaskCard(laneIdx, suggestions);
+}
+
+async function handleConfirmLaneTasks(laneIdx) {
+  const lane  = confirmedStructure.poolPrincipal.lanes[laneIdx];
+  const total = confirmedStructure.poolPrincipal.lanes.length;
+  const tasks = _currentLaneTasks.slice();
+
+  const card = document.getElementById('lane-task-card');
+  if (card) disableCard(card);
+
+  if (tasks.length > 0) {
+    addMessage(`✅ <b>${lane}</b>: ${tasks.map(t => `${elementIcon(t.tipo || 'task')} ${t.nombre}`).join(', ')}`, 'user');
+    tasks.forEach((t, i) => {
+      diagramState.laneTasks.push({ id: `LT_${laneIdx}_${i}`, name: t.nombre, laneIdx, tipo: t.tipo || 'task' });
+    });
+  } else {
+    addMessage(`⏭ <b>${lane}</b>: sin tareas.`, 'user');
+  }
+
+  try {
+    const xml = renderDiagramFromState(confirmedStructure, diagramState);
+    await modeler.importXML(xml);
+    container.removeClass('with-error').addClass('with-diagram');
+  } catch(err) {
+    addMessage(`❌ Error al actualizar el diagrama: ${err.message}`, 'ai', 'err'); return;
+  }
+
+  const nextLane = laneIdx + 1;
+  if (nextLane < total) {
+    await startLaneTaskFlow(nextLane);
+  } else {
+    const ext = confirmedStructure.poolExterno || [];
+    if (ext.length === 0) {
+      addMessage('✅ ¡Todas las tareas definidas! El diagrama está listo para editar.', 'ai', 'ok');
+      fase = 'refine'; updateUI();
+    } else {
+      addMessage(
+        `✅ Tareas de todos los departamentos definidas.<br>Ahora identificaré qué entrega el proceso a cada canal externo.`,
+        'ai'
+      );
+      currentActorIdx = 0;
+      await startActorDeliveryFlow(DEFAULT_API_KEY, 0);
+    }
+  }
+}
+
+async function handleModifyLaneTasks(modification) {
+  const laneIdx = currentLaneTaskIdx;
+  const lane    = confirmedStructure.poolPrincipal.lanes[laneIdx];
+  const lanes   = confirmedStructure.poolPrincipal.lanes;
+  const ext     = (confirmedStructure.poolExterno || []).map(p => p.nombre);
+  addTyping();
+  try {
+    const current = _currentLaneTasks.map(t => `${t.tipo}:"${t.nombre}"`).join(', ');
+    const prompt = `Elementos actuales de "${lane}": ${current || 'ninguno'}.\nModificación solicitada: "${modification}".\n\nDevuelve la lista actualizada con tipos BPMN correctos SOLO en JSON:\n{"elementos": [{"tipo": "task|sendTask|exclusiveGateway|parallelGateway|intermediateCatchEvent|intermediateThrowEvent", "nombre": "..."}]}`;
+    const reply = await callAPI(DEFAULT_API_KEY, 'Eres experto en modelado BPMN. Responde SOLO con JSON.',
+      [{ role: 'user', content: prompt }]);
+    removeTyping();
+    const m = reply.match(/\{[\s\S]*\}/);
+    const data = JSON.parse(m ? m[0] : reply);
+    const newTasks = Array.isArray(data.elementos) ? data.elementos
+      : Array.isArray(data.tareas) ? data.tareas.map(t => ({ tipo: 'task', nombre: t.nombre || t })) : [];
+    showLaneTaskCard(laneIdx, newTasks);
+    addMessage('Tareas actualizadas ✅ ¿Está bien así?', 'ai');
+  } catch(e) { removeTyping(); addMessage(`❌ Error: ${e.message}`, 'ai', 'err'); }
+}
+
 // ─── PASO 3: CONFIRMAR ENTREGAS DE UN ACTOR → actualizar diagrama programáticamente
 async function handleConfirmActorDeliveries(actorIdx, entregas) {
-  const apiKey = document.getElementById('ai-apikey').value.trim();
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
+  const apiKey = DEFAULT_API_KEY;
 
   const actor = confirmedStructure.poolExterno[actorIdx];
   const total = confirmedStructure.poolExterno.length;
@@ -666,8 +924,7 @@ Añade o modifica solo lo que el usuario pida.`;
 }
 
 async function handleRefine(instruction) {
-  const apiKey = document.getElementById('ai-apikey').value.trim();
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
+  const apiKey = DEFAULT_API_KEY;
 
   const sendBtn = document.getElementById('ai-send'); sendBtn.disabled = true;
   addTyping();
@@ -687,11 +944,9 @@ async function handleRefine(instruction) {
 
 // ─── DISPATCHER ──────────────────────────────────────────────────────────────
 async function handleSend() {
-  const apiKey  = document.getElementById('ai-apikey').value.trim();
+  const apiKey  = DEFAULT_API_KEY;
   const input   = document.getElementById('ai-scenario').value.trim();
   const sendBtn = document.getElementById('ai-send');
-
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
 
   if (fase === 'describe') {
     if (!input) return;
@@ -701,6 +956,10 @@ async function handleSend() {
     if (!input) return;
     addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
     sendBtn.disabled = true; await handleModifyStructure(input); sendBtn.disabled = false;
+  } else if (fase === 'describe_process') {
+    if (!input) return;
+    addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
+    sendBtn.disabled = true; await handleDescribeProcessFlow(input); sendBtn.disabled = false;
   } else if (fase === 'refine') {
     if (!input) return;
     addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
@@ -771,8 +1030,7 @@ async function runPervalAnalysis(apiKey, actorName) {
 }
 
 async function analyzePerval() {
-  const apiKey = document.getElementById('ai-apikey').value.trim();
-  if (!apiKey) { addMessage('⚠️ Introduce tu API Key.', 'ai', 'err'); return; }
+  const apiKey = DEFAULT_API_KEY;
 
   const externalActors = (confirmedStructure?.poolExterno || []).map(p => p.nombre);
 
@@ -876,11 +1134,25 @@ $(function() {
   document.getElementById('ai-close').addEventListener('click', () => panel.classList.remove('open'));
   document.getElementById('ai-send').addEventListener('click', handleSend);
   document.getElementById('ai-scenario').addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) handleSend(); });
+
+  document.getElementById('btn-confirm-main').addEventListener('click', () => {
+    if (fase === 'confirm_structure') handleConfirmStructure();
+    else if (fase === 'lane_tasks')   handleConfirmLaneTasks(currentLaneTaskIdx);
+  });
+  document.getElementById('btn-modify-main').addEventListener('click', () => {
+    const ta  = document.getElementById('ai-scenario');
+    const val = ta.value.trim();
+    if (!val) { ta.focus(); return; }
+    addMessage(val, 'user'); ta.value = '';
+    if (fase === 'confirm_structure') handleModifyStructure(val);
+    else if (fase === 'lane_tasks')   handleModifyLaneTasks(val);
+  });
   document.getElementById('ai-perval-btn').addEventListener('click', analyzePerval);
 
   document.getElementById('ai-reset').addEventListener('click', () => {
-    fase = 'describe'; processDescription = ''; confirmedStructure = null;
-    currentActorIdx = 0; diagramState = { sendTasks: [] }; pervalAnalisado = false;
+    fase = 'describe'; processDescription = ''; processFlowDescription = ''; confirmedStructure = null;
+    currentActorIdx = 0; currentLaneTaskIdx = 0; _currentLaneTasks = [];
+    diagramState = { laneTasks: [], sendTasks: [] }; pervalAnalisado = false;
     document.getElementById('ai-messages').innerHTML = `
       <div class="msg ai"><div class="msg-av">🤖</div><div class="msg-bubble">
         ¡Hola! Describe el proceso de e-commerce que quieres modelar.<br><br>
@@ -894,7 +1166,6 @@ $(function() {
     createNewDiagram();
   });
 
-  if (DEFAULT_API_KEY) document.getElementById('ai-apikey').value = DEFAULT_API_KEY;
   updateUI();
 });
 

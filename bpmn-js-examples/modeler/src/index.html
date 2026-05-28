@@ -157,34 +157,6 @@
     .ext-chip  { background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.25); color: #fdba74; }
     .lane-chip { background: rgba(14,165,233,0.10); border: 1px solid rgba(14,165,233,0.22); color: #7dd3fc; }
     .none-chip { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2); color: #9ca3af; font-style: italic; }
-    .struct-actions { display: flex; gap: 8px; margin-top: 4px; }
-    .btn-confirm-struct {
-      flex: 1; background: linear-gradient(135deg, #065f46, #0f766e);
-      border: none; border-radius: 9px; padding: 8px 12px;
-      color: #6ee7b7; font-size: 12px; font-weight: 600;
-      cursor: pointer; font-family: inherit; transition: opacity 0.2s;
-    }
-    .btn-confirm-struct:hover:not(:disabled) { opacity: 0.85; }
-    .btn-confirm-struct:disabled { opacity: 0.4; cursor: default; }
-    .btn-modify-struct {
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(14,165,233,0.15);
-      border-radius: 9px; padding: 8px 12px;
-      color: #7dd3fc; font-size: 12px; font-weight: 500;
-      cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap;
-    }
-    .btn-modify-struct:hover:not(:disabled) { background: rgba(14,165,233,0.1); }
-    .btn-modify-struct:disabled { opacity: 0.4; cursor: default; }
-    .modify-area {
-      margin-top: 10px; display: none; flex-direction: column; gap: 6px;
-    }
-    .modify-input {
-      width: 100%; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(14,165,233,0.12); border-radius: 8px;
-      padding: 8px 10px; color: #cce8f6; font-size: 12px;
-      font-family: inherit; resize: none; outline: none;
-    }
-    .modify-input:focus { border-color: rgba(14,165,233,0.42); }
-    .modify-input::placeholder { color: rgba(100,160,210,0.32); }
 
     /* ── Opciones (por si se usan en futuro) ── */
     .options-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -205,44 +177,6 @@
     .confirm-opts-btn:hover:not(:disabled) { opacity: 0.84; }
     .confirm-opts-btn:disabled { opacity: 0.38; cursor: default; }
 
-    /* ── Config (API key) ── */
-    .ai-config {
-      padding: 10px 14px;
-      border-top: 1px solid rgba(14,165,233,0.07);
-      border-bottom: 1px solid rgba(14,165,233,0.07);
-      flex-shrink: 0;
-    }
-    .ai-label { font-size: 10px; color: rgba(100,160,210,0.55); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 5px; font-weight: 500; }
-    .ai-config input {
-      width: 100%; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(14,165,233,0.11); border-radius: 9px; padding: 7px 10px;
-      color: #93c5d1; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace;
-      outline: none; transition: border-color .2s;
-    }
-    .ai-config input:focus { border-color: rgba(14,165,233,0.42); }
-    .ai-config input::placeholder { color: rgba(100,160,210,0.3); }
-
-    /* ── Provider toggle ── */
-    .provider-toggle {
-      display: flex; gap: 5px; margin-bottom: 8px;
-    }
-    .provider-btn {
-      flex: 1; padding: 5px 8px; border-radius: 8px; font-size: 11px; font-weight: 600;
-      cursor: pointer; font-family: inherit; transition: all 0.2s; border: 1px solid transparent;
-      background: rgba(255,255,255,0.03); color: rgba(100,160,210,0.45);
-      border-color: rgba(14,165,233,0.1);
-    }
-    .provider-btn.active-openai {
-      background: rgba(16,163,127,0.12); border-color: rgba(16,163,127,0.4);
-      color: #6ee7b7;
-    }
-    .provider-btn.active-claude {
-      background: rgba(217,119,6,0.12); border-color: rgba(217,119,6,0.4);
-      color: #fcd34d;
-    }
-    .provider-btn:hover:not(.active-openai):not(.active-claude) {
-      background: rgba(14,165,233,0.08); color: #7dd3fc;
-    }
 
     /* ── Input area (fija en el fondo) ── */
     .ai-input-area {
@@ -439,8 +373,8 @@
 
     <!-- Indicador de fase -->
     <div class="ai-phase-bar" id="ai-phase-bar">
-      <div class="phase-step active" id="phase-1">1·Describir</div>
-      <div class="phase-step" id="phase-2">2·Estructura</div>
+      <div class="phase-step active" id="phase-1">1·Usuarios</div>
+      <div class="phase-step" id="phase-2">2·Funcionalidad</div>
       <div class="phase-step" id="phase-3">3·Valores</div>
       <div class="phase-step" id="phase-4">4·Diagrama</div>
     </div>
@@ -450,28 +384,23 @@
       <div class="msg ai">
         <div class="msg-av">🤖</div>
         <div class="msg-bubble">
-          ¡Hola! Describe brevemente el proceso de negocio que quieres modelar.<br><br>
-          Identificaré los <b>participantes (pools)</b> y <b>departamentos (lanes)</b>, los dibujaré en el lienzo para que los confirmes y, una vez aprobados, generaré el diagrama completo.
+          ¡Hola! Vamos a construir tu diagrama BPMN paso a paso.<br><br>
+          <b>Paso 1 —</b> Dime <b>quiénes participan</b> en el proceso: tus clientes, proveedores, transportistas, y los departamentos internos de tu empresa.<br><br>
+          No hace falta que expliques qué hace cada uno todavía, solo quiénes son.
         </div>
       </div>
     </div>
 
-    <!-- Proveedor + API Key -->
-    <div class="ai-config">
-      <div class="ai-label">Proveedor LLM</div>
-      <div class="provider-toggle">
-        <button class="provider-btn active-openai" id="provider-openai" title="OpenAI / GitHub Models">⚡ OpenAI</button>
-        <button class="provider-btn" id="provider-claude" title="Claude (Anthropic)">✦ Claude</button>
-      </div>
-      <div class="ai-label">API Key</div>
-      <input type="password" id="ai-apikey" placeholder="Token de GitHub Models o sk- de OpenAI" />
-    </div>
 
     <!-- Input + botones -->
     <div class="ai-input-area" id="ai-free-input">
       <textarea id="ai-scenario" rows="2"
         placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
       <button id="ai-send" class="btn-send btn-blue">→ Identificar estructura</button>
+      <div id="ai-confirm-actions" style="display:none; gap:8px">
+        <button id="btn-confirm-main" class="btn-send btn-green" style="flex:1">✅ Confirmar</button>
+        <button id="btn-modify-main"  class="btn-send btn-blue"  style="flex:1">✏️ Modificar</button>
+      </div>
       <button id="ai-perval-btn">🔍 Analizar valor PERVAL</button>
       <div class="hint" id="ai-hint">Ctrl+Enter para enviar</div>
     </div>
@@ -497,34 +426,10 @@
     obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
 
     // Toggle proveedor LLM
-    const btnOpenAI = document.getElementById('provider-openai');
-    const btnClaude = document.getElementById('provider-claude');
-    const apikeyInput = document.getElementById('ai-apikey');
-    const PLACEHOLDERS = {
-      openai: 'Token de GitHub Models o sk- de OpenAI',
-      claude: 'sk-ant-... (API key de Anthropic)'
-    };
-    window.currentProvider = 'openai';
-
-    function setProvider(p) {
-      window.currentProvider = p;
-      if (p === 'openai') {
-        btnOpenAI.className = 'provider-btn active-openai';
-        btnClaude.className = 'provider-btn';
-      } else {
-        btnOpenAI.className = 'provider-btn';
-        btnClaude.className = 'provider-btn active-claude';
-      }
-      apikeyInput.placeholder = PLACEHOLDERS[p];
-      apikeyInput.value = '';
-    }
-    btnOpenAI.addEventListener('click', () => setProvider('openai'));
-    btnClaude.addEventListener('click', () => setProvider('claude'));
-
     // Actualizar indicador de fase
     window.updatePhaseBar = function(fase) {
       const steps = ['phase-1','phase-2','phase-3','phase-4'];
-      const faseMap = { describe: 0, confirm_structure: 1, actor_delivery: 2, refine: 3 };
+      const faseMap = { describe: 0, confirm_structure: 0, lane_tasks: 1, actor_delivery: 2, refine: 3 };
       const current = faseMap[fase] ?? 0;
       steps.forEach((id, i) => {
         const el = document.getElementById(id);

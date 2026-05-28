@@ -222,6 +222,28 @@
     .ai-config input:focus { border-color: rgba(14,165,233,0.42); }
     .ai-config input::placeholder { color: rgba(100,160,210,0.3); }
 
+    /* ── Provider toggle ── */
+    .provider-toggle {
+      display: flex; gap: 5px; margin-bottom: 8px;
+    }
+    .provider-btn {
+      flex: 1; padding: 5px 8px; border-radius: 8px; font-size: 11px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.2s; border: 1px solid transparent;
+      background: rgba(255,255,255,0.03); color: rgba(100,160,210,0.45);
+      border-color: rgba(14,165,233,0.1);
+    }
+    .provider-btn.active-openai {
+      background: rgba(16,163,127,0.12); border-color: rgba(16,163,127,0.4);
+      color: #6ee7b7;
+    }
+    .provider-btn.active-claude {
+      background: rgba(217,119,6,0.12); border-color: rgba(217,119,6,0.4);
+      color: #fcd34d;
+    }
+    .provider-btn:hover:not(.active-openai):not(.active-claude) {
+      background: rgba(14,165,233,0.08); color: #7dd3fc;
+    }
+
     /* ── Input area (fija en el fondo) ── */
     .ai-input-area {
       padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
@@ -434,8 +456,13 @@
       </div>
     </div>
 
-    <!-- API Key -->
+    <!-- Proveedor + API Key -->
     <div class="ai-config">
+      <div class="ai-label">Proveedor LLM</div>
+      <div class="provider-toggle">
+        <button class="provider-btn active-openai" id="provider-openai" title="OpenAI / GitHub Models">⚡ OpenAI</button>
+        <button class="provider-btn" id="provider-claude" title="Claude (Anthropic)">✦ Claude</button>
+      </div>
       <div class="ai-label">API Key</div>
       <input type="password" id="ai-apikey" placeholder="Token de GitHub Models o sk- de OpenAI" />
     </div>
@@ -468,6 +495,31 @@
       fab.style.display = panel.classList.contains('open') ? 'none' : 'flex';
     });
     obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
+
+    // Toggle proveedor LLM
+    const btnOpenAI = document.getElementById('provider-openai');
+    const btnClaude = document.getElementById('provider-claude');
+    const apikeyInput = document.getElementById('ai-apikey');
+    const PLACEHOLDERS = {
+      openai: 'Token de GitHub Models o sk- de OpenAI',
+      claude: 'sk-ant-... (API key de Anthropic)'
+    };
+    window.currentProvider = 'openai';
+
+    function setProvider(p) {
+      window.currentProvider = p;
+      if (p === 'openai') {
+        btnOpenAI.className = 'provider-btn active-openai';
+        btnClaude.className = 'provider-btn';
+      } else {
+        btnOpenAI.className = 'provider-btn';
+        btnClaude.className = 'provider-btn active-claude';
+      }
+      apikeyInput.placeholder = PLACEHOLDERS[p];
+      apikeyInput.value = '';
+    }
+    btnOpenAI.addEventListener('click', () => setProvider('openai'));
+    btnClaude.addEventListener('click', () => setProvider('claude'));
 
     // Actualizar indicador de fase
     window.updatePhaseBar = function(fase) {

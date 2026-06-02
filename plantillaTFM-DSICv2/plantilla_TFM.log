@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  27 MAY 2026 18:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  2 JUN 2026 13:01
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -543,7 +543,7 @@ Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 ))
 \c@lstlisting=\count344
  (include/Portada.tex
-<include/logo-upv.png, id=75, 136.8312pt x 158.2713pt>
+<include/logo-upv.png, id=99, 136.8312pt x 158.2713pt>
 File: include/logo-upv.png Graphic file (type png)
 <use include/logo-upv.png>
 Package pdftex.def Info: include/logo-upv.png  used on input line 12.
@@ -572,7 +572,7 @@ LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/l/n' tried instead on input line 18.
 LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/db/n' tried instead on input line 18.
-<include/DSIC.png, id=77, 92.7465pt x 64.3203pt>
+<include/DSIC.png, id=101, 92.7465pt x 64.3203pt>
 File: include/DSIC.png Graphic file (type png)
 <use include/DSIC.png>
 Package pdftex.def Info: include/DSIC.png  used on input line 22.
@@ -656,44 +656,84 @@ LaTeX Info: Redefining \% on input line 6.
 
 ]
 Cap\'{\i }tulo 2.
-) (secciones/04_AnalisisProblema.tex [7] [8
-
-]
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <12> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 17.
+[7]
+LaTeX Info: Redefining \. on input line 77.
+LaTeX Info: Redefining \% on input line 77.
+ [8]
+LaTeX Info: Redefining \. on input line 91.
+LaTeX Info: Redefining \% on input line 91.
+ [9]) (secciones/04_AnalisisProblema.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [10]
 Cap\'{\i }tulo 3.
-) (secciones/05_DisenoSolucion.tex [9] [10
+) (secciones/05_DisenoSolucion.tex [11
+
+] [12
 
 ]
 Cap\'{\i }tulo 4.
-) (secciones/06_DesarrolloImplementacion.tex [11] [12
+) (secciones/06_DesarrolloImplementacion.tex [13] [14
 
 ]
 Cap\'{\i }tulo 5.
-) (secciones/07_EjecucionFuncionamiento.tex [13] [14
+) (secciones/07_EjecucionFuncionamiento.tex [15] [16
 
 ]
 Cap\'{\i }tulo 6.
-) (secciones/08_EstudioEmpirico.tex [15] [16
+) (secciones/08_EstudioEmpirico.tex [17] [18
 
 ]
 Cap\'{\i }tulo 7.
-) (secciones/09_Resultados.tex [17] [18
+) (secciones/09_Resultados.tex [19] [20
 
 ]
 Cap\'{\i }tulo 8.
-) (secciones/10_Conclusiones.tex [19] [20
+) (secciones/10_Conclusiones.tex [21] [22
 
 ]
 Cap\'{\i }tulo 9.
-) [21] [22
+) [23] [24
 
-] (secciones/06_Bibliografia.tex) [23
+] (secciones/06_Bibliografia.tex
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 7.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+Underfull \hbox (badness 6332) in paragraph at lines 13--14
+[]\T1/pbk/l/n/10.95 N. Klievtso-va, J.-V. Ben-zin, T. Kam-pik, J. Man-gler y S. Rinderle-
+ []
 
-] (secciones/AnexoI.tex [24
+
+Underfull \hbox (badness 4505) in paragraph at lines 13--14
+\T1/pbk/l/n/10.95 Expert Users?,'' \T1/pbk/l/it/10.95 ar-Xiv pre-print ar-Xiv:2304.11065\T1/pbk/l/n/10.95 , 2023. Dis-po-ni-ble en:
+ []
 
 
-]) (secciones/AnexoII.tex [25] [26
+Underfull \hbox (badness 6658) in paragraph at lines 16--17
+[]\T1/pbk/l/n/10.95 J. Fi-llies et al., ``In-tro-du-cing the BPMN-Chatbot for Ef-fi-cient LLM-
+ []
 
-]) [27] (plantilla_TFM.aux
+
+Underfull \hbox (badness 10000) in paragraph at lines 16--17
+\T1/pbk/l/n/10.95 Based Pro-cess Mo-de-ling,'' en \T1/pbk/l/it/10.95 CEUR Workshop Pro-cee-dings\T1/pbk/l/n/10.95 , vol.
+ []
+
+
+Underfull \hbox (badness 5578) in paragraph at lines 16--17
+\T1/pbk/l/n/10.95 3758, pa-per 15, BPM 2024 Fo-rum, Cra-co-via, 2024. Dis-po-ni-ble en:
+ []
+
+) [25
+
+] (secciones/AnexoI.tex [26
+
+
+]) (secciones/AnexoII.tex [27] [28
+
+]) [29] (plantilla_TFM.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 )
@@ -702,20 +742,20 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-06>
  ***********
 Package rerunfilecheck Info: File `plantilla_TFM.out' has not changed.
-(rerunfilecheck)             Checksum: 8DA42CF730A712BBAA2A034DBF738D6D;2364.
+(rerunfilecheck)             Checksum: A6FB8E44778554DBF155970BD16788F6;4184.
  ) 
 Here is how much of TeX's memory you used:
- 15463 strings out of 467871
- 246034 string characters out of 5417408
- 669078 words of memory out of 5000000
- 43990 multiletter control sequences out of 15000+600000
- 650583 words of font info for 86 fonts, out of 8000000 for 9000
+ 15523 strings out of 467871
+ 246904 string characters out of 5417408
+ 670216 words of memory out of 5000000
+ 44032 multiletter control sequences out of 15000+600000
+ 652708 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  80i,11n,82p,1052b,647s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb>
-Output written on plantilla_TFM.pdf (37 pages, 163088 bytes).
+<C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
+Output written on plantilla_TFM.pdf (39 pages, 201133 bytes).
 PDF statistics:
- 297 PDF objects out of 1000 (max. 8388607)
- 59 named destinations out of 1000 (max. 500000)
- 155 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 356 PDF objects out of 1000 (max. 8388607)
+ 71 named destinations out of 1000 (max. 500000)
+ 203 words of extra memory for PDF output out of 10000 (max. 10000000)
 

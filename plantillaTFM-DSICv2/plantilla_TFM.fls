@@ -310,6 +310,9 @@ INPUT .\secciones\03_EstadoDelArte.tex
 INPUT .\secciones\03_EstadoDelArte.tex
 INPUT .\secciones\03_EstadoDelArte.tex
 INPUT secciones\03_EstadoDelArte.tex
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkd8t.tfm
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkd8t.vf
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkd8r.tfm
 INPUT .\secciones\04_AnalisisProblema.tex
 INPUT .\secciones\04_AnalisisProblema.tex
 INPUT .\secciones\04_AnalisisProblema.tex
@@ -350,6 +353,12 @@ INPUT .\secciones\06_Bibliografia.tex
 INPUT .\secciones\06_Bibliografia.tex
 INPUT .\secciones\06_Bibliografia.tex
 INPUT secciones\06_Bibliografia.tex
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\t1pcr.fd
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\t1pcr.fd
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\t1pcr.fd
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\courier\pcrr8t.tfm
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\courier\pcrr8t.vf
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\courier\pcrr8r.tfm
 INPUT .\secciones\AnexoI.tex
 INPUT .\secciones\AnexoI.tex
 INPUT .\secciones\AnexoI.tex
@@ -371,3 +380,5 @@ INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\type1\urw\bookman\ubk
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\type1\urw\bookman\ubkl8a.pfb
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\type1\urw\bookman\ubkli8a.pfb
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\type1\urw\bookman\ubkli8a.pfb
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\type1\urw\courier\ucrr8a.pfb
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\type1\urw\courier\ucrr8a.pfb

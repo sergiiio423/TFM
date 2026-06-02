@@ -5,6 +5,102 @@
 
 \chapter{Estado del arte}
 
+En los siguientes subapartados se lleva a cabo un análisis de los trabajos de investigación más relevantes en el ámbito de la generación automática de modelos de procesos de negocio mediante inteligencia artificial, con especial atención a los enfoques basados en modelos de lenguaje de gran escala (\textit{Large Language Models}, LLMs). Se examinan cuatro contribuciones representativas que abordan, desde distintas perspectivas, el problema de construir modelos BPMN a partir de lenguaje natural, incluyendo enfoques conversacionales e interactivos. A partir de este análisis, se identifica el conjunto de lagunas que el presente TFM se propone cubrir y se expone la propuesta que lo diferencia de los trabajos previos.
+
+%%---------------------------------------------------------
+\section{Análisis de trabajos relacionados}
+%%---------------------------------------------------------
+
+La revisión de la literatura en torno a la generación automatizada de modelos BPMN mediante LLMs pone de manifiesto un campo en rápida evolución, en el que los avances más significativos se han producido a partir de 2023, coincidiendo con la generalización del acceso a modelos como GPT-3.5 y GPT-4. A continuación se presentan los cuatro trabajos más directamente relacionados con el presente TFM.
+
+%%---------------------------------------------------------
+\subsection{LLMs en la gestión de procesos de negocio}
+%%---------------------------------------------------------
+
+Grohs et al. \cite{klievtsova2023} presentaron uno de los primeros trabajos que evalúan de forma sistemática el uso 
+de los LLMs en tareas propias de Business Process Management. Los autores analizaron la capacidad de GPT-4 
+para realizar distintas actividades relacionadas con la gestión de procesos de negocio a partir de información textual, 
+entre ellas la generación de modelos BPMN, la extracción de modelos declarativos basados en restricciones 
+y la clasificación de tareas según su idoneidad para la automatización mediante RPA. Para ello, compraron el rendimiento 
+del modelo con enfoques específicos desarrollados previamente para cada una de las tareas.
+
+
+
+Los resultados mostraron que GPT-4 es capaz de interpretar descripciones 
+textuales de procesos y generar representaciones estructuradas con un nivel de calidad comparable e incluso superior al de algunas
+soluciones especializadas. Además, el estudio pone de manifiesto que un único modelo de propósito general puede 
+aplicarse a diferentes problemas de BPM mediante el uso de instrucciones adecuadas, evitando la necesidad 
+de desarrollar herramientas independientes para cada tarea. Este trabajo 
+supone un avance relevante dentro de la investigación en BPM, ya que demuestra que los LLMs pueden actuar como herramientas
+versátiles para el análisis y modelado de procesos de negocio, sentando las bases para el desarrollo de nuevas aplicaciones apoyadas en IA generativa.
+
+
+Sin embargo, el trabajo se centra fundamentalmente en la evaluación de las capacidades de los LLMs de forma aislada, 
+sin proporcionar una herramienta integrada ni una interfaz que permita al usuario interactuar con el modelo 
+de manera iterativa y conversacional. Tampoco contempla la integración de los artefactos 
+generados en entornos de modelado estándar como bpmn.io, ni aborda el análisis del valor 
+percibido por el cliente dentro de los procesos modelados.
+
+%%---------------------------------------------------------
+\subsection{Generación automática de modelos BPMN 2.0 desde descripciones textuales}
+%%---------------------------------------------------------
+
+H\"orner et al. \cite{bise2025bpmn} presentan BPMNGen, un marco conversacional basado en LLMs para la generación 
+automática de modelos BPMN 2.0 a partir de descripciones en lenguaje natural. La propuesta combina una arquitectura cliente-servidor 
+con un asistente basado en GPT, capaz de interpretar descripciones textuales de procesos
+y transformarlas en representaciones estructuradas que posteriormente se convierten en modelos BPMN válidos.
+Además de la generación inicial de diagramas, el sistema permite modificar y refinar los modelos mediante nuevas instrucciones
+en lenguaje natural, facilitando un proceso de modelado más accesible para usuarios con distintos niveles de experiencia. 
+El trabajo incluye una evaluación empírica centrada en la calidad semántica de los modelos generados, así como en su 
+comprensión y carga cognitiva percibida por los usuarios, comparando los resultados obtenidos con modelos creados por expertos.
+
+
+No obstante, aunque BPMNGen incorpora mecanismos para la modificación iterativa de modelos mediante 
+instrucciones en lenguaje natural, la evaluación realizada por los autores se centra principalmente 
+en escenarios de generación automática basados en una única descripción textual. 
+Asimismo, la propuesta está orientada a la generación y evaluación de modelos BPMN desde una perspectiva de calidad semántica 
+y comprensión por parte de los usuarios, sin profundizar en aspectos relacionados con el análisis del valor aportado por las 
+actividades del proceso o la identificación de actividades con y sin valor añadido. Estas limitaciones abren oportunidades 
+para desarrollar herramientas que amplíen las capacidades de modelado incorporando nuevas perspectivas de análisis y soporte 
+a la toma de decisiones.
+
+Este trabajo es especialmente relevante para el presente TFM porque aborda de forma explícita los retos de la generación 
+de BPMN válido desde lenguaje natural, y proporciona un vocabulario y unas métricas de evaluación que resultan 
+de utilidad para valorar la calidad de los modelos generados. La identificación de los desafíos abiertos
+en este campo sirve de motivación directa para las decisiones de diseño adoptadas en la extensión desarrollada, 
+tales como el uso de un esquema de validación XML y la estrategia de regeneración iterativa ante errores sintácticos.
+%%---------------------------------------------------------
+\subsection{IA generativa y modelado conversacional de procesos}
+%%---------------------------------------------------------
+
+Klievtsova et al. \cite{abb2023} plantearon una pregunta central para el ámbito del modelado de procesos: ¿puede la IA generativa capacitar a usuarios no expertos para construir modelos de procesos mediante una interfaz conversacional? En este trabajo se exploró la viabilidad de utilizar modelos como GPT-4 para guiar a usuarios sin conocimientos previos de BPMN a través de un proceso de modelado iterativo. En este enfoque, el LLM actúa como facilitador del proceso de elicitación de requisitos, manteniendo el contexto de la conversación entre turnos y generando preguntas de aclaración cuando la descripción del usuario resulta ambigua o incompleta. De este modo, el modelo no solo produce un artefacto de proceso, sino que también contribuye activamente a su definición mediante el diálogo.
+
+Los resultados del trabajo demostraron que los LLMs son capaces de mantener conversaciones coherentes y orientadas al modelado de procesos, produciendo representaciones estructuradas que mejoran progresivamente a medida que avanza el intercambio. Este trabajo presenta una estrecha relación con la motivación del presente TFM: la hipótesis de que la IA conversacional puede hacer el modelado de procesos accesible a usuarios que no dominan los formalismos del estándar BPMN es, precisamente, uno de los fundamentos sobre los que se construye la extensión desarrollada.
+
+Sin embargo, la propuesta de Klievtsova et al. se limita a un prototipo experimental que no está integrado en ninguna herramienta de modelado estándar. Los modelos generados se presentan en formato textual o como estructuras intermedias, sin renderizado visual directo en un editor BPMN. Esta brecha entre la generación del modelo y su visualización e interacción en una herramienta real supone una barrera para la adopción práctica de la propuesta, que el presente TFM resuelve mediante la integración directa con bpmn.io y la generación de XML BPMN 2.0 válido renderizado en tiempo real.
+
+%%---------------------------------------------------------
+\subsection{BPMN-Chatbot: modelado de procesos mediante interfaz conversacional}
+%%---------------------------------------------------------
+
+Fillies et al. \cite{fillies2024} presentaron en el marco de la conferencia BPM 2024 el \textit{BPMN-Chatbot}, un sistema que combina una interfaz de mensajería instantánea con la capacidad de generar y visualizar diagramas BPMN como resultado de la conversación. El sistema utiliza un LLM como motor de generación de modelos y muestra el diagrama resultante directamente en la interfaz de chat, de forma que el usuario puede inspeccionar el proceso modelado sin abandonar el entorno conversacional. La propuesta persigue reducir la barrera de entrada al modelado formal de procesos, permitiendo que analistas con distintos niveles de experiencia puedan construir diagramas BPMN de forma rápida e intuitiva.
+
+Este trabajo es el más cercano al enfoque del presente TFM en cuanto a la combinación de una interfaz conversacional con la generación de diagramas BPMN. La arquitectura del BPMN-Chatbot ilustra cómo los LLMs pueden integrarse en un flujo de trabajo de modelado orientado al usuario final y constituye un precedente directo de la línea de investigación en la que se enmarca este trabajo. De hecho, el hecho de que este sistema fuese presentado en BPM 2024, la conferencia internacional de referencia en gestión de procesos de negocio, confirma la relevancia y oportunidad de este enfoque en la comunidad investigadora.
+
+No obstante, el BPMN-Chatbot presenta diferencias significativas respecto al sistema desarrollado en este TFM. En primer lugar, no está integrado en ningún editor BPMN existente: los diagramas se muestran como imágenes dentro del chat, pero no pueden editarse ni manipularse directamente en un entorno de modelado estándar. En segundo lugar, el sistema no incorpora ningún mecanismo de análisis del valor percibido por el cliente, que es uno de los objetivos centrales del presente trabajo a través de la clasificación PERVAL. En tercer lugar, el enfoque de Fillies et al. no contempla la generación de XML BPMN 2.0 sintácticamente válido para su importación y edición en herramientas de modelado, lo que limita su utilidad en flujos de trabajo profesionales de modelado de procesos.
+
+%%---------------------------------------------------------
+\section{Propuesta}
+%%---------------------------------------------------------
+
+Del análisis de los trabajos presentados en la sección anterior se desprende que, si bien la aplicación de LLMs al modelado de procesos de negocio es un campo en rápido crecimiento, existen lagunas relevantes que el presente TFM se propone cubrir.
+
+Los trabajos revisados demuestran que los LLMs son capaces de generar modelos de proceso de calidad aceptable a partir de lenguaje natural \cite{klievtsova2023,bise2025bpmn} y que la interacción conversacional constituye una vía prometedora para la participación de usuarios no expertos en el modelado \cite{abb2023,fillies2024}. Sin embargo, ninguno de los trabajos analizados propone una integración directa del LLM en un editor BPMN estándar de código abierto, como bpmn.io, que permita al usuario no solo generar el modelo sino también visualizarlo, modificarlo y exportarlo dentro de un entorno profesional de modelado.
+
+Asimismo, la dimensión del valor percibido por el cliente en los procesos de negocio no ha sido abordada en ninguno de los trabajos revisados. La clasificación PERVAL ofrece un marco conceptual para identificar y analizar los atributos de valor que un proceso orientado al cliente genera sobre el usuario, pero su aplicación en el contexto de la generación automática de modelos BPMN con LLMs constituye una aportación original del presente TFM.
+
+En consecuencia, el sistema desarrollado en este trabajo se distingue de los trabajos previos en tres aspectos fundamentales: en primer lugar, la integración de un LLM en una instancia local de bpmn.io mediante un panel conversacional, que permite la generación iterativa de modelos BPMN 2.0 válidos dentro de un entorno de modelado estándar; en segundo lugar, la incorporación de un módulo de análisis de valor PERVAL que identifica y clasifica los valores percibidos por el cliente en el proceso modelado; y en tercer lugar, la validación de la propuesta mediante un estudio empírico comparativo con un analista experto, que permite evaluar de forma sistemática el grado de alineamiento entre los modelos generados automáticamente y el criterio humano de referencia.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de estado del arte
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -10,7 +10,9 @@ En el contexto actual de la transformación digital, el modelado de procesos de 
 
 En este contexto, los modelos de lenguaje de gran escala (\textit{Large Language Models}, LLMs) ofrecen nuevas posibilidades para automatizar la generación y el análisis de modelos de procesos. Su capacidad para interpretar descripciones en lenguaje natural y generar artefactos estructurados los convierte en aliados prometedores para asistir a analistas y profesionales en la construcción de modelos BPMN.
 
-Este Trabajo de Fin de Máster (TFM) aborda el desarrollo de una extensión de la herramienta bpmn.io que integra un LLM para la generación y análisis automático de modelos BPMN a partir de descripciones textuales o conversacionales. La herramienta permite, de forma iterativa, construir modelos de procesos de negocio e identificar los valores asociados al cliente según la clasificación PERVAL. Para validar su utilidad, se diseña y ejecuta un estudio empírico en el que se comparan los resultados de la herramienta con los de un analista experto.
+No obstante, su aplicación al modelado de procesos de negocio mediante BPMN continúa siendo un área emergente de investigación. Estudios recientes han mostrado resultados alentadores, pero también evidencian desafíos relacionados con la calidad semántica, la validez de los modelos generados y la necesidad de evaluaciones empíricas sistemáticas que permitan comparar el desempeño de los LLMs con el de analistas humanos expertos \cite{kourani2025evaluating, kourani2024process}.
+
+Este Trabajo de Fin de Máster (TFM) aborda el desarrollo de una extensión de la herramienta bpmn.io que integra un LLM para la generación y análisis automático de modelos BPMN a partir de descripciones textuales o conversacionales. La herramienta permite, de forma iterativa, construir modelos de procesos de negocio e identificar los valores asociados a la percepción del cliente según la clasificación PERVAL. Para validar su utilidad, se diseña y ejecuta un estudio empírico en el que se comparan los resultados de la herramienta con los de un analista experto.
 
 %%---------------------------------------------------------
 \section{Motivación}
@@ -20,7 +22,9 @@ La motivación de este trabajo surge de la observación de un doble desafío en 
 
 Este desalineamiento entre el valor diseñado y el valor percibido puede tener un impacto directo en la experiencia del cliente y en la eficacia del proceso. Sin embargo, su identificación y corrección requieren de un análisis sistemático que, en la práctica, suele ser manual y costoso en tiempo y recursos.
 
-Los avances recientes en LLMs ofrecen una oportunidad para abordar estos desafíos de forma más eficiente. Su capacidad para comprender lenguaje natural y generar artefactos estructurados los convierte en candidatos idóneos para asistir en la generación de modelos BPMN y en la identificación del valor para el cliente.
+Los avances recientes en LLMs ofrecen una oportunidad para abordar estos desafíos de forma más eficiente. Su capacidad para comprender lenguaje natural y generar artefactos estructurados los convierte en una alternativa prometedora para asistir en la generación de modelos BPMN y en la identificación del valor para el cliente.
+
+A pesar del creciente interés por la aplicación de los LLMs en tareas de Ingeniería del Software, todavía existe evidencia empírica limitada sobre su utilización en el modelado de procesos orientado al valor. Este vacío en la literatura justifica la relevancia académica de esta investigación y la necesidad de estudios que evalúen de forma sistemática el desempeño de estos modelos en dicho contexto.
 
 La realización de este TFM ha permitido aplicar de forma práctica los conocimientos adquiridos durante el máster universitario, en especial en las áreas de ingeniería del software, modelado de procesos y tecnologías de inteligencia artificial.
 
@@ -28,7 +32,7 @@ La realización de este TFM ha permitido aplicar de forma práctica los conocimi
 \section{Objetivos}
 %%---------------------------------------------------------
 
-El objetivo principal de este trabajo es desarrollar una herramienta basada en LLMs que permita generar y analizar modelos BPMN de forma automática a partir de descripciones textuales o conversacionales, integrada como extensión sobre una versión local de bpmn.io, y validar su utilidad mediante un estudio empírico.
+El objetivo principal de este trabajo es diseñar, implementar y evaluar una herramienta basada en LLMs capaz de generar y analizar modelos BPMN de forma automática a partir de descripciones textuales o conversacionales, integrada como extensión sobre una versión local de bpmn.io, y evaluar empíricamente la capacidad de la herramienta mediante una comparación sistemática con los resultados obtenidos por un analista experto.
 
 A partir de este objetivo principal, se definen los siguientes objetivos secundarios:
 
@@ -44,7 +48,13 @@ A partir de este objetivo principal, se definen los siguientes objetivos secunda
 \section{Impacto Esperado}
 %%---------------------------------------------------------
 
-El impacto esperado de este trabajo es doble. En primer lugar, desde un punto de vista tecnológico, se espera demostrar la viabilidad de integrar LLMs en herramientas de modelado de procesos de negocio estándar, abriendo una línea de trabajo orientada a la asistencia inteligente en el modelado BPMN. En segundo lugar, desde un punto de vista metodológico, el estudio empírico aportará evidencia sobre el grado en que las herramientas basadas en LLMs pueden aproximarse al juicio de un analista humano experto, tanto en la calidad del modelo generado como en la identificación del valor para el cliente.
+Este trabajo aspira a generar las siguientes contribuciones:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Contribución científica:} proporcionar evidencia empírica sobre la aplicabilidad de los LLMs al modelado de procesos orientado al valor.
+    \item[$\bullet$] \textbf{Contribución tecnológica:} desarrollar una implementación funcional integrada en bpmn.io.
+    \item[$\bullet$] \textbf{Contribución metodológica:} proponer un procedimiento reproducible para evaluar la calidad de los modelos y de los valores identificados por sistemas basados en LLMs.
+\end{itemize}
 
 Este proyecto se alinea con los siguientes Objetivos de Desarrollo Sostenible (ODS):
 
@@ -56,6 +66,8 @@ Este proyecto se alinea con los siguientes Objetivos de Desarrollo Sostenible (O
 %%---------------------------------------------------------
 \section{Metodología}
 %%---------------------------------------------------------
+
+Desde una perspectiva metodológica, el trabajo combina una estrategia de desarrollo de software basada en Scrum con una evaluación empírica de carácter comparativo. La investigación puede caracterizarse como un estudio de diseño y evaluación tecnológica, en el que se desarrolla un artefacto software y posteriormente se analiza su desempeño mediante un estudio empírico.
 
 La metodología seguida en este trabajo se basa en enfoques ágiles de desarrollo de software, concretamente en el marco de trabajo \textit{Scrum}, con el objetivo de aplicar una planificación iterativa e incremental. Esta metodología permite adaptarse de forma continua a los requisitos funcionales y técnicos durante el desarrollo, resultando especialmente adecuada para un proyecto que integra un LLM en una herramienta de modelado y que requiere ciclos frecuentes de experimentación y mejora continua.
 
@@ -72,7 +84,7 @@ La estructura de este TFM ha sido diseñada para guiar al lector a lo largo del 
 \begin{itemize}
     \item[$\bullet$] \textbf{Introducción:} en este capítulo se contextualiza el proyecto, explicando la motivación que lo origina, los objetivos planteados y el impacto esperado del trabajo. También se describe la metodología de investigación seguida, la estructura del documento y las convenciones tipográficas adoptadas.
 
-    \item[$\bullet$] \textbf{Estado del arte:} en este capítulo se presentan los fundamentos teóricos y contexto tecnológico del trabajo. Se abordan BPMN y el modelado de procesos orientados al valor, las capacidades de los LLMs para generar y analizar artefactos software a partir del lenguaje natural. Además, se revisa la literatura sobre generación automática de modelos de procesos mediante IA, especialmente enfoques conversacionales y basados en LLMs.
+    \item[$\bullet$] \textbf{Estado del arte:} en este capítulo se presentan los fundamentos teóricos y contexto tecnológico del trabajo. Se abordan BPMN y el modelado de procesos orientados al valor, así como las capacidades de los LLMs para generar y analizar artefactos software a partir del lenguaje natural. Además, se revisa la literatura sobre generación automática de modelos de procesos mediante IA, especialmente enfoques conversacionales y basados en LLMs.
     \item[$\bullet$] \textbf{Análisis del problema:} en este capítulo se analizan los retos de la generación automática de modelos BPMN mediante LLMs y del análisis del valor del cliente con PERVAL. También se describen las interacciones entre el usuario, la extensión sobre bpmn.io y el LLM, se justifican las decisiones tecnológicas adoptadas y se presenta la planificación del trabajo por sprints, considerando además los aspectos legales y éticos del uso de modelos de lenguaje.  
     \item[$\bullet$] \textbf{Diseño de la solución:} en este capítulo se presenta la arquitectura general de la extensión sobre bpmn.io y la organización de sus componentes principales: el módulo de generación de modelos BPMN mediante el LLM y el módulo de análisis de valor PERVAL. Se describen el modelo de datos empleado, los mecanismos de comunicación entre la interfaz, el plugin y la API del LLM, y se analizan los \textit{frameworks}, lenguajes y herramientas utilizados en el desarrollo, evaluando sus ventajas y limitaciones.
     \item[$\bullet$] \textbf{Desarrollo e implementación: } en este capítulo se presenta la evolución del proyecto siguiendo una metodología ágil basada en \textit{sprints}. Se describen las principales tareas, avances y funcionalidades implementadas en cada iteración, desde la selección tecnológica inicial y la configuración del entorno de desarrollo sobre bpmn.io hasta la integración del LLM, la implementación del módulo de análisis PERVAL y la puesta en marcha completa de la extensión.

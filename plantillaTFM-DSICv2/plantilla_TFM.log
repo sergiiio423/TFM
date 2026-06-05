@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  4 JUN 2026 11:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  5 JUN 2026 11:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -634,21 +634,25 @@ l.22
       [1
 
 ]
-LaTeX Info: Redefining \. on input line 53.
-LaTeX Info: Redefining \% on input line 53.
+LaTeX Info: Redefining \. on input line 54.
+LaTeX Info: Redefining \% on input line 54.
 Package babel Info: 'spanish' activates 'spanish' shorthands.
-(babel)             Reported on input line 53.
+(babel)             Reported on input line 54.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.53     \item[$\bullet$]
-                          \textbf{ODS 12: producciÃ³n y consumo responsables... [2]
-LaTeX Info: Redefining \. on input line 73.
-LaTeX Info: Redefining \% on input line 73.
- [3]
-LaTeX Info: Redefining \. on input line 83.
-LaTeX Info: Redefining \% on input line 83.
+l.54     \item[$\bullet$]
+                          \textbf{ContribuciÃ³n cientÃ­fica:} proporcionar e... [2]
+Overfull \hbox (1.17062pt too wide) in paragraph at lines 56--57
+[]\T1/pbk/db/n/10.95 Contribución me-to-do-ló-gi-ca: \T1/pbk/l/n/10.95 pro-po-ner un pro-ce-di-mien-to re-pro-du-ci-ble pa-ra eva-
+ []
+
+LaTeX Info: Redefining \. on input line 77.
+LaTeX Info: Redefining \% on input line 77.
+[3]
+LaTeX Info: Redefining \. on input line 91.
+LaTeX Info: Redefining \% on input line 91.
  [4]) (secciones/03_EstadoDelArte.tex
 LaTeX Info: Redefining \. on input line 6.
 LaTeX Info: Redefining \% on input line 6.
@@ -670,36 +674,36 @@ LaTeX Info: Redefining \% on input line 115.
 LaTeX Info: Redefining \. on input line 55.
 LaTeX Info: Redefining \% on input line 55.
  [10] (secciones/06_Bibliografia.tex
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 7.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 13.
  (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
-Underfull \hbox (badness 1107) in paragraph at lines 10--11
+Underfull \hbox (badness 1107) in paragraph at lines 16--17
 []\T1/pbk/l/n/10.95 L. F. Hör-ner, M. Mö-ller y M. Reichert, ``Au-to-ma-ti-cally Ge-ne-ra-ting BPMN
  []
 
 
-Underfull \hbox (badness 2582) in paragraph at lines 10--11
+Underfull \hbox (badness 2582) in paragraph at lines 16--17
 \T1/pbk/l/n/10.95 2.0 Pro-cess Mo-dels from Na-tu-ral Lan-gua-ge Pro-cess Des-crip-tions: Cha-
  []
 
 
-Underfull \hbox (badness 3713) in paragraph at lines 10--11
+Underfull \hbox (badness 3713) in paragraph at lines 16--17
 \T1/pbk/l/n/10.95 llen-ges, Fra-me-work, Qua-lity As-sess-ment,'' \T1/pbk/l/it/10.95 Bu-si-ness & In-for-ma-tion Sys-
  []
 
 
-Underfull \hbox (badness 7012) in paragraph at lines 16--17
+Underfull \hbox (badness 7012) in paragraph at lines 22--23
 []\T1/pbk/l/n/10.95 J. Köp-ke y A. Sa-fan, ``In-tro-du-cing the BPMN-Chatbot for Ef-fi-cient
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 16--17
+Underfull \hbox (badness 10000) in paragraph at lines 22--23
 \T1/pbk/l/n/10.95 LLM-Based Pro-cess Mo-de-ling,'' en \T1/pbk/l/it/10.95 CEUR Workshop Pro-cee-dings\T1/pbk/l/n/10.95 , vol.
  []
 
 
-Underfull \hbox (badness 5578) in paragraph at lines 16--17
+Underfull \hbox (badness 5578) in paragraph at lines 22--23
 \T1/pbk/l/n/10.95 3758, pa-per 15, BPM 2024 Fo-rum, Cra-co-via, 2024. Dis-po-ni-ble en:
  []
 
@@ -723,17 +727,17 @@ Package rerunfilecheck Info: File `plantilla_TFM.out' has not changed.
 (rerunfilecheck)             Checksum: B9CFF4FD3719275A638FC8CE20F6850F;3003.
  ) 
 Here is how much of TeX's memory you used:
- 15439 strings out of 467871
- 244151 string characters out of 5417408
- 670215 words of memory out of 5000000
- 43990 multiletter control sequences out of 15000+600000
+ 15443 strings out of 467871
+ 244243 string characters out of 5417408
+ 670298 words of memory out of 5000000
+ 43992 multiletter control sequences out of 15000+600000
  652708 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 80i,11n,82p,1052b,647s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 80i,11n,82p,1074b,649s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on plantilla_TFM.pdf (25 pages, 188786 bytes).
+Output written on plantilla_TFM.pdf (25 pages, 190830 bytes).
 PDF statistics:
- 258 PDF objects out of 1000 (max. 8388607)
- 50 named destinations out of 1000 (max. 500000)
+ 262 PDF objects out of 1000 (max. 8388607)
+ 52 named destinations out of 1000 (max. 500000)
  147 words of extra memory for PDF output out of 10000 (max. 10000000)
 

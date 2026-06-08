@@ -126,23 +126,24 @@ No obstante, el BPMN-Chatbot presenta diferencias significativas respecto al sis
 Del análisis de los trabajos presentados en la sección anterior se desprende que, si bien la aplicación de LLMs al modelado de procesos de negocio 
 es un campo en rápido crecimiento, existen lagunas relevantes que el presente TFM se propone cubrir.
 
-Los trabajos revisados demuestran que los LLMs son capaces de generar modelos de proceso de calidad aceptable a partir de lenguaje natural 
-\cite{klievtsova2023,bise2025bpmn} y que la interacción conversacional constituye una vía prometedora para la participación 
-de usuarios no expertos en el modelado \cite{abb2023,fillies2024}. Sin embargo, ninguno de los trabajos analizados propone una integración 
-directa del LLM en un editor BPMN estándar de código abierto, como bpmn.io, que permita al usuario no solo generar el modelo sino también 
+Los trabajos revisados sugieren que los LLMs son capaces de generar modelos de proceso de calidad razonable a partir de descripciones en lenguaje natural
+\cite{klievtsova2023,bise2025bpmn} y que la interacción conversacional constituye una vía prometedora para la participación
+de usuarios no expertos en el modelado \cite{abb2023,fillies2024}. Sin embargo, ninguno de los trabajos revisados en este estudio propone una integración
+directa del LLM en un editor BPMN estándar de código abierto, como bpmn.io, que permita al usuario no solo generar el modelo sino también
 visualizarlo, modificarlo y exportarlo dentro de un entorno profesional de modelado.
 
 Asimismo, la dimensión del valor percibido por el cliente en los procesos de negocio no ha sido abordada en ninguno de los trabajos revisados. La 
 clasificación PERVAL ofrece un marco conceptual para identificar y analizar los atributos de valor que un proceso orientado al cliente genera 
-sobre el usuario, pero su aplicación en el contexto de la generación automática de modelos BPMN con LLMs constituye una aportación original del 
+sobre el usuario, pero su aplicación en el contexto de la generación automática de modelos BPMN mediante LLMs representa, según la revisión bibliográfica realizada, una contribución novedosa del
 presente TFM.
 
-En consecuencia, el sistema desarrollado en este trabajo se distingue de los trabajos previos en tres aspectos fundamentales: en primer lugar, 
-la integración de un LLM en una instancia local de bpmn.io mediante un panel conversacional, que permite la generación iterativa de modelos 
-BPMN 2.0 válidos dentro de un entorno de modelado estándar; en segundo lugar, la incorporación de un módulo de análisis de valor PERVAL que 
-identifica y clasifica los valores percibidos por el cliente en el proceso modelado; y en tercer lugar, la validación de la propuesta mediante 
-un estudio empírico comparativo con un analista experto, que permite evaluar de forma sistemática el grado de alineamiento entre los modelos 
-generados automáticamente y el criterio humano de referencia.
+En síntesis, la revisión realizada pone de manifiesto dos lagunas principales en la literatura: (i) la ausencia de soluciones que integren de forma nativa capacidades conversacionales basadas en LLMs dentro de entornos BPMN ampliamente utilizados por la comunidad profesional, y (ii) la falta de mecanismos que permitan identificar y analizar sistemáticamente el valor percibido por el cliente durante el proceso de modelado.
+
+En consecuencia, el sistema desarrollado en este trabajo se distingue de los trabajos previos en tres aspectos fundamentales: en primer lugar,
+la integración de un LLM en una instancia local de bpmn.io mediante un panel conversacional, que permite la generación iterativa de modelos
+BPMN 2.0 dentro de un entorno de modelado estándar; en segundo lugar, la incorporación de un módulo de análisis de valor PERVAL que
+identifica y clasifica los valores percibidos por el cliente en el proceso modelado; y en tercer lugar, la validación de la propuesta mediante
+un estudio empírico comparativo con un analista experto, con el objetivo de evaluar tanto la calidad de los modelos generados como la consistencia de los valores identificados.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de estado del arte

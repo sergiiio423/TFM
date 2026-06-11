@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <collaboration id="Collab_1">
+    <participant id="Part_Ext1" name="Cliente" processRef="Proc_Ext1"/>
+    <participant id="Part_Ext2" name="Pasarela de Pago" processRef="Proc_Ext2"/>
+    <participant id="Part_Ext3" name="Transportista" processRef="Proc_Ext3"/>
+    <participant id="Part_Main" name="Empresa de E-commerce" processRef="Proc_Main"/>
+    <messageFlow id="MF_ST_0_0" name="Confirmación de devolución" sourceRef="ST_0_0" targetRef="Part_Ext1"/>
+    <messageFlow id="MF_ST_0_1" name="Número de seguimiento de recogida" sourceRef="ST_0_1" targetRef="Part_Ext1"/>
+    <messageFlow id="MF_ST_0_2" name="Confirmación de reembolso" sourceRef="ST_0_2" targetRef="Part_Ext1"/>
+    <messageFlow id="MF_ST_0_3" name="Notificación de rechazo de devolución" sourceRef="ST_0_3" targetRef="Part_Ext1"/>
+    <messageFlow id="MF_ST_1_0" name="Solicitud de reembolso" sourceRef="ST_1_0" targetRef="Part_Ext2"/>
+    <messageFlow id="MF_ST_1_1" name="Confirmación de reembolso" sourceRef="ST_1_1" targetRef="Part_Ext2"/>
+    <messageFlow id="MF_ST_1_2" name="Notificación de no reembolso" sourceRef="ST_1_2" targetRef="Part_Ext2"/>
+    <messageFlow id="MF_ST_1_3" name="Solicitud de recogida" sourceRef="ST_1_3" targetRef="Part_Ext2"/>
+    <messageFlow id="MF_ST_2_0" name="Solicitud de recogida" sourceRef="ST_2_0" targetRef="Part_Ext3"/>
+    <messageFlow id="MF_ST_2_1" name="Solicitud de recogida" sourceRef="ST_2_1" targetRef="Part_Ext3"/>
+  </collaboration>
+  <process id="Proc_Ext1" isExecutable="false"/>
+  <process id="Proc_Ext2" isExecutable="false"/>
+  <process id="Proc_Ext3" isExecutable="false"/>
+
+  <process id="Proc_Main" isExecutable="false">
+    <laneSet id="LaneSet_1">
+      <lane id="Lane1" name="Atención al Cliente">
+        <flowNodeRef>SE_Main</flowNodeRef>
+        <flowNodeRef>LT_0_0</flowNodeRef>
+        <flowNodeRef>LT_0_1</flowNodeRef>
+        <flowNodeRef>LT_0_2</flowNodeRef>
+        <flowNodeRef>LT_0_3</flowNodeRef>
+        <flowNodeRef>LT_0_4</flowNodeRef>
+        <flowNodeRef>LT_0_5</flowNodeRef>
+        <flowNodeRef>LT_0_6</flowNodeRef>
+        <flowNodeRef>LT_0_7</flowNodeRef>
+        <flowNodeRef>LT_0_8</flowNodeRef>
+        <flowNodeRef>ST_0_0</flowNodeRef>
+        <flowNodeRef>ST_0_2</flowNodeRef>
+        <flowNodeRef>ST_1_0</flowNodeRef>
+        <flowNodeRef>ST_1_3</flowNodeRef>
+        <flowNodeRef>ST_2_0</flowNodeRef>
+        <flowNodeRef>EE_Main</flowNodeRef>
+      </lane>
+      <lane id="Lane2" name="Almacén">
+        <flowNodeRef>LT_1_0</flowNodeRef>
+        <flowNodeRef>LT_1_1</flowNodeRef>
+        <flowNodeRef>LT_1_2</flowNodeRef>
+        <flowNodeRef>LT_1_3</flowNodeRef>
+        <flowNodeRef>LT_1_4</flowNodeRef>
+        <flowNodeRef>LT_1_5</flowNodeRef>
+        <flowNodeRef>LT_1_6</flowNodeRef>
+        <flowNodeRef>LT_1_7</flowNodeRef>
+        <flowNodeRef>LT_1_8</flowNodeRef>
+        <flowNodeRef>ST_0_1</flowNodeRef>
+        <flowNodeRef>ST_0_3</flowNodeRef>
+        <flowNodeRef>ST_1_1</flowNodeRef>
+        <flowNodeRef>ST_1_2</flowNodeRef>
+        <flowNodeRef>ST_2_1</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="SE_Main" name="Inicio"/>
+    <endEvent id="EE_Main" name="Fin"/>
+    <intermediateCatchEvent id="LT_0_0" name="Recepción solicitud de devolución"><messageEventDefinition id="MED_LT_0_0"/></intermediateCatchEvent>
+    <task id="LT_0_1" name="Revisar solicitud de devolución"/>
+    <exclusiveGateway id="LT_0_2" name="¿Motivo válido y dentro del plazo?"/>
+    <sendTask id="LT_0_3" name="Enviar email rechazo devolución"/>
+    <sendTask id="LT_0_4" name="Solicitar recogida a transportista"/>
+    <exclusiveGateway id="LT_0_5" name="¿Producto en buen estado?"/>
+    <sendTask id="LT_0_6" name="Solicitar reembolso a pasarela de pago"/>
+    <sendTask id="LT_0_7" name="Enviar email confirmación reembolso"/>
+    <sendTask id="LT_0_8" name="Enviar email informar no reembolso"/>
+    <sendTask id="ST_0_0" name="Confirmación de devolución"/>
+    <sendTask id="ST_0_2" name="Confirmación de reembolso"/>
+    <sendTask id="ST_1_0" name="Solicitud de reembolso"/>
+    <sendTask id="ST_1_3" name="Solicitud de recogida"/>
+    <sendTask id="ST_2_0" name="Solicitud de recogida"/>
+    <intermediateCatchEvent id="LT_1_0" name="Recepción solicitud de devolución"><messageEventDefinition id="MED_LT_1_0"/></intermediateCatchEvent>
+    <task id="LT_1_1" name="Revisar solicitud de devolución"/>
+    <exclusiveGateway id="LT_1_2" name="¿Motivo válido y dentro del plazo?"/>
+    <sendTask id="LT_1_3" name="Enviar email rechazo devolución"/>
+    <sendTask id="LT_1_4" name="Solicitar recogida a transportista"/>
+    <exclusiveGateway id="LT_1_5" name="¿Producto en buen estado?"/>
+    <sendTask id="LT_1_6" name="Solicitar reembolso a pasarela de pago"/>
+    <sendTask id="LT_1_7" name="Enviar email confirmación reembolso"/>
+    <sendTask id="LT_1_8" name="Enviar email informar no reembolso"/>
+    <sendTask id="ST_0_1" name="Número de seguimiento de recogida"/>
+    <sendTask id="ST_0_3" name="Notificación de rechazo de devolución"/>
+    <sendTask id="ST_1_1" name="Confirmación de reembolso"/>
+    <sendTask id="ST_1_2" name="Notificación de no reembolso"/>
+    <sendTask id="ST_2_1" name="Solicitud de recogida"/>
+    <sequenceFlow id="SF_0" sourceRef="SE_Main" targetRef="LT_0_0"/>
+    <sequenceFlow id="SF_1" sourceRef="LT_0_0" targetRef="LT_0_1"/>
+    <sequenceFlow id="SF_2" sourceRef="LT_0_1" targetRef="LT_0_2"/>
+    <sequenceFlow id="SF_3" sourceRef="LT_0_2" targetRef="LT_0_3"/>
+    <sequenceFlow id="SF_4" sourceRef="LT_0_3" targetRef="LT_0_4"/>
+    <sequenceFlow id="SF_5" sourceRef="LT_0_4" targetRef="LT_0_5"/>
+    <sequenceFlow id="SF_6" sourceRef="LT_0_5" targetRef="LT_0_6"/>
+    <sequenceFlow id="SF_7" sourceRef="LT_0_6" targetRef="LT_0_7"/>
+    <sequenceFlow id="SF_8" sourceRef="LT_0_7" targetRef="LT_0_8"/>
+    <sequenceFlow id="SF_9" sourceRef="LT_0_8" targetRef="ST_0_0"/>
+    <sequenceFlow id="SF_10" sourceRef="ST_0_0" targetRef="ST_0_2"/>
+    <sequenceFlow id="SF_11" sourceRef="ST_0_2" targetRef="ST_1_0"/>
+    <sequenceFlow id="SF_12" sourceRef="ST_1_0" targetRef="ST_1_3"/>
+    <sequenceFlow id="SF_13" sourceRef="ST_1_3" targetRef="ST_2_0"/>
+    <sequenceFlow id="SF_14" sourceRef="ST_2_0" targetRef="LT_1_0"/>
+    <sequenceFlow id="SF_15" sourceRef="LT_1_0" targetRef="LT_1_1"/>
+    <sequenceFlow id="SF_16" sourceRef="LT_1_1" targetRef="LT_1_2"/>
+    <sequenceFlow id="SF_17" sourceRef="LT_1_2" targetRef="LT_1_3"/>
+    <sequenceFlow id="SF_18" sourceRef="LT_1_3" targetRef="LT_1_4"/>
+    <sequenceFlow id="SF_19" sourceRef="LT_1_4" targetRef="LT_1_5"/>
+    <sequenceFlow id="SF_20" sourceRef="LT_1_5" targetRef="LT_1_6"/>
+    <sequenceFlow id="SF_21" sourceRef="LT_1_6" targetRef="LT_1_7"/>
+    <sequenceFlow id="SF_22" sourceRef="LT_1_7" targetRef="LT_1_8"/>
+    <sequenceFlow id="SF_23" sourceRef="LT_1_8" targetRef="ST_0_1"/>
+    <sequenceFlow id="SF_24" sourceRef="ST_0_1" targetRef="ST_0_3"/>
+    <sequenceFlow id="SF_25" sourceRef="ST_0_3" targetRef="ST_1_1"/>
+    <sequenceFlow id="SF_26" sourceRef="ST_1_1" targetRef="ST_1_2"/>
+    <sequenceFlow id="SF_27" sourceRef="ST_1_2" targetRef="ST_2_1"/>
+    <sequenceFlow id="SF_28" sourceRef="ST_2_1" targetRef="EE_Main"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collab_1">
+      <bpmndi:BPMNShape id="Shape_Part_Ext1" bpmnElement="Part_Ext1" isHorizontal="true">
+        <dc:Bounds x="30" y="30" width="4930" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Part_Ext2" bpmnElement="Part_Ext2" isHorizontal="true">
+        <dc:Bounds x="30" y="210" width="4930" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Part_Ext3" bpmnElement="Part_Ext3" isHorizontal="true">
+        <dc:Bounds x="30" y="390" width="4930" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Part_Main" bpmnElement="Part_Main" isHorizontal="true">
+        <dc:Bounds x="30" y="570" width="4930" height="420"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane1" bpmnElement="Lane1" isHorizontal="true">
+        <dc:Bounds x="60" y="630" width="4900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane2" bpmnElement="Lane2" isHorizontal="true">
+        <dc:Bounds x="60" y="810" width="4900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SE" bpmnElement="SE_Main">
+        <dc:Bounds x="112" y="702" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EE" bpmnElement="EE_Main">
+        <dc:Bounds x="4630" y="702" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_0" bpmnElement="LT_0_0">
+        <dc:Bounds x="132" y="702" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_1" bpmnElement="LT_0_1">
+        <dc:Bounds x="260" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_2" bpmnElement="LT_0_2" isMarkerVisible="true">
+        <dc:Bounds x="445" y="695" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_3" bpmnElement="LT_0_3">
+        <dc:Bounds x="580" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_4" bpmnElement="LT_0_4">
+        <dc:Bounds x="740" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_5" bpmnElement="LT_0_5" isMarkerVisible="true">
+        <dc:Bounds x="925" y="695" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_6" bpmnElement="LT_0_6">
+        <dc:Bounds x="1060" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_7" bpmnElement="LT_0_7">
+        <dc:Bounds x="1220" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_0_8" bpmnElement="LT_0_8">
+        <dc:Bounds x="1380" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_0_0" bpmnElement="ST_0_0">
+        <dc:Bounds x="1540" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_0_2" bpmnElement="ST_0_2">
+        <dc:Bounds x="1700" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_1_0" bpmnElement="ST_1_0">
+        <dc:Bounds x="1860" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_1_3" bpmnElement="ST_1_3">
+        <dc:Bounds x="2020" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_2_0" bpmnElement="ST_2_0">
+        <dc:Bounds x="2180" y="680" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_0" bpmnElement="LT_1_0">
+        <dc:Bounds x="2372" y="882" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_1" bpmnElement="LT_1_1">
+        <dc:Bounds x="2500" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_2" bpmnElement="LT_1_2" isMarkerVisible="true">
+        <dc:Bounds x="2685" y="875" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_3" bpmnElement="LT_1_3">
+        <dc:Bounds x="2820" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_4" bpmnElement="LT_1_4">
+        <dc:Bounds x="2980" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_5" bpmnElement="LT_1_5" isMarkerVisible="true">
+        <dc:Bounds x="3165" y="875" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_6" bpmnElement="LT_1_6">
+        <dc:Bounds x="3300" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_7" bpmnElement="LT_1_7">
+        <dc:Bounds x="3460" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_LT_1_8" bpmnElement="LT_1_8">
+        <dc:Bounds x="3620" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_0_1" bpmnElement="ST_0_1">
+        <dc:Bounds x="3780" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_0_3" bpmnElement="ST_0_3">
+        <dc:Bounds x="3940" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_1_1" bpmnElement="ST_1_1">
+        <dc:Bounds x="4100" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_1_2" bpmnElement="ST_1_2">
+        <dc:Bounds x="4260" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ST_2_1" bpmnElement="ST_2_1">
+        <dc:Bounds x="4420" y="860" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_SF_0" bpmnElement="SF_0">
+        <di:waypoint x="130" y="720"/>
+        <di:waypoint x="150" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_1" bpmnElement="SF_1">
+        <di:waypoint x="150" y="720"/>
+        <di:waypoint x="310" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_2" bpmnElement="SF_2">
+        <di:waypoint x="310" y="720"/>
+        <di:waypoint x="470" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_3" bpmnElement="SF_3">
+        <di:waypoint x="470" y="720"/>
+        <di:waypoint x="630" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_4" bpmnElement="SF_4">
+        <di:waypoint x="630" y="720"/>
+        <di:waypoint x="790" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_5" bpmnElement="SF_5">
+        <di:waypoint x="790" y="720"/>
+        <di:waypoint x="950" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_6" bpmnElement="SF_6">
+        <di:waypoint x="950" y="720"/>
+        <di:waypoint x="1110" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_7" bpmnElement="SF_7">
+        <di:waypoint x="1110" y="720"/>
+        <di:waypoint x="1270" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_8" bpmnElement="SF_8">
+        <di:waypoint x="1270" y="720"/>
+        <di:waypoint x="1430" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_9" bpmnElement="SF_9">
+        <di:waypoint x="1430" y="720"/>
+        <di:waypoint x="1590" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_10" bpmnElement="SF_10">
+        <di:waypoint x="1590" y="720"/>
+        <di:waypoint x="1750" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_11" bpmnElement="SF_11">
+        <di:waypoint x="1750" y="720"/>
+        <di:waypoint x="1910" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_12" bpmnElement="SF_12">
+        <di:waypoint x="1910" y="720"/>
+        <di:waypoint x="2070" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_13" bpmnElement="SF_13">
+        <di:waypoint x="2070" y="720"/>
+        <di:waypoint x="2230" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_14" bpmnElement="SF_14">
+        <di:waypoint x="2230" y="720"/>
+        <di:waypoint x="2390" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_15" bpmnElement="SF_15">
+        <di:waypoint x="2390" y="900"/>
+        <di:waypoint x="2550" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_16" bpmnElement="SF_16">
+        <di:waypoint x="2550" y="900"/>
+        <di:waypoint x="2710" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_17" bpmnElement="SF_17">
+        <di:waypoint x="2710" y="900"/>
+        <di:waypoint x="2870" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_18" bpmnElement="SF_18">
+        <di:waypoint x="2870" y="900"/>
+        <di:waypoint x="3030" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_19" bpmnElement="SF_19">
+        <di:waypoint x="3030" y="900"/>
+        <di:waypoint x="3190" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_20" bpmnElement="SF_20">
+        <di:waypoint x="3190" y="900"/>
+        <di:waypoint x="3350" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_21" bpmnElement="SF_21">
+        <di:waypoint x="3350" y="900"/>
+        <di:waypoint x="3510" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_22" bpmnElement="SF_22">
+        <di:waypoint x="3510" y="900"/>
+        <di:waypoint x="3670" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_23" bpmnElement="SF_23">
+        <di:waypoint x="3670" y="900"/>
+        <di:waypoint x="3830" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_24" bpmnElement="SF_24">
+        <di:waypoint x="3830" y="900"/>
+        <di:waypoint x="3990" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_25" bpmnElement="SF_25">
+        <di:waypoint x="3990" y="900"/>
+        <di:waypoint x="4150" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_26" bpmnElement="SF_26">
+        <di:waypoint x="4150" y="900"/>
+        <di:waypoint x="4310" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_27" bpmnElement="SF_27">
+        <di:waypoint x="4310" y="900"/>
+        <di:waypoint x="4470" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_SF_28" bpmnElement="SF_28">
+        <di:waypoint x="4470" y="900"/>
+        <di:waypoint x="4648" y="720"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_0_0" bpmnElement="MF_ST_0_0">
+        <di:waypoint x="1590" y="680"/>
+        <di:waypoint x="1590" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_0_2" bpmnElement="MF_ST_0_2">
+        <di:waypoint x="1750" y="680"/>
+        <di:waypoint x="1750" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_1_0" bpmnElement="MF_ST_1_0">
+        <di:waypoint x="1910" y="680"/>
+        <di:waypoint x="1910" y="290"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_1_3" bpmnElement="MF_ST_1_3">
+        <di:waypoint x="2070" y="680"/>
+        <di:waypoint x="2070" y="290"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_2_0" bpmnElement="MF_ST_2_0">
+        <di:waypoint x="2230" y="680"/>
+        <di:waypoint x="2230" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_0_1" bpmnElement="MF_ST_0_1">
+        <di:waypoint x="3830" y="860"/>
+        <di:waypoint x="3830" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_0_3" bpmnElement="MF_ST_0_3">
+        <di:waypoint x="3990" y="860"/>
+        <di:waypoint x="3990" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_1_1" bpmnElement="MF_ST_1_1">
+        <di:waypoint x="4150" y="860"/>
+        <di:waypoint x="4150" y="290"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_1_2" bpmnElement="MF_ST_1_2">
+        <di:waypoint x="4310" y="860"/>
+        <di:waypoint x="4310" y="290"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_ST_2_1" bpmnElement="MF_ST_2_1">
+        <di:waypoint x="4470" y="860"/>
+        <di:waypoint x="4470" y="470"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

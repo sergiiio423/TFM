@@ -154,9 +154,11 @@
     .struct-chip {
       padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
     }
-    .ext-chip  { background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.25); color: #fdba74; }
+    .ext-chip    { background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.25); color: #fdba74; }
+    .client-chip { background: rgba(34,197,94,0.12);  border: 1px solid rgba(34,197,94,0.28);  color: #86efac; }
     .lane-chip { background: rgba(14,165,233,0.10); border: 1px solid rgba(14,165,233,0.22); color: #7dd3fc; }
     .none-chip { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2); color: #9ca3af; font-style: italic; }
+    .struct-legend { font-size: 9px; color: rgba(148,163,184,0.6); margin-top: 5px; }
 
     /* ── Opciones (por si se usan en futuro) ── */
     .options-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -322,6 +324,9 @@
     .pv-sum-text { font-size: 11px; color: rgba(186,230,253,0.62); line-height: 1.45; }
     .pv-general { margin: 4px 8px 8px; background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.1); border-radius: 9px; padding: 8px 11px; font-size: 11px; color: rgba(186,230,253,0.72); line-height: 1.5; }
     .pv-general-lbl { font-weight: 700; color: #7dd3fc; }
+    .pv-actions { margin: 4px 8px 10px; padding-top: 8px; border-top: 1px solid rgba(14,165,233,0.1); }
+    .pv-legend { display: flex; flex-wrap: wrap; gap: 5px; }
+    .pv-legend-chip { border-radius: 6px; padding: 2px 8px; font-size: 10px; font-weight: 600; color: #1f2937; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -429,7 +434,7 @@
     // Actualizar indicador de fase
     window.updatePhaseBar = function(fase) {
       const steps = ['phase-1','phase-2','phase-3','phase-4'];
-      const faseMap = { describe: 0, confirm_structure: 0, lane_tasks: 1, actor_delivery: 2, refine: 3 };
+      const faseMap = { describe: 0, confirm_structure: 0, flow_start: 1, flow_step: 1, flow_branches: 1, flow_branch_step: 1, refine: 3 };
       const current = faseMap[fase] ?? 0;
       steps.forEach((id, i) => {
         const el = document.getElementById(id);

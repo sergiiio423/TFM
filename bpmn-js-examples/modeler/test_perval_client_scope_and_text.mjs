@@ -12,10 +12,9 @@ import { chromium } from 'playwright';
 
 const TIMEOUT = 120_000;
 
-const PARTICIPANTES = `En mi proceso participa el cliente que compra online y mi empresa, una
-pequeña tienda llamada MiTienda. No tenemos departamentos.`;
-
-const FLUJO = `El cliente envía un pedido (mensaje de inicio). MiTienda prepara el pedido y
+const DESCRIPCION = `En mi proceso participa el cliente que compra online y mi empresa, una
+pequeña tienda llamada MiTienda. No tenemos departamentos.
+El cliente envía un pedido (mensaje de inicio). MiTienda prepara el pedido y
 envía la confirmación de envío al cliente, momento en el que el proceso termina.`;
 
 async function waitNoTyping(page) {
@@ -43,16 +42,16 @@ async function waitFreshStepCard(page) {
   await page.click('#ai-fab');
   await page.waitForSelector('#ai-panel.open');
 
-  await page.fill('#ai-scenario', PARTICIPANTES);
+  await page.fill('#ai-scenario', DESCRIPCION);
   await page.click('#ai-send');
   await waitNoTyping(page);
   await page.waitForSelector('#structure-card', { timeout: TIMEOUT });
   await page.click('#btn-confirm-main');
   console.log('✅ Estructura confirmada');
 
-  await waitNoTyping(page);
-  await page.fill('#ai-scenario', FLUJO);
-  await page.click('#ai-send');
+  await page.waitForSelector('#flow-mode-card', { timeout: TIMEOUT });
+  await page.click('#btn-flow-mode-manual');
+
   await waitNoTyping(page);
   await page.waitForSelector('#start-card', { timeout: TIMEOUT });
   await page.click('#btn-start-confirm');

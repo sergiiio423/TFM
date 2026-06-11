@@ -81,6 +81,16 @@
     .ai-reset:hover { background: rgba(250,204,21,0.1); color: #fde047; border-color: rgba(250,204,21,0.2); }
     .ai-close:hover  { background: rgba(239,68,68,0.1);  color: #fca5a5; border-color: rgba(239,68,68,0.18); }
 
+    .ai-lang-switch { display: flex; border: 1px solid rgba(14,165,233,0.12); border-radius: 8px; overflow: hidden; }
+    .lang-btn {
+      background: rgba(255,255,255,0.04); border: none; padding: 0 7px; height: 28px;
+      color: rgba(125,211,252,0.45); font-size: 10px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: all 0.2s; letter-spacing: 0.3px;
+    }
+    .lang-btn + .lang-btn { border-left: 1px solid rgba(14,165,233,0.12); }
+    .lang-btn:hover { background: rgba(14,165,233,0.1); color: #7dd3fc; }
+    .lang-btn.active { background: rgba(14,165,233,0.18); color: #7dd3fc; }
+
     /* ── Fase indicator ── */
     .ai-phase-bar {
       display: flex; gap: 0;
@@ -195,6 +205,27 @@
     .ai-input-area textarea:focus { border-color: rgba(14,165,233,0.38); }
     .ai-input-area textarea::placeholder { color: rgba(100,160,210,0.32); }
 
+    .ai-textarea-row { display: flex; gap: 8px; align-items: stretch; }
+    .ai-textarea-row textarea { flex: 1; }
+    #ai-mic {
+      flex-shrink: 0; width: 38px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(14,165,233,0.11);
+      border-radius: 11px; color: #7dd3fc; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    #ai-mic svg { width: 17px; height: 17px; }
+    #ai-mic:hover:not(:disabled) { border-color: rgba(14,165,233,0.38); background: rgba(14,165,233,0.08); }
+    #ai-mic:disabled { opacity: 0.3; cursor: not-allowed; }
+    #ai-mic.recording {
+      background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.5); color: #fca5a5;
+      animation: mic-pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes mic-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.35); }
+      50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+
     .btn-send {
       width: 100%; padding: 10px;
       border: none; border-radius: 11px; color: white;
@@ -203,6 +234,9 @@
     }
     .btn-blue  { background: linear-gradient(135deg, #0369a1, #0e7490); }
     .btn-green { background: linear-gradient(135deg, #059669, #0d9488); }
+    .btn-outline {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(14,165,233,0.18); color: #7dd3fc;
+    }
     .btn-send:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,0.28); }
     .btn-send:disabled { opacity:.32; cursor: not-allowed; transform: none; }
 
@@ -371,6 +405,10 @@
         </div>
       </div>
       <div class="ai-header-actions">
+        <div class="ai-lang-switch" id="ai-lang-switch" title="Cambiar idioma">
+          <button class="lang-btn" data-lang="es">ES</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
         <button class="ai-reset" id="ai-reset" title="Nueva conversación">↺</button>
         <button class="ai-close" id="ai-close">✕</button>
       </div>
@@ -399,13 +437,24 @@
 
     <!-- Input + botones -->
     <div class="ai-input-area" id="ai-free-input">
-      <textarea id="ai-scenario" rows="2"
-        placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
+      <div class="ai-textarea-row">
+        <textarea id="ai-scenario" rows="2"
+          placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
+        <button id="ai-mic" type="button" title="Hablar para dictar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
       <button id="ai-send" class="btn-send btn-blue">→ Identificar estructura</button>
       <div id="ai-confirm-actions" style="display:none; gap:8px">
         <button id="btn-confirm-main" class="btn-send btn-green" style="flex:1">✅ Confirmar</button>
         <button id="btn-modify-main"  class="btn-send btn-blue"  style="flex:1">✏️ Modificar</button>
       </div>
+      <button id="ai-add-info-btn" class="btn-send btn-outline" style="display:none">➕ Añadir información</button>
       <button id="ai-perval-btn">🔍 Analizar valor PERVAL</button>
       <div class="hint" id="ai-hint">Ctrl+Enter para enviar</div>
     </div>

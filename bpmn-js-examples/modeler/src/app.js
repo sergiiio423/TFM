@@ -9,6 +9,7 @@ import './style.css';
 import $ from 'jquery';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import diagramXML from '../resources/newDiagram.bpmn';
+import { t, getLang, setLang, recognitionLang, langDirective } from './i18n.js';
 
 var container = $('#js-drop-zone');
 var modeler   = new BpmnModeler({ container: '#js-canvas' });
@@ -25,11 +26,11 @@ function registerFileDrop(container, callback) {
   container.get(0).addEventListener('dragover', handleDragOver, false);
   container.get(0).addEventListener('drop', handleFileSelect, false);
 }
-if (!window.FileList || !window.FileReader) { window.alert('Usa Chrome o Firefox.'); }
+if (!window.FileList || !window.FileReader) { window.alert(t('useChromeFirefox')); }
 else { registerFileDrop(container, openDiagram); }
 
 // ─── ESTADO ───────────────────────────────────────────────────────────────────
-// Fases: 'describe' → 'confirm_structure' → 'describe_process' → 'flow_start' → 'flow_step' (xN) → 'refine'
+// Fases: 'describe' → 'confirm_structure' → 'flow_start' → 'flow_step' (xN) → 'refine'
 var fase = 'describe';
 var processDescription     = '';
 var processFlowDescription = '';
@@ -41,6 +42,10 @@ var confirmedStructure  = null;
 //   join?: { id, tipo, nombre:'', laneIdx }   // solo si alguna rama converge
 var diagramState        = { steps: [] };
 var pervalAnalisado     = false;
+// Modo del asistente paso a paso: false = pide confirmación de cada paso (tarjetas);
+// true = genera todo el proceso de una vez, con el mismo razonamiento del LLM,
+// auto-confirmando cada sugerencia hasta que el diagrama queda completo.
+var autoGenerateAll     = false;
 const MAX_FLOW_STEPS    = 20;
 const MAX_BRANCH_STEPS  = 6;
 
@@ -63,81 +68,80 @@ function updateUI() {
   const textarea      = document.getElementById('ai-scenario');
   const pervalBtn     = document.getElementById('ai-perval-btn');
   const hint          = document.getElementById('ai-hint');
+  const addInfoBtn    = document.getElementById('ai-add-info-btn');
 
   textarea.disabled = false;
   btn.disabled      = false;
 
-  // Por defecto muestra el botón principal y oculta los de confirmación
+  // Por defecto muestra el botón principal y oculta los de confirmación / añadir info
   btn.style.display         = '';
   if (confirmActs) confirmActs.style.display = 'none';
+  if (addInfoBtn)  addInfoBtn.style.display  = 'none';
 
   if (fase === 'describe') {
-    btn.textContent = '→ Identificar participantes';
+    btn.textContent = t('describeBtn');
     btn.className   = 'btn-send btn-blue';
-    textarea.placeholder = '¿Quiénes participan en tu proceso? Ej: clientes, proveedores, tu empresa y sus departamentos...';
+    textarea.placeholder = t('describePlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Ctrl+Enter para enviar';
+    if (hint) hint.textContent = t('hintCtrlEnter');
 
   } else if (fase === 'confirm_structure') {
     btn.style.display = 'none';
     if (confirmActs) confirmActs.style.display = 'flex';
-    textarea.placeholder = 'Escribe aquí los cambios que quieres aplicar...';
+    textarea.placeholder = t('confirmStructPlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Escribe un cambio y pulsa ✏️ Modificar, o confirma directamente';
-
-  } else if (fase === 'describe_process') {
-    btn.textContent = '→ Continuar con las tareas';
-    btn.className   = 'btn-send btn-blue';
-    textarea.placeholder = 'Describe el flujo completo: qué hace cada departamento, decisiones (gateways), mensajes a actores externos...';
-    if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Describe el proceso con tanto detalle como quieras y pulsa Continuar';
+    if (hint) hint.textContent = t('hintConfirmStruct');
 
   } else if (fase === 'flow_start') {
     btn.style.display = 'none';
     if (confirmActs) confirmActs.style.display = 'none';
     btn.disabled      = true;
-    textarea.disabled = true;
-    textarea.placeholder = 'Usa la tarjeta para definir el inicio del proceso...';
+    textarea.disabled = false;
+    textarea.placeholder = t('addInfoPlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Confirma cómo empieza el proceso';
+    if (addInfoBtn) { addInfoBtn.style.display = 'block'; addInfoBtn.textContent = t('addInfoBtn'); }
+    if (hint) hint.textContent = t('hintFlowStart') + t('hintAddInfoSuffix');
 
   } else if (fase === 'flow_step') {
     btn.style.display = 'none';
     if (confirmActs) confirmActs.style.display = 'none';
     btn.disabled      = true;
-    textarea.disabled = true;
-    textarea.placeholder = 'Usa la tarjeta para confirmar el siguiente paso...';
+    textarea.disabled = false;
+    textarea.placeholder = t('addInfoPlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
+    if (addInfoBtn) { addInfoBtn.style.display = 'block'; addInfoBtn.textContent = t('addInfoBtn'); }
     const stepNum = (diagramState.steps || []).filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent').length + 1;
-    if (hint) hint.textContent = `Paso ${stepNum} — confirma o edita`;
+    if (hint) hint.textContent = t('hintFlowStep', { n: stepNum }) + t('hintAddInfoSuffix');
 
   } else if (fase === 'flow_branches') {
     btn.style.display = 'none';
     if (confirmActs) confirmActs.style.display = 'none';
     btn.disabled      = true;
-    textarea.disabled = true;
-    textarea.placeholder = 'Usa la tarjeta para definir los casos de la puerta...';
+    textarea.disabled = false;
+    textarea.placeholder = t('addInfoPlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Define los casos/ramas de la puerta';
+    if (addInfoBtn) { addInfoBtn.style.display = 'block'; addInfoBtn.textContent = t('addInfoBtn'); }
+    if (hint) hint.textContent = t('hintFlowBranches') + t('hintAddInfoSuffix');
 
   } else if (fase === 'flow_branch_step') {
     btn.style.display = 'none';
     if (confirmActs) confirmActs.style.display = 'none';
     btn.disabled      = true;
-    textarea.disabled = true;
-    textarea.placeholder = 'Usa la tarjeta para confirmar el siguiente paso del caso...';
+    textarea.disabled = false;
+    textarea.placeholder = t('addInfoPlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
-    if (hint) hint.textContent = 'Confirma o edita el paso de este caso';
+    if (addInfoBtn) { addInfoBtn.style.display = 'block'; addInfoBtn.textContent = t('addInfoBtn'); }
+    if (hint) hint.textContent = t('hintFlowBranchStep') + t('hintAddInfoSuffix');
 
   } else { // refine
-    btn.textContent = '✦ Modificar diagrama';
+    btn.textContent = t('refineBtn');
     btn.className   = 'btn-send btn-green';
-    textarea.placeholder = 'Ej: Añade un gateway de validación, renombra el lane de logística...';
+    textarea.placeholder = t('refinePlaceholder');
     if (pervalBtn) {
       pervalBtn.style.display = 'block';
-      pervalBtn.textContent   = pervalAnalisado ? '🔄 Re-analizar PERVAL' : '🔍 Analizar valor PERVAL';
+      pervalBtn.textContent   = pervalAnalisado ? t('pervalBtnReanalyze') : t('pervalBtnAnalyze');
     }
-    if (hint) hint.textContent = 'Ctrl+Enter para enviar · ↺ para nueva sesión';
+    if (hint) hint.textContent = t('hintRefine');
   }
   if (typeof window.updatePhaseBar === 'function') window.updatePhaseBar(fase);
 }
@@ -170,11 +174,11 @@ REGLAS:
   (Ventas, Logística, Atención al Cliente, Finanzas…). Máximo 5.
   Si la descripción NO menciona departamentos ni áreas internas, devuelve [] (lista vacía) — NO inventes departamentos:
   la organización se dibujará como una única piscina sin calles.
-- Nombres concisos: 1-3 palabras`;
+- Nombres concisos: 1-3 palabras${langDirective()}`;
 }
 
 function buildModifyStructurePrompt(current, mod) {
-  return `Estructura actual:\n${JSON.stringify(current, null, 2)}\n\nModificación: "${mod}"\n\nDevuelve ÚNICAMENTE el JSON modificado (mismo formato, conservando el campo "rol" de cada poolExterno —"cliente" o "colaborador"— y ajustándolo solo si la modificación lo requiere).`;
+  return `Estructura actual:\n${JSON.stringify(current, null, 2)}\n\nModificación: "${mod}"\n\nDevuelve ÚNICAMENTE el JSON modificado (mismo formato, conservando el campo "rol" de cada poolExterno —"cliente" o "colaborador"— y ajustándolo solo si la modificación lo requiere).${langDirective()}`;
 }
 
 /**
@@ -201,7 +205,7 @@ REGLAS:
 - Normalmente hay un único inicio; usa varios solo si la descripción lo indica explícitamente.
 
 RESPONDE SOLO con JSON (sin texto adicional):
-{"inicios":[{"lane":"${lanes[0]}","nombre":"Inicio","trigger":"none","from":null}]}`;
+{"inicios":[{"lane":"${lanes[0]}","nombre":"Inicio","trigger":"none","from":null}]}${langDirective()}`;
 }
 
 /**
@@ -248,12 +252,29 @@ ESE MISMO momento, en lugar de modelar una tarea de envío seguida de un evento 
 usas "endMessageEvent", "esFinal" debe ser true y, si el mensaje va a un actor externo (p.ej. el
 cliente), indícalo en "actorExterno".
 
+PRESTA ESPECIAL ATENCIÓN A LAS DECISIONES Y RAMIFICACIONES DE LA DESCRIPCIÓN:
+- Si, llegados a este punto del proceso, existe una condición que hace que el proceso siga
+  caminos DISTINTOS según el caso (p.ej. "si hay stock... si no hay stock...", "según el método
+  de pago", "el pedido puede ser aprobado o rechazado", "dependiendo de si el cliente...", "en
+  caso de que...", "si supera un importe..."), el SIGUIENTE paso DEBE ser una puerta
+  "exclusiveGateway" (XOR) que represente esa decisión — NO sigas con una tarea que ignore la
+  ramificación ni la des por hecha.
+- Si la descripción indica que, llegados a este punto, dos o más actividades ocurren EN PARALELO
+  o SIMULTÁNEAMENTE (p.ej. "al mismo tiempo", "en paralelo", "simultáneamente", "mientras tanto"),
+  el SIGUIENTE paso DEBE ser una puerta "parallelGateway" (AND).
+- Usa "exclusiveGateway"/"parallelGateway" SOLO para decisiones o paralelismos reales, descritos
+  explícita o implícitamente en la descripción; no los inventes si el proceso es estrictamente
+  secuencial sin alternativas.
+- No conviertas un proceso con bifurcaciones en una simple secuencia lineal de tareas: cuando la
+  narrativa llegue a un punto de decisión o de paralelismo, modélalo con el gateway adecuado en
+  ESE momento, no más adelante ni nunca.
+
 REGLAS:
 - Si no hay actores externos, "actorExterno" debe ser siempre null.
 - No repitas pasos ya confirmados.
 
 RESPONDE SOLO con JSON (sin texto adicional):
-{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinal":false}`;
+{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinal":false}${langDirective()}`;
 }
 
 /**
@@ -278,7 +299,7 @@ Según la descripción, ¿qué casos/ramas salen de esta puerta?
 - Nombres breves de 1-4 palabras (p.ej. "Hay stock" / "Sin stock", o "Pago aceptado" / "Pago rechazado").
 
 RESPONDE SOLO con JSON (sin texto adicional):
-{"casos":["Caso 1","Caso 2"]}`;
+{"casos":["Caso 1","Caso 2"]}${langDirective()}`;
 }
 
 /**
@@ -322,7 +343,12 @@ REGLAS:
 - No repitas pasos ya confirmados de esta rama.
 
 RESPONDE SOLO con JSON (sin texto adicional):
-{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinalRama":false,"terminaProceso":false}`;
+{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinalRama":false,"terminaProceso":false}${langDirective()}`;
+}
+
+/** Prompt de sistema corto reutilizado en las llamadas "rápidas" (inicio, siguiente paso, ramas). */
+function bpmnJsonExpertPrompt() {
+  return `Eres experto en modelado BPMN. Responde SOLO con JSON.${langDirective()}`;
 }
 
 function buildRefinementMessage(instruction, currentXML) {
@@ -388,9 +414,9 @@ function renderDiagramFromState(structure, state) {
   const extY   = i => 30 + i * (EH + EG);
   const extCY  = i => extY(i) + EH / 2;
   const mainY  = ext.length > 0 ? 30 + ext.length * (EH + EG) : 30;
-  const mainH  = Math.max(1, N) * LH + 60;
+  const mainH  = Math.max(1, N) * LH;
   // Sin lanes (piscina única): los elementos se centran verticalmente en el pool
-  const laneCY = j => N > 0 ? mainY + 60 + j * LH + LH / 2 : mainY + mainH / 2;
+  const laneCY = j => N > 0 ? mainY + j * LH + LH / 2 : mainY + mainH / 2;
 
   // ── Collaboration ──────────────────────────────────────────────────────
   let col = '';
@@ -499,7 +525,7 @@ ${laneSetBlock}${taskXml ? taskXml+'\n' : ''}${seqXml ? seqXml+'\n' : ''}  </pro
       </bpmndi:BPMNShape>\n`;
   lanes.forEach((_, j) => {
     shapes += `      <bpmndi:BPMNShape id="Shape_Lane${j+1}" bpmnElement="Lane${j+1}" isHorizontal="true">
-        <dc:Bounds x="60" y="${mainY+60+j*LH}" width="${PW-30}" height="${LH}"/>
+        <dc:Bounds x="60" y="${mainY+j*LH}" width="${PW-30}" height="${LH}"/>
       </bpmndi:BPMNShape>\n`;
   });
 
@@ -589,12 +615,12 @@ function showStructureCard(structure) {
         const isClient = p.rol === 'cliente';
         return `<span class="struct-chip ${isClient ? 'client-chip' : 'ext-chip'}">${isClient ? '🧑‍💼' : '🤝'} ${p.nombre}</span>`;
       }).join('')
-    : '<span class="struct-chip none-chip">Ninguno</span>';
+    : `<span class="struct-chip none-chip">${t('structNone')}</span>`;
   const laneChips = (structure.poolPrincipal.lanes || []).length > 0
     ? (structure.poolPrincipal.lanes || []).map(l => `<span class="struct-chip lane-chip">📋 ${l}</span>`).join('')
-    : '<span class="struct-chip none-chip">Piscina única (sin departamentos)</span>';
+    : `<span class="struct-chip none-chip">${t('structSinglePool')}</span>`;
   const extLegend = (structure.poolExterno || []).length > 0
-    ? '<div class="struct-legend">🧑‍💼 cliente (recibe el valor) · 🤝 colaborador</div>'
+    ? `<div class="struct-legend">${t('structLegend')}</div>`
     : '';
 
   div.innerHTML = `
@@ -602,14 +628,14 @@ function showStructureCard(structure) {
     <div class="msg-bubble structure-bubble">
       <div class="struct-row">
         <div class="struct-col">
-          <div class="struct-label">CLIENTES Y COLABORADORES EXTERNOS</div>
+          <div class="struct-label">${t('structExtLabel')}</div>
           <div class="struct-chips">${extChips}</div>
           ${extLegend}
         </div>
         <div class="struct-col">
-          <div class="struct-label">ORGANIZACIÓN PRINCIPAL</div>
+          <div class="struct-label">${t('structOrgLabel')}</div>
           <div class="struct-main-name">🏢 ${structure.poolPrincipal.nombre}</div>
-          <div class="struct-label" style="margin-top:8px">DEPARTAMENTOS (LANES)</div>
+          <div class="struct-label" style="margin-top:8px">${t('structLanesLabel')}</div>
           <div class="struct-chips">${laneChips}</div>
         </div>
       </div>
@@ -619,6 +645,22 @@ function showStructureCard(structure) {
 }
 
 // ─── TARJETA INICIO DEL PROCESO ───────────────────────────────────────────────
+/**
+ * Convierte la sugerencia cruda del LLM (inicios = [{ lane, nombre, trigger, from }])
+ * en el formato editable usado por la tarjeta y por handleConfirmStarts.
+ */
+function inicioToItems(inicios) {
+  const lanes = effectiveLanes();
+  const ext   = confirmedStructure.poolExterno || [];
+  return (inicios.length > 0 ? inicios : [{ lane: lanes[0], nombre: t('defaultStartName'), trigger: 'none', from: null }])
+    .map(s => ({
+      nombre:  s.nombre || t('defaultStartName'),
+      laneIdx: Math.max(0, lanes.indexOf(s.lane)),
+      trigger: (s.trigger === 'message' && ext.length > 0) ? 'message' : 'none',
+      fromIdx: s.trigger === 'message' ? Math.max(0, ext.findIndex(p => p.nombre === s.from)) : 0
+    }));
+}
+
 /**
  * Muestra la tarjeta para confirmar/editar el o los puntos de inicio del proceso.
  * inicios = [{ lane, nombre, trigger: 'message'|'none', from }]
@@ -631,19 +673,13 @@ function showStartCard(inicios) {
   const ext   = confirmedStructure.poolExterno || [];
 
   // Estado editable local
-  const items = (inicios.length > 0 ? inicios : [{ lane: lanes[0], nombre: 'Inicio', trigger: 'none', from: null }])
-    .map(s => ({
-      nombre:  s.nombre || 'Inicio',
-      laneIdx: Math.max(0, lanes.indexOf(s.lane)),
-      trigger: (s.trigger === 'message' && ext.length > 0) ? 'message' : 'none',
-      fromIdx: s.trigger === 'message' ? Math.max(0, ext.findIndex(p => p.nombre === s.from)) : 0
-    }));
+  const items = inicioToItems(inicios);
 
   const wrapper = document.createElement('div');
   wrapper.className = 'msg ai'; wrapper.id = 'start-card';
 
   function rowsHtml() {
-    if (items.length === 0) return '<p class="val-empty">Sin inicios. Añade uno abajo.</p>';
+    if (items.length === 0) return `<p class="val-empty">${t('startNoneYet')}</p>`;
     return items.map((it, i) => `
       <div class="del-row">
         <span class="del-chip-icon">🏁</span>
@@ -653,12 +689,12 @@ function showStartCard(inicios) {
           lanes.map((l, li) => `<option value="${li}"${li===it.laneIdx?' selected':''}>${l}</option>`).join('')
         }</select>
         <select class="del-lane-sel" data-idx="${i}" data-field="trigger">
-          <option value="none"${it.trigger==='none'?' selected':''}>Sin disparador</option>
-          ${ext.length > 0 ? `<option value="message"${it.trigger==='message'?' selected':''}>📩 Mensaje recibido</option>` : ''}
+          <option value="none"${it.trigger==='none'?' selected':''}>${t('startNoTrigger')}</option>
+          ${ext.length > 0 ? `<option value="message"${it.trigger==='message'?' selected':''}>${t('startMsgTrigger')}</option>` : ''}
         </select>
         ${it.trigger === 'message' ? `
         <select class="del-lane-sel" data-idx="${i}" data-field="fromIdx">${
-          ext.map((p, pi) => `<option value="${pi}"${pi===it.fromIdx?' selected':''}>de ${p.nombre}</option>`).join('')
+          ext.map((p, pi) => `<option value="${pi}"${pi===it.fromIdx?' selected':''}>${t('startFromActor', { actor: p.nombre })}</option>`).join('')
         }</select>` : ''}
         <button class="del-row-remove" data-idx="${i}">×</button>
       </div>`).join('');
@@ -689,14 +725,14 @@ function showStartCard(inicios) {
   wrapper.innerHTML = `
     <div class="msg-av">🤖</div>
     <div class="msg-bubble value-bubble">
-      <div class="val-header">🏁 Inicio del proceso</div>
-      <div class="val-subtitle">¿Cómo empieza el proceso? Puede haber varios inicios en paralelo.</div>
+      <div class="val-header">${t('startHeader')}</div>
+      <div class="val-subtitle">${t('startSubtitle')}</div>
       <div id="start-rows">${rowsHtml()}</div>
       <div class="val-add-row" style="margin-top:8px">
-        <button class="val-add-btn" id="start-add-btn" style="flex:0 0 auto;font-size:11px;padding:5px 10px">+ añadir otro inicio</button>
+        <button class="val-add-btn" id="start-add-btn" style="flex:0 0 auto;font-size:11px;padding:5px 10px">${t('startAddBtn')}</button>
       </div>
       <div class="val-confirm-row">
-        <button class="btn-send btn-green" id="btn-start-confirm" style="width:100%">✅ Confirmar inicio(s)</button>
+        <button class="btn-send btn-green" id="btn-start-confirm" style="width:100%">${t('startConfirmBtn')}</button>
       </div>
     </div>`;
 
@@ -704,7 +740,7 @@ function showStartCard(inicios) {
   bindRowEvents();
 
   wrapper.querySelector('#start-add-btn').addEventListener('click', () => {
-    items.push({ nombre: 'Inicio', laneIdx: 0, trigger: 'none', fromIdx: 0 });
+    items.push({ nombre: t('defaultStartName'), laneIdx: 0, trigger: 'none', fromIdx: 0 });
     rebuild();
   });
   wrapper.querySelector('#btn-start-confirm').addEventListener('click', () => {
@@ -714,6 +750,30 @@ function showStartCard(inicios) {
 }
 
 // ─── TARJETA SIGUIENTE PASO (asistente paso a paso) ──────────────────────────
+/**
+ * Convierte la sugerencia cruda del LLM (suggestion = { tipo, nombre, lane, actorExterno })
+ * en el formato interno usado por handleConfirmStep/handleConfirmBranchStep.
+ * Si se pasa allowedTipos y suggestion.tipo no está en esa lista (p.ej. un
+ * gateway sugerido dentro de una rama), se sanea al primer tipo permitido.
+ */
+function suggestionToStepData(suggestion, allowedTipos) {
+  const lanes = effectiveLanes();
+  const ext   = confirmedStructure.poolExterno || [];
+  const isMsgTipo = t => t === 'sendTask' || t === 'intermediateThrowEvent' || t === 'endMessageEvent';
+
+  let tipoVal = suggestion.tipo;
+  if (allowedTipos && !allowedTipos.includes(tipoVal)) tipoVal = allowedTipos[0];
+
+  return {
+    tipo:    tipoVal,
+    nombre:  suggestion.nombre || t('defaultStepName'),
+    laneIdx: Math.max(0, lanes.indexOf(suggestion.lane)),
+    participantIdx: (ext.length > 0 && isMsgTipo(tipoVal))
+      ? Math.max(0, ext.findIndex(p => p.nombre === suggestion.actorExterno))
+      : undefined
+  };
+}
+
 /**
  * Muestra la tarjeta para confirmar/editar el siguiente paso del proceso.
  * suggestion = { tipo, nombre, lane, actorExterno }
@@ -742,11 +802,11 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
   const wrapper = document.createElement('div');
   wrapper.className = 'msg ai'; wrapper.id = 'next-step-card';
 
-  const header   = inBranch ? `🔀 Caso «${branchCtx.branchNombre}» — Paso ${stepNum}` : `➡️ Paso ${stepNum}`;
+  const header   = inBranch ? t('stepHeaderBranch', { branch: branchCtx.branchNombre, n: stepNum }) : t('stepHeaderMain', { n: stepNum });
   const subtitle = inBranch
-    ? `¿Qué pasa en el caso «${branchCtx.branchNombre}» de la puerta «${branchCtx.gatewayNombre}»?`
-    : '¿Qué pasa ahora y quién lo hace? Edita si hace falta.';
-  const finalLbl = inBranch ? 'Este es el último paso de este caso' : 'Este es el último paso del proceso';
+    ? t('stepSubtitleBranch', { branch: branchCtx.branchNombre, gateway: branchCtx.gatewayNombre })
+    : t('stepSubtitleMain');
+  const finalLbl = inBranch ? t('stepFinalBranch') : t('stepFinalMain');
 
   wrapper.innerHTML = `
     <div class="msg-av">🤖</div>
@@ -763,7 +823,7 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
       </div>
       <div id="step-actor-row" class="del-row" style="margin-top:6px;display:${ext.length > 0 && isMsgTipo(suggestion.tipo) ? 'flex' : 'none'}">
         <span class="del-chip-icon">📨</span>
-        <span class="del-chip-name" style="flex:0 0 auto">Destinatario:</span>
+        <span class="del-chip-name" style="flex:0 0 auto">${t('stepRecipient')}</span>
         <select class="del-lane-sel" id="step-actor">${
           ext.map((p, pi) => `<option value="${pi}"${pi===actorIdx?' selected':''}>${p.nombre}</option>`).join('')
         }</select>
@@ -778,7 +838,7 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
       <div class="val-add-row" id="step-endproc-row" style="margin-top:4px;display:${esFinal && !isEndMsgTipo(suggestion.tipo) ? 'flex' : 'none'}">
         <label style="font-size:11px;color:#fca5a5;display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="step-end-process"${branchCtx.terminaProceso ? ' checked' : ''}>
-          El proceso termina en este caso (Fin propio; la rama no converge)
+          ${t('stepEndProcessLabel')}
         </label>
       </div>` : ''}
       <div class="val-confirm-row">
@@ -796,13 +856,13 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
   const confirmBtn = wrapper.querySelector('#btn-step-confirm');
 
   function refreshBtn() {
-    if (!inBranch && isGwTipo(tipoSel.value)) { confirmBtn.textContent = '✅ Confirmar y definir casos'; return; }
+    if (!inBranch && isGwTipo(tipoSel.value)) { confirmBtn.textContent = t('btnConfirmDefineCases'); return; }
     if (isEndMsgTipo(tipoSel.value)) {
-      confirmBtn.textContent = inBranch ? '✅ Confirmar y cerrar caso (mensaje final)' : '✅ Confirmar y finalizar (mensaje final)';
+      confirmBtn.textContent = inBranch ? t('btnConfirmCloseCaseMsg') : t('btnConfirmFinishMsg');
       return;
     }
-    if (finalChk.checked) confirmBtn.textContent = inBranch ? '✅ Confirmar y cerrar caso' : '✅ Confirmar y finalizar';
-    else confirmBtn.textContent = '✅ Confirmar y continuar';
+    if (finalChk.checked) confirmBtn.textContent = inBranch ? t('btnConfirmCloseCase') : t('btnConfirmFinish');
+    else confirmBtn.textContent = t('btnConfirmContinue');
   }
   refreshBtn();
 
@@ -825,7 +885,7 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
     const isEndMsg = isEndMsgTipo(tipoVal);
     const stepData = {
       tipo:    tipoVal,
-      nombre:  wrapper.querySelector('#step-nombre').value.trim() || 'Paso',
+      nombre:  wrapper.querySelector('#step-nombre').value.trim() || t('defaultStepName'),
       laneIdx: parseInt(wrapper.querySelector('#step-lane').value),
       participantIdx: (ext.length > 0 && isMsgTipo(tipoVal))
         ? parseInt(wrapper.querySelector('#step-actor').value)
@@ -878,14 +938,14 @@ function showBranchesCard(gatewayStep, casos) {
   wrapper.innerHTML = `
     <div class="msg-av">🤖</div>
     <div class="msg-bubble value-bubble">
-      <div class="val-header">🔀 Casos para «${gatewayStep.nombre}»</div>
-      <div class="val-subtitle">Define las ramas que salen de esta puerta (mínimo 2). Después definiremos los pasos de cada caso, uno a uno.</div>
+      <div class="val-header">${t('branchesHeader', { name: gatewayStep.nombre })}</div>
+      <div class="val-subtitle">${t('branchesSubtitle')}</div>
       <div id="branch-rows">${rowsHtml()}</div>
       <div class="val-add-row" style="margin-top:8px">
-        <button class="val-add-btn" id="branch-add-btn" style="flex:0 0 auto;font-size:11px;padding:5px 10px">+ añadir caso</button>
+        <button class="val-add-btn" id="branch-add-btn" style="flex:0 0 auto;font-size:11px;padding:5px 10px">${t('branchesAddBtn')}</button>
       </div>
       <div class="val-confirm-row">
-        <button class="btn-send btn-green" id="btn-branches-confirm" style="width:100%">✅ Confirmar casos</button>
+        <button class="btn-send btn-green" id="btn-branches-confirm" style="width:100%">${t('branchesConfirmBtn')}</button>
       </div>
     </div>`;
 
@@ -893,7 +953,7 @@ function showBranchesCard(gatewayStep, casos) {
   bindRowEvents();
 
   wrapper.querySelector('#branch-add-btn').addEventListener('click', () => {
-    items.push(`Caso ${items.length + 1}`);
+    items.push(t('defaultCaseName', { n: items.length + 1 }));
     rebuild();
   });
   wrapper.querySelector('#btn-branches-confirm').addEventListener('click', () => {
@@ -977,7 +1037,7 @@ function cleanXML(raw) {
   }
 
   if (!xml.includes('bpmndi:BPMNDiagram') && !xml.includes('BPMNDiagram'))
-    throw new Error('El modelo generó el proceso sin sección de diagrama visual. Pulsa de nuevo para reintentar.');
+    throw new Error(t('errNoDiagramSection'));
   return xml;
 }
 
@@ -993,7 +1053,7 @@ async function handleDescribeProcess(description) {
 
     let structure;
     try { const m = reply.match(/\{[\s\S]*\}/); structure = JSON.parse(m ? m[0] : reply); if (!structure.poolPrincipal?.nombre) throw new Error(); }
-    catch(e) { addMessage('❌ No pude identificar la estructura. Prueba con más detalle.', 'ai', 'err'); return; }
+    catch(e) { addMessage(t('errStructure'), 'ai', 'err'); return; }
     structure.poolPrincipal.lanes = structure.poolPrincipal.lanes || [];
 
     confirmedStructure = structure;
@@ -1001,49 +1061,69 @@ async function handleDescribeProcess(description) {
     container.removeClass('with-error').addClass('with-diagram');
 
     const lanesArr = structure.poolPrincipal.lanes;
-    const lanesTxt = lanesArr.length > 0 ? lanesArr.join(', ') : 'sin departamentos (piscina única)';
-    const ext   = (structure.poolExterno || []).map(p => p.nombre).join(', ') || 'ninguno';
-    const lanesQuestion = lanesArr.length === 0
-      ? `<br><br>⚠️ No has mencionado departamentos, así que he dibujado tu organización como una <b>única piscina sin calles</b>.
-         Si quieres dividirla en departamentos, escríbelo como modificación (p.ej. «añade los departamentos Ventas y Almacén»);
-         si no, confirma para continuar.`
-      : '';
-    addMessage(`He dibujado la estructura en el lienzo:<br>
-      🏢 <b>${structure.poolPrincipal.nombre}</b> → ${lanesTxt}<br>
-      👤 Canales externos: <b>${ext}</b><br><br>
-      ${structure.resumen || ''}${lanesQuestion}<br><br>
-      ¿Es correcta? Confirma para continuar al análisis de qué reciben los canales externos.`, 'ai');
+    const lanesTxt = lanesArr.length > 0 ? lanesArr.join(', ') : t('noLanesText');
+    const ext   = (structure.poolExterno || []).map(p => p.nombre).join(', ') || t('noneExt');
+    const lanesQuestion = lanesArr.length === 0 ? t('lanesQuestionMsg') : '';
+    addMessage(t('structDrawnMsg', {
+      org: structure.poolPrincipal.nombre,
+      lanes: lanesTxt,
+      ext,
+      resumen: structure.resumen || '',
+      lanesQuestion
+    }), 'ai');
 
     showStructureCard(structure);
     fase = 'confirm_structure';
     updateUI();
-  } catch(err) { removeTyping(); addMessage(`❌ Error: ${err.message}`, 'ai', 'err'); }
+  } catch(err) { removeTyping(); addMessage(t('errorPrefix', { msg: err.message }), 'ai', 'err'); }
 }
 
-// ─── PASO 2A: CONFIRMAR ESTRUCTURA → PEDIR DESCRIPCIÓN DEL FLUJO ─────────────
+// ─── PASO 2A: CONFIRMAR ESTRUCTURA → ELEGIR MODO Y EMPEZAR EL FLUJO ──────────
 async function handleConfirmStructure() {
-  addMessage('Estructura confirmada ✅', 'user');
+  addMessage(t('structConfirmedUser'), 'user');
   diagramState = { steps: [] };
-  processFlowDescription = '';
-
-  const lanesArr = confirmedStructure.poolPrincipal.lanes || [];
-  const quienTxt = lanesArr.length > 0
-    ? `cada departamento (<b>${lanesArr.join(', ')}</b>)`
-    : `tu organización (<b>${confirmedStructure.poolPrincipal.nombre}</b>)`;
-  const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre).join(', ') || 'ninguno';
-  addMessage(
-    `Perfecto. Ahora cuéntame cómo funciona el proceso en detalle.<br><br>
-     Describe qué hace ${quienTxt}, cómo se comunica con los actores externos (<b>${ext}</b>) y cualquier decisión o gateway que deba aparecer.<br><br>
-     Cuanto más detalle des, más preciso será el diagrama.`,
-    'ai'
-  );
-  fase = 'describe_process'; updateUI();
+  processFlowDescription = processDescription;
+  showFlowModeCard();
 }
 
-async function handleDescribeProcessFlow(description) {
-  processFlowDescription = description;
-  addMessage('Descripción del flujo recibida ✅', 'ai');
-  await startFlowStartPhase();
+/**
+ * Tarjeta para elegir cómo se genera el proceso paso a paso:
+ * - Paso a paso: el asistente pide confirmación de cada sugerencia (tarjetas).
+ * - Automático: el asistente sigue el mismo razonamiento pero auto-confirma
+ *   cada sugerencia hasta completar el diagrama (siempre acotado por
+ *   MAX_FLOW_STEPS / MAX_BRANCH_STEPS, así que nunca entra en bucle).
+ */
+function showFlowModeCard() {
+  const messages = document.getElementById('ai-messages');
+  const old = document.getElementById('flow-mode-card'); if (old) old.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg ai'; wrapper.id = 'flow-mode-card';
+  wrapper.innerHTML = `
+    <div class="msg-av">🤖</div>
+    <div class="msg-bubble value-bubble">
+      <div class="val-header">${t('flowModeHeader')}</div>
+      <div class="val-subtitle">${t('flowModeSubtitle')}</div>
+      <div class="val-confirm-row">
+        <button class="btn-send btn-blue" id="btn-flow-mode-manual" style="width:100%">${t('flowModeManualBtn')}</button>
+        <button class="btn-send btn-green" id="btn-flow-mode-auto" style="width:100%;margin-top:8px">${t('flowModeAutoBtn')}</button>
+      </div>
+    </div>`;
+
+  messages.appendChild(wrapper); messages.scrollTop = messages.scrollHeight;
+
+  wrapper.querySelector('#btn-flow-mode-manual').addEventListener('click', () => {
+    disableCard(wrapper);
+    autoGenerateAll = false;
+    addMessage(t('flowModeManualChosen'), 'user');
+    startFlowStartPhase();
+  });
+  wrapper.querySelector('#btn-flow-mode-auto').addEventListener('click', () => {
+    disableCard(wrapper);
+    autoGenerateAll = true;
+    addMessage(t('flowModeAutoChosen'), 'user');
+    startFlowStartPhase();
+  });
 }
 
 // ─── PASO 2B: MODIFICAR ESTRUCTURA ───────────────────────────────────────────
@@ -1058,16 +1138,16 @@ async function handleModifyStructure(modification) {
 
     let structure;
     try { const m = reply.match(/\{[\s\S]*\}/); structure = JSON.parse(m ? m[0] : reply); if (!structure.poolPrincipal?.nombre) throw new Error(); }
-    catch(e) { addMessage('❌ No pude aplicar los cambios. Intenta de nuevo.', 'ai', 'err'); showStructureCard(confirmedStructure); return; }
+    catch(e) { addMessage(t('errModify'), 'ai', 'err'); showStructureCard(confirmedStructure); return; }
     structure.poolPrincipal.lanes = structure.poolPrincipal.lanes || [];
 
     confirmedStructure = structure;
     await modeler.importXML(buildStructureBPMN(structure));
     container.removeClass('with-error').addClass('with-diagram');
-    addMessage('Estructura actualizada ✅ ¿Está bien ahora?', 'ai');
+    addMessage(t('structUpdated'), 'ai');
     showStructureCard(structure);
     fase = 'confirm_structure'; updateUI();
-  } catch(err) { removeTyping(); addMessage(`❌ Error: ${err.message}`, 'ai', 'err'); showStructureCard(confirmedStructure); }
+  } catch(err) { removeTyping(); addMessage(t('errorPrefix', { msg: err.message }), 'ai', 'err'); showStructureCard(confirmedStructure); }
 }
 
 // ─── FLUJO PASO A PASO: HELPERS DE TIPO ──────────────────────────────────────
@@ -1078,7 +1158,7 @@ async function handleModifyStructure(modification) {
  */
 function effectiveLanes() {
   const l = confirmedStructure?.poolPrincipal?.lanes || [];
-  return l.length > 0 ? l : [confirmedStructure?.poolPrincipal?.nombre || 'Organización'];
+  return l.length > 0 ? l : [confirmedStructure?.poolPrincipal?.nombre || t('defaultOrgName')];
 }
 
 function elementIcon(tipo) {
@@ -1098,20 +1178,20 @@ function elementIcon(tipo) {
   return icons[tipo] || '📋';
 }
 function elementLabel(tipo) {
-  const labels = {
-    task:                   'Tarea',
-    sendTask:               'Envío',
-    intermediateCatchEvent: 'Espera msg',
-    intermediateThrowEvent: 'Lanza msg',
-    compensationEvent:      'Compensación',
-    timerEvent:             'Temporizador',
-    endMessageEvent:        'Fin con mensaje',
-    exclusiveGateway:       'Gateway XOR',
-    parallelGateway:        'Gateway AND',
-    startEvent:             'Inicio',
-    endEvent:               'Fin',
+  const keys = {
+    task:                   'elTask',
+    sendTask:               'elSendTask',
+    intermediateCatchEvent: 'elIntermediateCatch',
+    intermediateThrowEvent: 'elIntermediateThrow',
+    compensationEvent:      'elCompensation',
+    timerEvent:             'elTimer',
+    endMessageEvent:        'elEndMessage',
+    exclusiveGateway:       'elExclusiveGw',
+    parallelGateway:        'elParallelGw',
+    startEvent:             'elStart',
+    endEvent:               'elEnd',
   };
-  return labels[tipo] || 'Tarea';
+  return t(keys[tipo] || 'elTask');
 }
 
 // ─── PASO 3A: INICIO DEL PROCESO ─────────────────────────────────────────────
@@ -1123,21 +1203,23 @@ async function startFlowStartPhase() {
   const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre);
 
   fase = 'flow_start'; updateUI();
-  addMessage('🏁 Buscando el punto de inicio del proceso...', 'ai');
+  addMessage(t('searchingStart'), 'ai');
   addTyping();
 
   let inicios = [];
   try {
-    const reply = await callAPI(DEFAULT_API_KEY, 'Eres experto en modelado BPMN. Responde SOLO con JSON.',
+    const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
       [{ role: 'user', content: buildFlowStartPrompt(processFlowDescription, lanes, ext) }]);
     removeTyping();
     const m = reply.match(/\{[\s\S]*\}/);
     const data = JSON.parse(m ? m[0] : reply);
     inicios = Array.isArray(data.inicios) ? data.inicios : [];
-  } catch(e) { removeTyping(); inicios = []; }
+  } catch(e) { removeTyping(); addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err'); inicios = []; }
 
-  if (inicios.length === 0) inicios = [{ lane: lanes[0], nombre: 'Inicio', trigger: 'none', from: null }];
+  if (inicios.length === 0) inicios = [{ lane: lanes[0], nombre: t('defaultStartName'), trigger: 'none', from: null }];
 
+  // El punto de inicio SIEMPRE se pregunta, incluso en modo automático: solo
+  // los pasos posteriores (flow_step / branches) se generan sin confirmación.
   showStartCard(inicios);
 }
 
@@ -1145,10 +1227,10 @@ async function handleConfirmStarts(items) {
   const lanes = effectiveLanes();
   const ext   = confirmedStructure.poolExterno || [];
 
-  if (items.length === 0) items = [{ nombre: 'Inicio', laneIdx: 0, trigger: 'none', fromIdx: 0 }];
+  if (items.length === 0) items = [{ nombre: t('defaultStartName'), laneIdx: 0, trigger: 'none', fromIdx: 0 }];
 
   const resumen = items.map(it => {
-    const trig = it.trigger === 'message' ? ` (📩 mensaje de ${ext[it.fromIdx]?.nombre || '?'})` : '';
+    const trig = it.trigger === 'message' ? t('startTriggerMsg', { actor: ext[it.fromIdx]?.nombre || '?' }) : '';
     return `🏁 ${it.nombre} — ${lanes[it.laneIdx]}${trig}`;
   }).join('<br>');
   addMessage(resumen, 'user');
@@ -1170,10 +1252,11 @@ async function handleConfirmStarts(items) {
     await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
   } catch(err) {
-    addMessage(`❌ Error al actualizar el diagrama: ${err.message}`, 'ai', 'err'); return;
+    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
   }
 
-  addMessage('Inicio confirmado ✅ Ahora vamos paso a paso: te iré preguntando qué pasa después y quién lo hace.', 'ai');
+  addMessage(t('startConfirmedMsg'), 'ai');
+  if (autoGenerateAll) addMessage(t('autoModeRunningMsg'), 'ai');
   await startNextStepFlow();
 }
 
@@ -1188,26 +1271,35 @@ async function startNextStepFlow() {
   const stepNum = mainSteps.length + 1;
 
   fase = 'flow_step'; updateUI();
-  addMessage(`➡️ Paso ${stepNum} — pensando qué pasa después...`, 'ai');
+  addMessage(t('thinkingNextStep', { n: stepNum }), 'ai');
   addTyping();
 
-  let suggestion = { tipo: 'task', nombre: 'Siguiente paso', lane: lanes[0], actorExterno: null };
+  let suggestion = { tipo: 'task', nombre: t('defaultNextStepName'), lane: lanes[0], actorExterno: null };
   let esFinal = mainSteps.length >= MAX_FLOW_STEPS;
 
   if (!esFinal) {
     try {
-      const reply = await callAPI(DEFAULT_API_KEY, 'Eres experto en modelado BPMN. Responde SOLO con JSON.',
+      const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
         [{ role: 'user', content: buildNextStepPrompt(processFlowDescription, lanes, ext, diagramState.steps) }]);
       removeTyping();
       const m = reply.match(/\{[\s\S]*\}/);
       const data = JSON.parse(m ? m[0] : reply);
       if (data.siguiente) suggestion = data.siguiente;
       esFinal = !!data.esFinal;
-    } catch(e) { removeTyping(); }
+    } catch(e) {
+      removeTyping();
+      addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err');
+      // No se pudo consultar al LLM: en vez de seguir generando "Siguiente
+      // paso" en bucle hasta MAX_FLOW_STEPS, se cierra el diagrama ahora con
+      // este último paso de relleno.
+      esFinal = true;
+    }
   } else {
     removeTyping();
-    addMessage('⚠️ Se alcanzó el límite de pasos del asistente. Marca este paso como el último.', 'ai', 'err');
+    addMessage(t('limitReachedStep'), 'ai', 'err');
   }
+
+  if (autoGenerateAll) { await handleConfirmStep(suggestionToStepData(suggestion), esFinal); return; }
 
   showNextStepCard(suggestion, stepNum, esFinal);
 }
@@ -1235,7 +1327,7 @@ async function handleConfirmStep(stepData, isFinal) {
   addMessage(label, 'user');
 
   if (isFinal && !isEndMsg) {
-    diagramState.steps.push({ id: 'END_0', tipo: 'endEvent', nombre: 'Fin', laneIdx: stepData.laneIdx });
+    diagramState.steps.push({ id: 'END_0', tipo: 'endEvent', nombre: t('elEnd'), laneIdx: stepData.laneIdx });
   }
 
   try {
@@ -1244,14 +1336,14 @@ async function handleConfirmStep(stepData, isFinal) {
     await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
   } catch(err) {
-    addMessage(`❌ Error al actualizar el diagrama: ${err.message}`, 'ai', 'err'); return;
+    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
   }
 
   if (isGW) { await startBranchDefinitionPhase(step); return; }
 
   if (isFinal) {
     fase = 'refine'; updateUI();
-    addMessage('✅ ¡Diagrama completado! Puedes pedir modificaciones o analizar el valor PERVAL.', 'ai', 'ok');
+    addMessage(t('diagramComplete'), 'ai', 'ok');
   } else {
     await startNextStepFlow();
   }
@@ -1266,12 +1358,12 @@ async function startBranchDefinitionPhase(gatewayStep) {
   const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre);
 
   fase = 'flow_branches'; updateUI();
-  addMessage(`🔀 Puerta «${gatewayStep.nombre}»: identificando los casos/ramas...`, 'ai');
+  addMessage(t('identifyingCases', { name: gatewayStep.nombre }), 'ai');
   addTyping();
 
   let casos = [];
   try {
-    const reply = await callAPI(DEFAULT_API_KEY, 'Eres experto en modelado BPMN. Responde SOLO con JSON.',
+    const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
       [{ role: 'user', content: buildGatewayBranchesPrompt(processFlowDescription, gatewayStep, lanes, ext) }]);
     removeTyping();
     const m = reply.match(/\{[\s\S]*\}/);
@@ -1279,8 +1371,10 @@ async function startBranchDefinitionPhase(gatewayStep) {
     casos = Array.isArray(data.casos)
       ? data.casos.filter(c => typeof c === 'string' && c.trim()).map(c => c.trim()).slice(0, 8)
       : [];
-  } catch(e) { removeTyping(); }
-  if (casos.length < 2) casos = ['Caso 1', 'Caso 2'];
+  } catch(e) { removeTyping(); addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err'); }
+  if (casos.length < 2) casos = [t('defaultCaseName', { n: 1 }), t('defaultCaseName', { n: 2 })];
+
+  if (autoGenerateAll) { handleConfirmBranches(gatewayStep, casos); return; }
 
   showBranchesCard(gatewayStep, casos);
 }
@@ -1303,16 +1397,16 @@ async function startBranchStepFlow(gatewayStep, branchIdx) {
   const stepNum = branch.steps.length + 1;
 
   fase = 'flow_branch_step'; updateUI();
-  addMessage(`🔀 Caso «${branch.nombre}» (${branchIdx + 1}/${gatewayStep.branches.length}) — paso ${stepNum}...`, 'ai');
+  addMessage(t('caseStepThinking', { branch: branch.nombre, i: branchIdx + 1, total: gatewayStep.branches.length, n: stepNum }), 'ai');
   addTyping();
 
-  let suggestion     = { tipo: 'task', nombre: 'Siguiente paso', lane: lanes[gatewayStep.laneIdx], actorExterno: null };
+  let suggestion     = { tipo: 'task', nombre: t('defaultNextStepName'), lane: lanes[gatewayStep.laneIdx], actorExterno: null };
   let esFinalRama    = branch.steps.length >= MAX_BRANCH_STEPS;
   let terminaProceso = false;
 
   if (!esFinalRama) {
     try {
-      const reply = await callAPI(DEFAULT_API_KEY, 'Eres experto en modelado BPMN. Responde SOLO con JSON.',
+      const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
         [{ role: 'user', content: buildBranchStepPrompt(processFlowDescription, lanes, ext, gatewayStep, branch) }]);
       removeTyping();
       const m = reply.match(/\{[\s\S]*\}/);
@@ -1320,10 +1414,26 @@ async function startBranchStepFlow(gatewayStep, branchIdx) {
       if (data.siguiente) suggestion = data.siguiente;
       esFinalRama    = !!data.esFinalRama;
       terminaProceso = !!data.terminaProceso;
-    } catch(e) { removeTyping(); }
+    } catch(e) {
+      removeTyping();
+      addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err');
+      // No se pudo consultar al LLM: cierra esta rama ahora (convergiendo)
+      // en vez de seguir generando pasos de relleno hasta MAX_BRANCH_STEPS.
+      esFinalRama = true;
+    }
   } else {
     removeTyping();
-    addMessage('⚠️ Límite de pasos de la rama alcanzado. Marca este paso como el último del caso.', 'ai', 'err');
+    addMessage(t('limitReachedBranch'), 'ai', 'err');
+  }
+
+  if (autoGenerateAll) {
+    const allowedTipos = ['task','sendTask','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent'];
+    const stepData = suggestionToStepData(suggestion, allowedTipos);
+    const isEndMsg = stepData.tipo === 'endMessageEvent';
+    const fin     = isEndMsg ? true : esFinalRama;
+    const termina = isEndMsg ? true : (fin && terminaProceso);
+    await handleConfirmBranchStep(gatewayStep, branchIdx, stepData, fin, termina);
+    return;
   }
 
   showNextStepCard(suggestion, stepNum, esFinalRama, {
@@ -1355,7 +1465,7 @@ async function handleConfirmBranchStep(gatewayStep, branchIdx, stepData, esFinal
     });
     if (esFinalRama && terminaProceso) {
       branch.endsHere = true;
-      branch.steps.push({ id: `${branch.id}_END`, tipo: 'endEvent', nombre: 'Fin', laneIdx: stepData.laneIdx });
+      branch.steps.push({ id: `${branch.id}_END`, tipo: 'endEvent', nombre: t('elEnd'), laneIdx: stepData.laneIdx });
     }
   }
 
@@ -1372,7 +1482,7 @@ async function handleConfirmBranchStep(gatewayStep, branchIdx, stepData, esFinal
     await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
   } catch(err) {
-    addMessage(`❌ Error al actualizar el diagrama: ${err.message}`, 'ai', 'err'); return;
+    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
   }
 
   if (!esFinalRama) { await startBranchStepFlow(gatewayStep, branchIdx); return; }
@@ -1399,15 +1509,15 @@ async function finishBranches(gatewayStep) {
     await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
   } catch(err) {
-    addMessage(`❌ Error al actualizar el diagrama: ${err.message}`, 'ai', 'err'); return;
+    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
   }
 
   if (converge) {
-    addMessage(`✅ Casos de «${gatewayStep.nombre}» completados. Las ramas convergen y el proceso continúa.`, 'ai');
+    addMessage(t('casesCompletedConverge', { name: gatewayStep.nombre }), 'ai');
     await startNextStepFlow();
   } else {
     fase = 'refine'; updateUI();
-    addMessage('✅ ¡Diagrama completado! Todas las ramas terminan el proceso. Puedes pedir modificaciones o analizar el valor PERVAL.', 'ai', 'ok');
+    addMessage(t('diagramCompleteAllBranches'), 'ai', 'ok');
   }
 }
 
@@ -1416,7 +1526,7 @@ function buildRefinementSystemPrompt() {
   return `Eres un experto BPMN 2.0. Modifica el diagrama según la instrucción del usuario.
 Devuelve SOLO XML válido completo (desde <?xml hasta </definitions>), sin texto ni markdown.
 Mantén todos los pools, lanes, sendTasks y messageFlows existentes.
-Añade o modifica solo lo que el usuario pida.`;
+Añade o modifica solo lo que el usuario pida.${langDirective()}`;
 }
 
 async function handleRefine(instruction) {
@@ -1433,8 +1543,8 @@ async function handleRefine(instruction) {
     const xml = cleanXML(rawXML);
     await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
-    addMessage('✅ ¡Diagrama modificado!', 'ai', 'ok');
-  } catch(err) { removeTyping(); addMessage(`❌ Error: ${err.message}`, 'ai', 'err'); }
+    addMessage(t('diagramModified'), 'ai', 'ok');
+  } catch(err) { removeTyping(); addMessage(t('errorPrefix', { msg: err.message }), 'ai', 'err'); }
   finally { sendBtn.disabled = false; updateUI(); }
 }
 
@@ -1452,15 +1562,25 @@ async function handleSend() {
     if (!input) return;
     addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
     sendBtn.disabled = true; await handleModifyStructure(input); sendBtn.disabled = false;
-  } else if (fase === 'describe_process') {
-    if (!input) return;
-    addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
-    sendBtn.disabled = true; await handleDescribeProcessFlow(input); sendBtn.disabled = false;
   } else if (fase === 'refine') {
     if (!input) return;
     addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
     sendBtn.disabled = true; await handleRefine(input); sendBtn.disabled = false;
+  } else {
+    // Fases de flujo paso a paso: Ctrl+Enter añade información extra
+    handleAddInfo();
   }
+}
+
+/** Permite añadir información extra (olvidada) en cualquier momento durante el flujo paso a paso. */
+function handleAddInfo() {
+  const ta  = document.getElementById('ai-scenario');
+  const val = ta.value.trim();
+  if (!val) { ta.focus(); return; }
+  addMessage(val, 'user');
+  processFlowDescription = (processFlowDescription ? processFlowDescription + '\n' : '') + val;
+  ta.value = '';
+  addMessage(t('addInfoConfirmedMsg'), 'ai', 'ok');
 }
 
 // ─── PERVAL: selección de actor → análisis ───────────────────────────────────
@@ -1483,13 +1603,13 @@ function showPervalActorSelect(clientActors, collaboratorActors, onSelect) {
   div.innerHTML = `
     <div class="msg-av">🤖</div>
     <div class="msg-bubble question-bubble">
-      <div class="question-text">¿Para qué actor quieres calcular el valor PERVAL?</div>
+      <div class="question-text">${t('pervalActorQuestion')}</div>
       <div class="options-grid">
         ${clientBtns}
-        <button class="opt-btn" id="perval-todos">📊 Todos los actores</button>
+        <button class="opt-btn" id="perval-todos">${t('pervalAllActors')}</button>
       </div>
       ${collabBtns ? `
-      <div class="val-subtitle" style="margin-top:8px">Otros colaboradores externos (no clientes):</div>
+      <div class="val-subtitle" style="margin-top:8px">${t('pervalOtherCollabs')}</div>
       <div class="options-grid">${collabBtns}</div>` : ''}
     </div>`;
 
@@ -1504,7 +1624,7 @@ function showPervalActorSelect(clientActors, collaboratorActors, onSelect) {
   });
   div.querySelector('#perval-todos').addEventListener('click', () => {
     div.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '0.4'; });
-    addMessage('Todos los actores', 'user');
+    addMessage(t('pervalAllActorsUserMsg'), 'user');
     onSelect(null);
   });
 }
@@ -1513,7 +1633,7 @@ async function runPervalAnalysis(apiKey, actorName) {
   const pervalBtn = document.getElementById('ai-perval-btn');
   pervalBtn.disabled = true;
   addTyping();
-  addMessage(`🔍 Calculando el valor PERVAL${actorName ? ` para <b>${actorName}</b>` : ''}...`, 'ai');
+  addMessage(t('calculatingPerval', { forActor: actorName ? t('forActorSuffix', { actor: actorName }) : '' }), 'ai');
 
   try {
     const { xml: currentXML } = await modeler.saveXML({ format: true });
@@ -1527,7 +1647,7 @@ async function runPervalAnalysis(apiKey, actorName) {
       scope = 'tareas';
       tasks = extractTasksFromXML(currentXML);
     }
-    if (tasks.length === 0) { removeTyping(); addMessage('⚠️ No hay elementos que analizar en el diagrama.', 'ai', 'err'); return; }
+    if (tasks.length === 0) { removeTyping(); addMessage(t('noElementsToAnalyze'), 'ai', 'err'); return; }
 
     const systemPrompt = buildPervalSystemPrompt(actorName, scope);
     const rawResponse  = await callAPI(apiKey, systemPrompt,
@@ -1536,11 +1656,11 @@ async function runPervalAnalysis(apiKey, actorName) {
 
     let data;
     try { const m = rawResponse.match(/\{[\s\S]*\}/); data = JSON.parse(m ? m[0] : rawResponse); }
-    catch(e) { addMessage('❌ No se pudo procesar la respuesta PERVAL.', 'ai', 'err'); return; }
+    catch(e) { addMessage(t('pervalParseError'), 'ai', 'err'); return; }
 
     showPervalResults(data, actorName);
     pervalAnalisado = true;
-  } catch(err) { removeTyping(); addMessage(`❌ Error PERVAL: ${err.message}`, 'ai', 'err'); }
+  } catch(err) { removeTyping(); addMessage(t('pervalError', { msg: err.message }), 'ai', 'err'); }
   finally { pervalBtn.disabled = false; updateUI(); }
 }
 
@@ -1606,7 +1726,7 @@ RESPONDE ÚNICAMENTE con JSON:
   "tareas": [{"nombre":"...","dimensiones":["Quality"],"valor":"...","justificacion":"..."}],
   "resumen": {"Quality":"...","Price":"...","Emotional":"...","Social":"..."},
   "valorGeneral": "..."
-}`;
+}${langDirective()}`;
 }
 
 function buildPervalUserMessage(xml, tasks, actorName, scope) {
@@ -1670,17 +1790,21 @@ function pervalRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+const PERVAL_DIM_LABEL_KEYS = {
+  Quality: 'dimQuality', Price: 'dimPrice', Emotional: 'dimEmotional', Social: 'dimSocial', Interno: 'dimInterno'
+};
+
 function showPervalResults(data, actorName) {
   const dim = {};
   Object.entries(PERVAL_DIM).forEach(([k,c]) => {
-    dim[k] = { ...c, bg: pervalRgba(c.diagram.stroke, 0.15), border: pervalRgba(c.diagram.stroke, 0.35) };
+    dim[k] = { ...c, label: t(PERVAL_DIM_LABEL_KEYS[k]), bg: pervalRgba(c.diagram.stroke, 0.15), border: pervalRgba(c.diagram.stroke, 0.35) };
   });
   const taskRows = (data.tareas||[]).map(t => {
     const badges = (t.dimensiones||[]).map(d => { const c=dim[d]||dim.Interno; return`<span class="pv-badge" style="background:${c.bg};border:1px solid ${c.border};color:${c.text}">${c.icon} ${c.label}</span>`; }).join('');
     return`<div class="pv-row"><div class="pv-name">${t.nombre}</div><div class="pv-badges">${badges}</div><div class="pv-desc">${t.valor||''}</div></div>`;
   }).join('');
   const summaryCards = Object.entries(data.resumen||{}).map(([d,text]) => { const c=dim[d]||dim.Interno; return`<div class="pv-sum-card" style="background:${c.bg};border:1px solid ${c.border}"><div class="pv-sum-title" style="color:${c.text}">${c.icon} ${c.label}</div><div class="pv-sum-text">${text}</div></div>`; }).join('');
-  const generalHtml = data.valorGeneral ? `<div class="pv-general"><span class="pv-general-lbl">Valoración global${actorName ? ` · ${actorName}` : ''} · </span>${data.valorGeneral}</div>` : '';
+  const generalHtml = data.valorGeneral ? `<div class="pv-general"><span class="pv-general-lbl">${t('pervalGlobalLbl')}${actorName ? ` · ${actorName}` : ''} · </span>${data.valorGeneral}</div>` : '';
 
   const hasTasks = (data.tareas||[]).length > 0;
   const legendChips = Object.values(dim).map(c =>
@@ -1690,12 +1814,12 @@ function showPervalResults(data, actorName) {
     <div class="pv-actions">
       <div class="pv-legend">${legendChips}</div>
       <div class="val-confirm-row" style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn-send btn-green" id="pv-apply-colors" style="flex:1">🎨 Pintar diagrama por valor</button>
-        <button class="btn-send" id="pv-clear-colors" style="flex:0 0 auto;background:rgba(255,255,255,0.08)">↩️ Quitar</button>
+        <button class="btn-send btn-green" id="pv-apply-colors" style="flex:1">${t('pervalPaintBtn')}</button>
+        <button class="btn-send" id="pv-clear-colors" style="flex:0 0 auto;background:rgba(255,255,255,0.08)">${t('pervalRemoveBtn')}</button>
       </div>
     </div>` : '';
 
-  const html = `<div class="pv-results"><div class="pv-header">📊 Análisis PERVAL${actorName ? ` — ${actorName}` : ''}</div><div class="pv-section-lbl">Clasificación por tarea</div><div class="pv-tasks">${taskRows}</div><div class="pv-section-lbl" style="margin-top:10px">Resumen por dimensión</div><div class="pv-summary">${summaryCards}</div>${generalHtml}${colorActions}</div>`;
+  const html = `<div class="pv-results"><div class="pv-header">${t('pervalHeader')}${actorName ? ` — ${actorName}` : ''}</div><div class="pv-section-lbl">${t('pervalClassifByTask')}</div><div class="pv-tasks">${taskRows}</div><div class="pv-section-lbl" style="margin-top:10px">${t('pervalSummaryByDim')}</div><div class="pv-summary">${summaryCards}</div>${generalHtml}${colorActions}</div>`;
   const messages = document.getElementById('ai-messages');
   const div = document.createElement('div'); div.className = 'msg ai';
   div.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble pv-bubble">${html}</div>`;
@@ -1781,8 +1905,68 @@ function clearPervalAnnotations() {
   _pervalAnnotationIds = [];
 }
 
+// ─── Dictado por voz (Web Speech API) ────────────────────────────────────────
+function setupVoiceInput() {
+  const micBtn   = document.getElementById('ai-mic');
+  const textarea = document.getElementById('ai-scenario');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    micBtn.disabled = true;
+    micBtn.title = t('micUnavailable');
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = recognitionLang();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  let listening = false;
+  let baseText = '';
+  let finalTranscript = '';
+
+  recognition.addEventListener('result', (e) => {
+    let interimTranscript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const transcript = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalTranscript += transcript;
+      else interimTranscript += transcript;
+    }
+    const sep = baseText && !/\s$/.test(baseText) ? ' ' : '';
+    textarea.value = baseText + sep + (finalTranscript + interimTranscript).trim();
+  });
+
+  recognition.addEventListener('end', () => {
+    listening = false;
+    micBtn.classList.remove('recording');
+  });
+
+  recognition.addEventListener('error', (e) => {
+    listening = false;
+    micBtn.classList.remove('recording');
+    if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      addMessage(t('micError', { err: e.error }), 'ai', 'err');
+    }
+  });
+
+  micBtn.addEventListener('click', () => {
+    if (listening) { recognition.stop(); return; }
+    baseText = textarea.value;
+    finalTranscript = '';
+    listening = true;
+    micBtn.classList.add('recording');
+    recognition.lang = recognitionLang();
+    try { recognition.start(); }
+    catch(e) { listening = false; micBtn.classList.remove('recording'); }
+    textarea.focus();
+  });
+}
+
 // ─── BOOTSTRAP ────────────────────────────────────────────────────────────────
 $(function() {
+  setupVoiceInput();
+
   $('#js-create-diagram').click(e => { e.stopPropagation(); e.preventDefault(); createNewDiagram(); });
 
   var downloadLink    = $('#js-download-diagram');
@@ -1806,6 +1990,7 @@ $(function() {
   document.getElementById('ai-close').addEventListener('click', () => panel.classList.remove('open'));
   document.getElementById('ai-send').addEventListener('click', handleSend);
   document.getElementById('ai-scenario').addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) handleSend(); });
+  document.getElementById('ai-add-info-btn').addEventListener('click', handleAddInfo);
 
   document.getElementById('btn-confirm-main').addEventListener('click', () => {
     if (fase === 'confirm_structure') handleConfirmStructure();
@@ -1821,21 +2006,62 @@ $(function() {
 
   document.getElementById('ai-reset').addEventListener('click', () => {
     fase = 'describe'; processDescription = ''; processFlowDescription = ''; confirmedStructure = null;
-    diagramState = { steps: [] }; pervalAnalisado = false;
+    diagramState = { steps: [] }; pervalAnalisado = false; autoGenerateAll = false;
     document.getElementById('ai-messages').innerHTML = `
-      <div class="msg ai"><div class="msg-av">🤖</div><div class="msg-bubble">
-        ¡Hola! Describe el proceso de e-commerce que quieres modelar.<br><br>
-        El flujo iterativo es:<br>
-        <b>1·</b> Identifico los canales/usuarios del sistema (pools y lanes) → los dibujo<br>
-        <b>2·</b> Defines qué entrega el proceso a cada canal externo<br>
-        <b>3·</b> Genero el diagrama centrado en esas entregas de valor<br>
-        <b>4·</b> Opcionalmente, calculas el valor PERVAL para el canal que elijas
-      </div></div>`;
+      <div class="msg ai"><div class="msg-av">🤖</div><div class="msg-bubble">${t('welcomeReset')}</div></div>`;
     updateUI();
     createNewDiagram();
   });
 
-  updateUI();
+  document.querySelectorAll('#ai-lang-switch .lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (setLang(btn.dataset.lang)) applyStaticTranslations();
+    });
+  });
+
+  applyStaticTranslations();
 });
+
+// ─── i18n: aplica las traducciones a los textos estáticos del chrome ────────
+function applyStaticTranslations() {
+  document.documentElement.lang = getLang();
+
+  const subtitle = document.querySelector('.ai-subtitle');
+  if (subtitle) subtitle.textContent = t('subtitle');
+
+  const resetBtn = document.getElementById('ai-reset');
+  if (resetBtn) resetBtn.title = t('resetTitle');
+
+  const fab = document.getElementById('ai-fab');
+  if (fab) fab.title = t('fabTitle');
+
+  const langSwitch = document.getElementById('ai-lang-switch');
+  if (langSwitch) langSwitch.title = t('langSwitchTitle');
+
+  const micBtn = document.getElementById('ai-mic');
+  if (micBtn && !micBtn.disabled) micBtn.title = t('micTitle');
+
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`phase-${i}`);
+    if (el) el.textContent = t(`phase${i}`);
+  }
+
+  document.querySelectorAll('#ai-lang-switch .lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === getLang());
+  });
+
+  const confirmMainBtn = document.getElementById('btn-confirm-main');
+  if (confirmMainBtn) confirmMainBtn.textContent = t('btnConfirmMain');
+  const modifyMainBtn = document.getElementById('btn-modify-main');
+  if (modifyMainBtn) modifyMainBtn.textContent = t('btnModifyMain');
+
+  const messages = document.getElementById('ai-messages');
+  if (fase === 'describe' && messages && messages.children.length === 1) {
+    const bubble = messages.querySelector('.msg.ai .msg-bubble');
+    if (bubble) bubble.innerHTML = t('welcomeInitial');
+  }
+
+  updateUI();
+}
 
 function debounce(fn, timeout) { var timer; return function() { if (timer) clearTimeout(timer); timer = setTimeout(fn, timeout); }; }

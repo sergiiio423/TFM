@@ -15,7 +15,6 @@ services:
   - type: web
     name: tfm-bpmn-frontend
     runtime: static
-    plan: free
     rootDir: bpmn-js-examples/modeler
     buildCommand: npm install && npm run build
     staticPublishPath: public

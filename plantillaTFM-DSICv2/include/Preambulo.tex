@@ -14,7 +14,19 @@
 \usepackage{bookman}
 \decimalpoint
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes.geometric,arrows.meta}
 \usepackage{amsfonts,amsgen,amsmath,amssymb}
+
+%% Figura de "muñeco de palos" utilizada en los diagramas de actores,
+%% contexto y casos de uso del capítulo de análisis del problema.
+\newcommand{\stickman}{%
+  \draw (0,0.9) circle (0.22);
+  \draw (0,0.68) -- (0,-0.2);
+  \draw (-0.3,0.4) -- (0.3,0.4);
+  \draw (0,-0.2) -- (-0.25,-0.8);
+  \draw (0,-0.2) -- (0.25,-0.8);
+}
 \usepackage[top=3cm, bottom=3cm, right=2.54cm, left=2.54cm]{geometry}
 \usepackage{afterpage}
 \usepackage{colortbl,longtable}

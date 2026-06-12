@@ -129,6 +129,7 @@ export const I18N = {
     elEndMessage:         'Fin con mensaje',
     elExclusiveGw:        'Gateway XOR',
     elParallelGw:         'Gateway AND',
+    elInclusiveGw:        'Gateway OR',
     elStart:              'Inicio',
     elEnd:                'Fin',
     defaultNextStepName:  'Siguiente paso',
@@ -173,6 +174,8 @@ export const I18N = {
 
     thinkingNextStep:   '➡️ Paso {n} — pensando qué pasa después...',
     limitReachedStep:   '⚠️ Se alcanzó el límite de pasos del asistente. Marca este paso como el último.',
+    dupStepDetected:    '⚠️ La IA sugirió un paso repetido («{name}»). Para evitar elementos duplicados, se da el proceso por terminado.',
+    dupBranchStepDetected: '⚠️ La IA sugirió un paso repetido en el caso «{branch}». Se cierra este caso para evitar elementos duplicados.',
 
     diagramComplete: '✅ ¡Diagrama completado! Puedes pedir modificaciones o analizar el valor PERVAL.',
 
@@ -326,6 +329,7 @@ export const I18N = {
     elEndMessage:         'End with message',
     elExclusiveGw:        'XOR Gateway',
     elParallelGw:         'AND Gateway',
+    elInclusiveGw:        'OR Gateway',
     elStart:              'Start',
     elEnd:                'End',
     defaultNextStepName:  'Next step',
@@ -370,6 +374,8 @@ export const I18N = {
 
     thinkingNextStep:   '➡️ Step {n} — thinking about what happens next...',
     limitReachedStep:   "⚠️ The assistant's step limit has been reached. Mark this step as the last one.",
+    dupStepDetected:    '⚠️ The AI suggested a repeated step ("{name}"). To avoid duplicated elements, the process is considered finished.',
+    dupBranchStepDetected: '⚠️ The AI suggested a repeated step in case "{branch}". This case is closed to avoid duplicated elements.',
 
     diagramComplete: '✅ Diagram complete! You can request modifications or analyze the PERVAL value.',
 

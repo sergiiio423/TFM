@@ -1,0 +1,26 @@
+services:
+  # Servidor MCP (Node/Express) - expone /mcp y llama al LLM (GitHub Models).
+  - type: web
+    name: tfm-bpmn-mcp-server
+    runtime: node
+    plan: free
+    rootDir: bpmn-js-examples/modeler
+    buildCommand: npm install
+    startCommand: npm run mcp-server
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false
+
+  # Frontend estático (bpmn-js + asistente), generado con webpack.
+  - type: web
+    name: tfm-bpmn-frontend
+    runtime: static
+    plan: free
+    rootDir: bpmn-js-examples/modeler
+    buildCommand: npm install && npm run build
+    staticPublishPath: public
+    envVars:
+      # URL pública del servicio tfm-bpmn-mcp-server anterior. Si Render
+      # asigna un nombre distinto (por colisión), actualiza este valor.
+      - key: MCP_SERVER_URL
+        value: https://tfm-bpmn-mcp-server.onrender.com

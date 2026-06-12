@@ -1,6 +1,3 @@
-// ─── API KEY ──────────────────────────────────────────────────────────────────
-const DEFAULT_API_KEY = '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';
-
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
@@ -9,7 +6,8 @@ import './style.css';
 import $ from 'jquery';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import diagramXML from '../resources/newDiagram.bpmn';
-import { t, getLang, setLang, recognitionLang, langDirective } from './i18n.js';
+import { t, getLang, setLang, recognitionLang } from './i18n.js';
+import { callTool } from './mcpClient.js';
 
 var container = $('#js-drop-zone');
 var modeler   = new BpmnModeler({ container: '#js-canvas' });
@@ -37,7 +35,7 @@ var processFlowDescription = '';
 var confirmedStructure  = null;
 // diagramState.steps: array global en orden cronológico.
 // step: { id, tipo, nombre, laneIdx, participantIdx?, messageTrigger?, fromParticipantIdx? }
-// Los gateways (exclusiveGateway/parallelGateway) llevan además:
+// Los gateways (exclusiveGateway/parallelGateway/inclusiveGateway) llevan además:
 //   branches: [{ id, nombre, steps: [step...], endsHere: bool }]
 //   join?: { id, tipo, nombre:'', laneIdx }   // solo si alguna rama converge
 var diagramState        = { steps: [] };
@@ -46,8 +44,6 @@ var pervalAnalisado     = false;
 // true = genera todo el proceso de una vez, con el mismo razonamiento del LLM,
 // auto-confirmando cada sugerencia hasta que el diagrama queda completo.
 var autoGenerateAll     = false;
-const MAX_FLOW_STEPS    = 20;
-const MAX_BRANCH_STEPS  = 6;
 
 // ─── HELPERS CHAT ─────────────────────────────────────────────────────────────
 function addMessage(text, type = 'ai', style = '') {
@@ -144,463 +140,6 @@ function updateUI() {
     if (hint) hint.textContent = t('hintRefine');
   }
   if (typeof window.updatePhaseBar === 'function') window.updatePhaseBar(fase);
-}
-
-// ─── PROMPTS ──────────────────────────────────────────────────────────────────
-
-/** Paso 1: detectar pools y lanes */
-function buildStructureSystemPrompt() {
-  return `Eres un experto en modelado de procesos BPMN 2.0 para e-commerce.
-Analiza la descripción de un proceso de negocio e identifica los participantes y departamentos.
-
-RESPONDE ÚNICAMENTE con JSON válido (sin texto adicional, sin bloques de código):
-{
-  "poolExterno": [{"nombre": "nombre del canal o cliente externo", "rol": "cliente"}],
-  "poolPrincipal": {
-    "nombre": "nombre de la empresa u organización principal",
-    "lanes": ["Departamento1", "Departamento2"]
-  },
-  "resumen": "Una frase resumiendo los participantes"
-}
-
-REGLAS:
-- poolExterno: canales o actores EXTERNOS (clientes, marketplace, pasarela de pago, transportista, proveedor…). Puede ser [].
-- "rol" de cada poolExterno: "cliente" si ese actor es quien RECIBE EL VALOR/resultado del proceso (normalmente
-  quien inicia el proceso o a quien se dirige el resultado final, p.ej. el comprador/cliente final);
-  "colaborador" para el resto de actores externos que participan pero NO son destinatarios del valor
-  (pasarela de pago, transportista, proveedor, marketplace…).
-- Si poolExterno no está vacío, debe haber AL MENOS un actor con "rol":"cliente".
-- poolPrincipal.lanes: SOLO los departamentos/áreas internas mencionados EXPLÍCITAMENTE en la descripción
-  (Ventas, Logística, Atención al Cliente, Finanzas…). Máximo 5.
-  Si la descripción NO menciona departamentos ni áreas internas, devuelve [] (lista vacía) — NO inventes departamentos:
-  la organización se dibujará como una única piscina sin calles.
-- Nombres concisos: 1-3 palabras${langDirective()}`;
-}
-
-function buildModifyStructurePrompt(current, mod) {
-  return `Estructura actual:\n${JSON.stringify(current, null, 2)}\n\nModificación: "${mod}"\n\nDevuelve ÚNICAMENTE el JSON modificado (mismo formato, conservando el campo "rol" de cada poolExterno —"cliente" o "colaborador"— y ajustándolo solo si la modificación lo requiere).${langDirective()}`;
-}
-
-/**
- * Identifica el/los punto(s) de inicio del proceso.
- * Devuelve JSON: { "inicios": [{ "lane", "nombre", "trigger": "message"|"none", "from": "<actor>"|null }] }
- */
-function buildFlowStartPrompt(description, lanes, externalActors) {
-  return `Eres un experto en modelado BPMN 2.0 para e-commerce.
-Departamentos internos: ${lanes.join(', ')}
-Actores externos: ${externalActors.length > 0 ? externalActors.join(', ') : 'ninguno'}
-
-Descripción del proceso:
-${description}
-
-Identifica el/los punto(s) de INICIO del proceso (puede haber varios inicios en paralelo si el proceso arranca por más de un motivo).
-Para cada inicio indica:
-- "lane": el departamento donde ocurre (uno de los departamentos listados)
-- "nombre": nombre breve del evento de inicio
-- "trigger": "message" si lo dispara la recepción de un mensaje de un actor externo, o "none" en caso contrario
-- "from": si trigger es "message", el nombre de uno de los actores externos; si no, null
-
-REGLAS:
-- Si no hay actores externos, usa siempre "trigger":"none" y "from":null.
-- Normalmente hay un único inicio; usa varios solo si la descripción lo indica explícitamente.
-
-RESPONDE SOLO con JSON (sin texto adicional):
-{"inicios":[{"lane":"${lanes[0]}","nombre":"Inicio","trigger":"none","from":null}]}${langDirective()}`;
-}
-
-/**
- * Sugiere el SIGUIENTE paso del proceso dado el contexto y los pasos confirmados.
- * Devuelve JSON: { "siguiente": { "tipo", "nombre", "lane", "actorExterno" }, "esFinal": bool }
- */
-function buildNextStepPrompt(description, lanes, externalActors, steps) {
-  const resumen = steps.length > 0
-    ? steps.map((s, i) => {
-        let line = `${i+1}. [${lanes[s.laneIdx]}] ${elementLabel(s.tipo)}: ${s.nombre}`;
-        if (s.branches?.length) {
-          line += '\n' + s.branches.map(b =>
-            `   · Caso "${b.nombre}": ${b.steps.map(bs => bs.nombre).join(' → ') || '(sin pasos)'}${b.endsHere ? ' [termina el proceso]' : ' [converge]'}`
-          ).join('\n');
-        }
-        return line;
-      }).join('\n')
-    : '(ninguno todavía)';
-  return `Eres un experto en modelado BPMN 2.0 para e-commerce.
-Departamentos internos: ${lanes.join(', ')}
-Actores externos: ${externalActors.length > 0 ? externalActors.join(', ') : 'ninguno'}
-
-Descripción completa del proceso:
-${description}
-
-Pasos confirmados hasta ahora (en orden cronológico):
-${resumen}
-
-¿Cuál es el SIGUIENTE paso del proceso, según la descripción? Indica:
-- "tipo": uno de task | sendTask | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | timerEvent | endMessageEvent | exclusiveGateway | parallelGateway
-- "nombre": nombre breve del paso
-- "lane": departamento que lo realiza (uno de los departamentos listados)
-- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre (uno de los actores externos); si no, null
-- "esFinal": true si DESPUÉS de este paso el proceso TERMINA (se añadirá un evento de fin automáticamente)
-
-Usa "compensationEvent" (Evento Intermedio de Compensación) cuando el proceso deba deshacer o
-revertir una acción anterior (p.ej. anular un cargo ya realizado tras una cancelación).
-Usa "timerEvent" (Evento Intermedio de Temporizador) cuando el proceso deba ESPERAR un periodo
-de tiempo o hasta un momento determinado antes de continuar (p.ej. "esperar 1 día", "1,5 horas
-antes de la entrega").
-Usa "endMessageEvent" (Evento de Fin de Mensaje) cuando el ÚLTIMO paso del proceso consista en
-ENVIAR un mensaje/notificación final (confirmación, factura, ticket...) y el proceso termine EN
-ESE MISMO momento, en lugar de modelar una tarea de envío seguida de un evento de Fin aparte. Si
-usas "endMessageEvent", "esFinal" debe ser true y, si el mensaje va a un actor externo (p.ej. el
-cliente), indícalo en "actorExterno".
-
-PRESTA ESPECIAL ATENCIÓN A LAS DECISIONES Y RAMIFICACIONES DE LA DESCRIPCIÓN:
-- Si, llegados a este punto del proceso, existe una condición que hace que el proceso siga
-  caminos DISTINTOS según el caso (p.ej. "si hay stock... si no hay stock...", "según el método
-  de pago", "el pedido puede ser aprobado o rechazado", "dependiendo de si el cliente...", "en
-  caso de que...", "si supera un importe..."), el SIGUIENTE paso DEBE ser una puerta
-  "exclusiveGateway" (XOR) que represente esa decisión — NO sigas con una tarea que ignore la
-  ramificación ni la des por hecha.
-- Si la descripción indica que, llegados a este punto, dos o más actividades ocurren EN PARALELO
-  o SIMULTÁNEAMENTE (p.ej. "al mismo tiempo", "en paralelo", "simultáneamente", "mientras tanto"),
-  el SIGUIENTE paso DEBE ser una puerta "parallelGateway" (AND).
-- Usa "exclusiveGateway"/"parallelGateway" SOLO para decisiones o paralelismos reales, descritos
-  explícita o implícitamente en la descripción; no los inventes si el proceso es estrictamente
-  secuencial sin alternativas.
-- No conviertas un proceso con bifurcaciones en una simple secuencia lineal de tareas: cuando la
-  narrativa llegue a un punto de decisión o de paralelismo, modélalo con el gateway adecuado en
-  ESE momento, no más adelante ni nunca.
-
-REGLAS:
-- Si no hay actores externos, "actorExterno" debe ser siempre null.
-- No repitas pasos ya confirmados.
-
-RESPONDE SOLO con JSON (sin texto adicional):
-{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinal":false}${langDirective()}`;
-}
-
-/**
- * Sugiere los casos/ramas que salen de un gateway.
- * Devuelve JSON: { "casos": ["Hay stock", "Sin stock", ...] }
- */
-function buildGatewayBranchesPrompt(description, gatewayStep, lanes, externalActors) {
-  const tipoTxt = gatewayStep.tipo === 'exclusiveGateway'
-    ? 'EXCLUSIVA (XOR): solo se sigue UNO de los casos según la condición'
-    : 'PARALELA (AND): se siguen TODOS los caminos a la vez';
-  return `Eres un experto en modelado BPMN 2.0 para e-commerce.
-Departamentos internos: ${lanes.join(', ')}
-Actores externos: ${externalActors.length > 0 ? externalActors.join(', ') : 'ninguno'}
-
-Descripción completa del proceso:
-${description}
-
-El proceso ha llegado a una puerta ${tipoTxt}, llamada "${gatewayStep.nombre}".
-
-Según la descripción, ¿qué casos/ramas salen de esta puerta?
-- Mínimo 2 y máximo 5 casos.
-- Nombres breves de 1-4 palabras (p.ej. "Hay stock" / "Sin stock", o "Pago aceptado" / "Pago rechazado").
-
-RESPONDE SOLO con JSON (sin texto adicional):
-{"casos":["Caso 1","Caso 2"]}${langDirective()}`;
-}
-
-/**
- * Sugiere el SIGUIENTE paso dentro de una rama/caso de un gateway.
- * Devuelve JSON: { "siguiente": {...}, "esFinalRama": bool, "terminaProceso": bool }
- */
-function buildBranchStepPrompt(description, lanes, externalActors, gatewayStep, branch) {
-  const resumen = branch.steps.length > 0
-    ? branch.steps.map((s, i) => `${i+1}. [${lanes[s.laneIdx]}] ${elementLabel(s.tipo)}: ${s.nombre}`).join('\n')
-    : '(ninguno todavía)';
-  return `Eres un experto en modelado BPMN 2.0 para e-commerce.
-Departamentos internos: ${lanes.join(', ')}
-Actores externos: ${externalActors.length > 0 ? externalActors.join(', ') : 'ninguno'}
-
-Descripción completa del proceso:
-${description}
-
-El proceso llegó a la puerta "${gatewayStep.nombre}" (${gatewayStep.tipo === 'exclusiveGateway' ? 'exclusiva/XOR' : 'paralela/AND'}).
-Estamos definiendo los pasos del caso/rama: "${branch.nombre}".
-
-Pasos confirmados de ESTA rama hasta ahora:
-${resumen}
-
-¿Cuál es el SIGUIENTE paso de esta rama, según la descripción? Indica:
-- "tipo": uno de task | sendTask | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | timerEvent | endMessageEvent
-  (NO se permiten gateways dentro de una rama)
-- "nombre": nombre breve del paso
-- "lane": departamento que lo realiza (uno de los departamentos listados)
-- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre (uno de los actores externos); si no, null
-- "esFinalRama": true si este es el ÚLTIMO paso de esta rama
-- "terminaProceso": SOLO relevante si esFinalRama es true. true si el proceso COMPLETO termina en esta
-  rama (se añadirá un evento de Fin propio); false si la rama CONVERGE con las demás y el proceso
-  continúa después de la puerta de unión.
-
-Usa "endMessageEvent" (Evento de Fin de Mensaje) cuando esta rama termine ENVIANDO un mensaje
-final (p.ej. al cliente) y el proceso completo acabe ahí mismo: en ese caso "esFinalRama" y
-"terminaProceso" deben ser true, y "actorExterno" indica el destinatario si procede.
-
-REGLAS:
-- Si no hay actores externos, "actorExterno" debe ser siempre null.
-- No repitas pasos ya confirmados de esta rama.
-
-RESPONDE SOLO con JSON (sin texto adicional):
-{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinalRama":false,"terminaProceso":false}${langDirective()}`;
-}
-
-/** Prompt de sistema corto reutilizado en las llamadas "rápidas" (inicio, siguiente paso, ramas). */
-function bpmnJsonExpertPrompt() {
-  return `Eres experto en modelado BPMN. Responde SOLO con JSON.${langDirective()}`;
-}
-
-function buildRefinementMessage(instruction, currentXML) {
-  return `Diagrama BPMN actual:\n\n${currentXML}\n\nAplica esta modificación y devuelve el XML COMPLETO con la sección bpmndi:BPMNDiagram:\n"${instruction}"`;
-}
-
-// ─── GENERACIÓN PROGRAMÁTICA DEL DIAGRAMA ────────────────────────────────────
-function renderDiagramFromState(structure, state) {
-  const ext   = structure.poolExterno || [];
-  const lanes = structure.poolPrincipal.lanes || [];
-  const N     = lanes.length;
-  const EH    = 160, EG = 20;
-  const X0    = 150, DX = 160;
-  const BRANCH_GAP = 110; // > altura de tarea (80) para que las ramas no se solapen
-
-  // diagramState.steps ya está en orden cronológico global.
-  const steps  = state.steps || [];
-  const starts = steps.filter(s => s.tipo === 'startEvent');
-  const ends   = steps.filter(s => s.tipo === 'endEvent');
-  const mains  = steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent');
-
-  // Altura de lane: si hay gateways con ramas, dejar sitio para el abanico vertical
-  const maxBranches = Math.max(1, ...mains.filter(m => m.branches?.length).map(m => m.branches.length));
-  const LH = Math.max(180, maxBranches * BRANCH_GAP + 110);
-
-  // Posiciones X: recorrido secuencial. Las ramas de un gateway se dibujan en
-  // paralelo (mismo rango X, desplazamiento vertical _yOffset por rama) y
-  // convergen, si procede, en el gateway de unión (join).
-  starts.forEach(s => { s._x = X0; s._yOffset = 0; });
-  let cursorX = X0 + DX;
-  const branchExtras = []; // pasos dentro de ramas + joins (para shapes/refs)
-  mains.forEach(step => {
-    step._yOffset = 0;
-    if ((step.tipo === 'exclusiveGateway' || step.tipo === 'parallelGateway') && step.branches?.length) {
-      step._x = cursorX; cursorX += DX;
-      let maxLen = 0;
-      step.branches.forEach((branch, bi) => {
-        const yOff = (bi - (step.branches.length - 1) / 2) * BRANCH_GAP;
-        (branch.steps || []).forEach((bstep, j) => {
-          bstep._x = cursorX + j * DX; bstep._yOffset = yOff;
-          branchExtras.push(bstep);
-        });
-        maxLen = Math.max(maxLen, (branch.steps || []).length);
-      });
-      cursorX += Math.max(maxLen, 1) * DX;
-      if (step.join) {
-        step.join._x = cursorX; step.join._yOffset = 0;
-        branchExtras.push(step.join);
-        cursorX += DX;
-      }
-    } else {
-      step._x = cursorX; cursorX += DX;
-    }
-  });
-  const endX = cursorX;
-  ends.forEach(s => { s._x = endX; s._yOffset = 0; });
-
-  const ordered = [...starts, ...mains, ...branchExtras, ...ends];
-
-  // Pool width: enough to fit all elements + margin
-  const PW = Math.max(1200, endX + 300);
-
-  const extY   = i => 30 + i * (EH + EG);
-  const extCY  = i => extY(i) + EH / 2;
-  const mainY  = ext.length > 0 ? 30 + ext.length * (EH + EG) : 30;
-  const mainH  = Math.max(1, N) * LH;
-  // Sin lanes (piscina única): los elementos se centran verticalmente en el pool
-  const laneCY = j => N > 0 ? mainY + j * LH + LH / 2 : mainY + mainH / 2;
-
-  // ── Collaboration ──────────────────────────────────────────────────────
-  let col = '';
-  ext.forEach((p, i) => {
-    col += `    <participant id="Part_Ext${i+1}" name="${p.nombre}" processRef="Proc_Ext${i+1}"/>\n`;
-  });
-  col += `    <participant id="Part_Main" name="${structure.poolPrincipal.nombre}" processRef="Proc_Main"/>\n`;
-  ordered.forEach(s => {
-    if (s.participantIdx !== undefined) {
-      col += `    <messageFlow id="MF_${s.id}" name="${s.nombre}" sourceRef="${s.id}" targetRef="Part_Ext${s.participantIdx+1}"/>\n`;
-    }
-    if (s.tipo === 'startEvent' && s.messageTrigger && s.fromParticipantIdx !== undefined) {
-      col += `    <messageFlow id="MF_${s.id}_in" sourceRef="Part_Ext${s.fromParticipantIdx+1}" targetRef="${s.id}"/>\n`;
-    }
-  });
-
-  // ── External processes ─────────────────────────────────────────────────
-  let proc = '';
-  ext.forEach((p, i) => { proc += `  <process id="Proc_Ext${i+1}" isExecutable="false"/>\n`; });
-
-  // ── Lane sets ─────────────────────────────────────────────────────────
-  let laneSetXml = '';
-  lanes.forEach((lane, j) => {
-    const refs = ordered.filter(t => t.laneIdx === j)
-      .map(t => `        <flowNodeRef>${t.id}</flowNodeRef>`).join('\n');
-    laneSetXml += `      <lane id="Lane${j+1}" name="${lane}">\n${refs ? refs+'\n' : ''}      </lane>\n`;
-  });
-
-  // ── Task / gateway / event elements ─────────────────────────────────────
-  const taskXml = ordered.map(t => {
-    const n = (t.nombre || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    if (t.tipo === 'startEvent')
-      return `    <startEvent id="${t.id}" name="${n}">${t.messageTrigger ? `<messageEventDefinition id="MED_${t.id}"/>` : ''}</startEvent>`;
-    if (t.tipo === 'endEvent')
-      return t.messageTrigger
-        ? `    <endEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></endEvent>`
-        : `    <endEvent id="${t.id}" name="${n}"/>`;
-    if (t.tipo === 'exclusiveGateway') return `    <exclusiveGateway id="${t.id}" name="${n}"/>`;
-    if (t.tipo === 'parallelGateway')  return `    <parallelGateway  id="${t.id}" name="${n}"/>`;
-    if (t.tipo === 'intermediateCatchEvent')
-      return `    <intermediateCatchEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></intermediateCatchEvent>`;
-    if (t.tipo === 'intermediateThrowEvent')
-      return `    <intermediateThrowEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></intermediateThrowEvent>`;
-    if (t.tipo === 'compensationEvent')
-      return `    <intermediateThrowEvent id="${t.id}" name="${n}"><compensateEventDefinition id="CED_${t.id}"/></intermediateThrowEvent>`;
-    if (t.tipo === 'timerEvent')
-      return `    <intermediateCatchEvent id="${t.id}" name="${n}"><timerEventDefinition id="TED_${t.id}"/></intermediateCatchEvent>`;
-    if (t.tipo === 'sendTask') return `    <sendTask id="${t.id}" name="${n}"/>`;
-    return `    <task id="${t.id}" name="${n}"/>`;
-  }).join('\n');
-
-  // ── Sequence flows ──────────────────────────────────────────────────────
-  // start(s) → pasos intermedios (con bifurcación/convergencia en gateways
-  // con ramas) → fin(es). Cada entrada de chain es [src, tgt, name?].
-  const escName = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const chain = [];
-  if (mains.length > 0) {
-    starts.forEach(s => chain.push([s.id, mains[0].id]));
-    mains.forEach((m, i) => {
-      const next = mains[i+1];
-      if ((m.tipo === 'exclusiveGateway' || m.tipo === 'parallelGateway') && m.branches?.length) {
-        m.branches.forEach(branch => {
-          const bsteps = branch.steps || [];
-          // En XOR el flujo saliente lleva el nombre del caso (condición)
-          const flowName = m.tipo === 'exclusiveGateway' ? branch.nombre : '';
-          if (bsteps.length > 0) {
-            chain.push([m.id, bsteps[0].id, flowName]);
-            for (let j = 0; j < bsteps.length - 1; j++) chain.push([bsteps[j].id, bsteps[j+1].id]);
-            // Si la rama termina el proceso, su último paso ya es un endEvent: no sale nada de él
-            if (!branch.endsHere && m.join) chain.push([bsteps[bsteps.length-1].id, m.join.id]);
-          } else if (m.join) {
-            chain.push([m.id, m.join.id, flowName]);
-          }
-        });
-        if (m.join) {
-          if (next) chain.push([m.join.id, next.id]);
-          else ends.forEach(e => chain.push([m.join.id, e.id]));
-        }
-        // Sin join (todas las ramas terminan el proceso): no hay continuación.
-      } else {
-        if (next) chain.push([m.id, next.id]);
-        else ends.forEach(e => chain.push([m.id, e.id]));
-      }
-    });
-  } else {
-    starts.forEach(s => ends.forEach(e => chain.push([s.id, e.id])));
-  }
-  const seqXml = chain.map(([src, tgt, name], i) =>
-    `    <sequenceFlow id="SF_${i}" sourceRef="${src}" targetRef="${tgt}"${name ? ` name="${escName(name)}"` : ''}/>`
-  ).join('\n');
-
-  const laneSetBlock = N > 0 ? `    <laneSet id="LaneSet_1">\n${laneSetXml}    </laneSet>\n` : '';
-  proc += `\n  <process id="Proc_Main" isExecutable="false">
-${laneSetBlock}${taskXml ? taskXml+'\n' : ''}${seqXml ? seqXml+'\n' : ''}  </process>`;
-
-  // ── DI shapes ─────────────────────────────────────────────────────────
-  let shapes = '', edges = '';
-
-  ext.forEach((p, i) => {
-    shapes += `      <bpmndi:BPMNShape id="Shape_Part_Ext${i+1}" bpmnElement="Part_Ext${i+1}" isHorizontal="true">
-        <dc:Bounds x="30" y="${extY(i)}" width="${PW}" height="${EH}"/>
-      </bpmndi:BPMNShape>\n`;
-  });
-  shapes += `      <bpmndi:BPMNShape id="Shape_Part_Main" bpmnElement="Part_Main" isHorizontal="true">
-        <dc:Bounds x="30" y="${mainY}" width="${PW}" height="${mainH}"/>
-      </bpmndi:BPMNShape>\n`;
-  lanes.forEach((_, j) => {
-    shapes += `      <bpmndi:BPMNShape id="Shape_Lane${j+1}" bpmnElement="Lane${j+1}" isHorizontal="true">
-        <dc:Bounds x="60" y="${mainY+j*LH}" width="${PW-30}" height="${LH}"/>
-      </bpmndi:BPMNShape>\n`;
-  });
-
-  // Element shapes (size depends on tipo)
-  const isGwTipo = t => t === 'exclusiveGateway' || t === 'parallelGateway';
-  const isEvTipo = t => t === 'intermediateCatchEvent' || t === 'intermediateThrowEvent'
-                     || t === 'compensationEvent' || t === 'timerEvent'
-                     || t === 'startEvent' || t === 'endEvent';
-  const shapeW = t => isGwTipo(t.tipo) ? 50 : isEvTipo(t.tipo) ? 36 : 100;
-  const shapeH = t => isGwTipo(t.tipo) ? 50 : isEvTipo(t.tipo) ? 36 : 80;
-  const elemCY = t => laneCY(t.laneIdx) + (t._yOffset || 0);
-
-  ordered.forEach(t => {
-    const w = shapeW(t), h = shapeH(t);
-    shapes += `      <bpmndi:BPMNShape id="Shape_${t.id}" bpmnElement="${t.id}"${isGwTipo(t.tipo) ? ' isMarkerVisible="true"' : ''}>
-        <dc:Bounds x="${t._x-w/2}" y="${elemCY(t)-h/2}" width="${w}" height="${h}"/>
-      </bpmndi:BPMNShape>\n`;
-  });
-
-  // ── DI edges ──────────────────────────────────────────────────────────
-  const elemOf = id => ordered.find(o => o.id === id);
-
-  // Sequence flow edges: anclados a los bordes de las figuras; si origen y
-  // destino están a distinta altura, ruta ortogonal (horizontal-vertical-horizontal)
-  chain.forEach(([src, tgt], i) => {
-    const s = elemOf(src), t = elemOf(tgt);
-    if (!s || !t) return;
-    const sy = elemCY(s), ty = elemCY(t);
-    const sx = s._x + shapeW(s) / 2; // borde derecho del origen
-    const tx = t._x - shapeW(t) / 2; // borde izquierdo del destino
-    const wps = Math.abs(sy - ty) < 1
-      ? [[sx, sy], [tx, ty]]
-      : [[sx, sy], [(sx + tx) / 2, sy], [(sx + tx) / 2, ty], [tx, ty]];
-    edges += `      <bpmndi:BPMNEdge id="Edge_SF_${i}" bpmnElement="SF_${i}">
-${wps.map(([x, y]) => `        <di:waypoint x="${x}" y="${y}"/>`).join('\n')}
-      </bpmndi:BPMNEdge>\n`;
-  });
-
-  // Message flow edges: salientes (sendTask/throw → actor externo), incluidos pasos de ramas
-  ordered.filter(t => t.participantIdx !== undefined).forEach(t => {
-    const srcY = elemCY(t) - shapeH(t) / 2; // borde superior
-    edges += `      <bpmndi:BPMNEdge id="Edge_MF_${t.id}" bpmnElement="MF_${t.id}">
-        <di:waypoint x="${t._x}" y="${srcY}"/>
-        <di:waypoint x="${t._x}" y="${extCY(t.participantIdx)}"/>
-      </bpmndi:BPMNEdge>\n`;
-  });
-
-  // Message flow edges: entrantes (actor externo → startEvent con disparador de mensaje)
-  starts.filter(s => s.messageTrigger && s.fromParticipantIdx !== undefined).forEach(s => {
-    const tgtY = elemCY(s) - shapeH(s) / 2; // borde superior del evento de inicio
-    edges += `      <bpmndi:BPMNEdge id="Edge_MF_${s.id}_in" bpmnElement="MF_${s.id}_in">
-        <di:waypoint x="${s._x}" y="${extCY(s.fromParticipantIdx)}"/>
-        <di:waypoint x="${s._x}" y="${tgtY}"/>
-      </bpmndi:BPMNEdge>\n`;
-  });
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-             id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
-  <collaboration id="Collab_1">
-${col}  </collaboration>
-${proc}
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collab_1">
-${shapes}${edges}    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
-</definitions>`;
-}
-
-// Alias para la estructura vacía inicial (sin pasos aún)
-function buildStructureBPMN(structure) {
-  return renderDiagramFromState(structure, { steps: [] });
 }
 
 // ─── TARJETA ESTRUCTURA ───────────────────────────────────────────────────────
@@ -785,14 +324,14 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
   const lanes = effectiveLanes();
   const ext   = confirmedStructure.poolExterno || [];
   const isMsgTipo = t => t === 'sendTask' || t === 'intermediateThrowEvent' || t === 'endMessageEvent';
-  const isGwTipo  = t => t === 'exclusiveGateway' || t === 'parallelGateway';
+  const isGwTipo  = t => t === 'exclusiveGateway' || t === 'parallelGateway' || t === 'inclusiveGateway';
   const isEndMsgTipo = t => t === 'endMessageEvent';
   const inBranch  = !!branchCtx;
 
   // Dentro de una rama no se permiten gateways anidados
   const tipos = inBranch
     ? ['task','sendTask','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent']
-    : ['task','sendTask','exclusiveGateway','parallelGateway','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent'];
+    : ['task','sendTask','exclusiveGateway','parallelGateway','inclusiveGateway','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent'];
   const TIPOS_HTML = tipos
     .map(t => `<option value="${t}"${t===suggestion.tipo?' selected':''}>${elementIcon(t)} ${elementLabel(t)}</option>`).join('');
 
@@ -970,94 +509,16 @@ function disableCard(div) {
   });
 }
 
-// ─── LLAMADA A LA API ─────────────────────────────────────────────────────────
-// GitHub Models limita las peticiones POR MODELO y día (p.ej. 150/día para
-// gpt-4o-mini). Si un modelo agota su cuota (429), se prueba con el siguiente.
-const LLM_MODELS = ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'Phi-4', 'Mistral-Nemo'];
-let _llmModelIdx = 0; // recuerda el último modelo que funcionó en esta sesión
-
-async function callOpenAI(apiKey, systemPrompt, messages) {
-  let lastErr = null;
-  for (let k = 0; k < LLM_MODELS.length; k++) {
-    const idx   = (_llmModelIdx + k) % LLM_MODELS.length;
-    const model = LLM_MODELS[idx];
-    const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemPrompt }, ...messages],
-        temperature: 0.3,
-        max_tokens: 8000
-      })
-    });
-    if (response.ok) {
-      _llmModelIdx = idx;
-      const data = await response.json();
-      return data.choices[0].message.content.trim();
-    }
-    const err = await response.json().catch(() => ({}));
-    const msg = err.error?.message || `Error ${response.status} en la API`;
-    if (response.status === 429) {
-      console.warn(`Límite alcanzado para "${model}", probando con el siguiente modelo...`);
-      lastErr = new Error(msg);
-      continue;
-    }
-    throw new Error(msg);
-  }
-  throw new Error(`Se agotó la cuota diaria de todos los modelos disponibles. Espera unas horas o usa otro token. Último error: ${lastErr?.message || '?'}`);
-}
-
-function callAPI(apiKey, systemPrompt, messages) {
-  return callOpenAI(apiKey, systemPrompt, messages);
-}
-
-function cleanXML(raw) {
-  let xml = raw.replace(/```xml/gi, '').replace(/```bpmn/gi, '').replace(/```/g, '').trim();
-  const idx = xml.indexOf('<?xml');
-  if (idx > -1) xml = xml.substring(idx);
-  if (!xml.startsWith('<?xml')) { const d = xml.indexOf('<definitions'); if (d > -1) xml = xml.substring(d); }
-
-  // ── Reparación 1: comilla de cierre olvidada antes de />
-  // El LLM a veces genera: height="36/>  en lugar de  height="36"/>
-  // Patrón: ="VALOR/>  →  ="VALOR"/>
-  xml = xml.replace(/="([^"<>\n\r]*)\s*\/>/g, '="$1"/>');
-
-  // ── Reparación 2: truncaciones (XML cortado antes de </definitions>)
-  if (!xml.includes('</definitions>')) {
-    // Recortar hasta el último '>' completo (eliminar tag a medias)
-    const lastGt = xml.lastIndexOf('>');
-    if (lastGt > 0) xml = xml.substring(0, lastGt + 1);
-
-    const needsPlane = xml.includes('<bpmndi:BPMNPlane') && !xml.includes('</bpmndi:BPMNPlane>');
-    const needsDiag  = xml.includes('<bpmndi:BPMNDiagram') && !xml.includes('</bpmndi:BPMNDiagram>');
-    if (needsPlane) xml += '\n    </bpmndi:BPMNPlane>';
-    if (needsDiag)  xml += '\n  </bpmndi:BPMNDiagram>';
-    xml += '\n</definitions>';
-  }
-
-  if (!xml.includes('bpmndi:BPMNDiagram') && !xml.includes('BPMNDiagram'))
-    throw new Error(t('errNoDiagramSection'));
-  return xml;
-}
-
 // ─── PASO 1: IDENTIFICAR ESTRUCTURA ──────────────────────────────────────────
 async function handleDescribeProcess(description) {
-  const apiKey = DEFAULT_API_KEY;
-
   processDescription = description;
   addTyping();
   try {
-    const reply = await callAPI(apiKey, buildStructureSystemPrompt(), [{ role: 'user', content: description }]);
+    const { structure, xml } = await callTool('identify_structure', { description, lang: getLang() });
     removeTyping();
 
-    let structure;
-    try { const m = reply.match(/\{[\s\S]*\}/); structure = JSON.parse(m ? m[0] : reply); if (!structure.poolPrincipal?.nombre) throw new Error(); }
-    catch(e) { addMessage(t('errStructure'), 'ai', 'err'); return; }
-    structure.poolPrincipal.lanes = structure.poolPrincipal.lanes || [];
-
     confirmedStructure = structure;
-    await modeler.importXML(buildStructureBPMN(structure));
+    await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
 
     const lanesArr = structure.poolPrincipal.lanes;
@@ -1075,7 +536,7 @@ async function handleDescribeProcess(description) {
     showStructureCard(structure);
     fase = 'confirm_structure';
     updateUI();
-  } catch(err) { removeTyping(); addMessage(t('errorPrefix', { msg: err.message }), 'ai', 'err'); }
+  } catch(err) { removeTyping(); addMessage(err.message, 'ai', 'err'); }
 }
 
 // ─── PASO 2A: CONFIRMAR ESTRUCTURA → ELEGIR MODO Y EMPEZAR EL FLUJO ──────────
@@ -1128,26 +589,20 @@ function showFlowModeCard() {
 
 // ─── PASO 2B: MODIFICAR ESTRUCTURA ───────────────────────────────────────────
 async function handleModifyStructure(modification) {
-  const apiKey = DEFAULT_API_KEY;
-
   addTyping();
   try {
-    const reply = await callAPI(apiKey, buildStructureSystemPrompt(),
-      [{ role: 'user', content: buildModifyStructurePrompt(confirmedStructure, modification) }]);
+    const { structure, xml } = await callTool('modify_structure', {
+      currentStructure: confirmedStructure, modification, lang: getLang()
+    });
     removeTyping();
 
-    let structure;
-    try { const m = reply.match(/\{[\s\S]*\}/); structure = JSON.parse(m ? m[0] : reply); if (!structure.poolPrincipal?.nombre) throw new Error(); }
-    catch(e) { addMessage(t('errModify'), 'ai', 'err'); showStructureCard(confirmedStructure); return; }
-    structure.poolPrincipal.lanes = structure.poolPrincipal.lanes || [];
-
     confirmedStructure = structure;
-    await modeler.importXML(buildStructureBPMN(structure));
+    await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
     addMessage(t('structUpdated'), 'ai');
     showStructureCard(structure);
     fase = 'confirm_structure'; updateUI();
-  } catch(err) { removeTyping(); addMessage(t('errorPrefix', { msg: err.message }), 'ai', 'err'); showStructureCard(confirmedStructure); }
+  } catch(err) { removeTyping(); addMessage(err.message, 'ai', 'err'); showStructureCard(confirmedStructure); }
 }
 
 // ─── FLUJO PASO A PASO: HELPERS DE TIPO ──────────────────────────────────────
@@ -1172,6 +627,7 @@ function elementIcon(tipo) {
     endMessageEvent:        '✉️',
     exclusiveGateway:       '◇',
     parallelGateway:        '╋',
+    inclusiveGateway:       '◎',
     startEvent:             '🏁',
     endEvent:               '🔚',
   };
@@ -1188,10 +644,28 @@ function elementLabel(tipo) {
     endMessageEvent:        'elEndMessage',
     exclusiveGateway:       'elExclusiveGw',
     parallelGateway:        'elParallelGw',
+    inclusiveGateway:       'elInclusiveGw',
     startEvent:             'elStart',
     endEvent:               'elEnd',
   };
   return t(keys[tipo] || 'elTask');
+}
+
+/**
+ * Renderiza el diagrama actual (confirmedStructure + diagramState) vía el
+ * servidor MCP y lo importa en el modeler. Devuelve true si tuvo éxito.
+ */
+async function renderAndImport() {
+  try {
+    const { xml } = await callTool('render_diagram', { structure: confirmedStructure, diagramState });
+    window._lastGeneratedXML = xml;
+    await modeler.importXML(xml);
+    container.removeClass('with-error').addClass('with-diagram');
+    return true;
+  } catch(err) {
+    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err');
+    return false;
+  }
 }
 
 // ─── PASO 3A: INICIO DEL PROCESO ─────────────────────────────────────────────
@@ -1206,17 +680,11 @@ async function startFlowStartPhase() {
   addMessage(t('searchingStart'), 'ai');
   addTyping();
 
-  let inicios = [];
-  try {
-    const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
-      [{ role: 'user', content: buildFlowStartPrompt(processFlowDescription, lanes, ext) }]);
-    removeTyping();
-    const m = reply.match(/\{[\s\S]*\}/);
-    const data = JSON.parse(m ? m[0] : reply);
-    inicios = Array.isArray(data.inicios) ? data.inicios : [];
-  } catch(e) { removeTyping(); addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err'); inicios = []; }
-
-  if (inicios.length === 0) inicios = [{ lane: lanes[0], nombre: t('defaultStartName'), trigger: 'none', from: null }];
+  const { inicios, errorMsg } = await callTool('suggest_flow_start', {
+    description: processFlowDescription, lanes, externalActors: ext, lang: getLang()
+  });
+  removeTyping();
+  if (errorMsg) addMessage(errorMsg, 'ai', 'err');
 
   // El punto de inicio SIEMPRE se pregunta, incluso en modo automático: solo
   // los pasos posteriores (flow_step / branches) se generan sin confirmación.
@@ -1246,14 +714,7 @@ async function handleConfirmStarts(items) {
     });
   });
 
-  try {
-    const xml = renderDiagramFromState(confirmedStructure, diagramState);
-    window._lastGeneratedXML = xml;
-    await modeler.importXML(xml);
-    container.removeClass('with-error').addClass('with-diagram');
-  } catch(err) {
-    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
-  }
+  if (!await renderAndImport()) return;
 
   addMessage(t('startConfirmedMsg'), 'ai');
   if (autoGenerateAll) addMessage(t('autoModeRunningMsg'), 'ai');
@@ -1274,29 +735,23 @@ async function startNextStepFlow() {
   addMessage(t('thinkingNextStep', { n: stepNum }), 'ai');
   addTyping();
 
-  let suggestion = { tipo: 'task', nombre: t('defaultNextStepName'), lane: lanes[0], actorExterno: null };
-  let esFinal = mainSteps.length >= MAX_FLOW_STEPS;
+  let { suggestion, esFinal, dupPersistente, limitReached, errorMsg } = await callTool('suggest_next_step', {
+    description: processFlowDescription, lanes, externalActors: ext, steps: diagramState.steps, lang: getLang()
+  });
+  removeTyping();
 
-  if (!esFinal) {
-    try {
-      const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
-        [{ role: 'user', content: buildNextStepPrompt(processFlowDescription, lanes, ext, diagramState.steps) }]);
-      removeTyping();
-      const m = reply.match(/\{[\s\S]*\}/);
-      const data = JSON.parse(m ? m[0] : reply);
-      if (data.siguiente) suggestion = data.siguiente;
-      esFinal = !!data.esFinal;
-    } catch(e) {
-      removeTyping();
-      addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err');
-      // No se pudo consultar al LLM: en vez de seguir generando "Siguiente
-      // paso" en bucle hasta MAX_FLOW_STEPS, se cierra el diagrama ahora con
-      // este último paso de relleno.
-      esFinal = true;
+  if (limitReached) addMessage(t('limitReachedStep'), 'ai', 'err');
+  if (errorMsg) addMessage(errorMsg, 'ai', 'err');
+
+  // Solo si tras el reintento la IA SIGUE repitiendo, se cierra el proceso.
+  if (dupPersistente) {
+    if (autoGenerateAll) {
+      // No se añade el paso repetido: se cierra el diagrama aquí mismo.
+      addMessage(t('dupStepDetected', { name: suggestion.nombre }), 'ai', 'err');
+      await finishDiagramNow(mainSteps[mainSteps.length - 1].laneIdx);
+      return;
     }
-  } else {
-    removeTyping();
-    addMessage(t('limitReachedStep'), 'ai', 'err');
+    esFinal = true; // en modo manual la tarjeta propone cerrar; el usuario decide
   }
 
   if (autoGenerateAll) { await handleConfirmStep(suggestionToStepData(suggestion), esFinal); return; }
@@ -1304,10 +759,22 @@ async function startNextStepFlow() {
   showNextStepCard(suggestion, stepNum, esFinal);
 }
 
+/**
+ * Cierra el flujo principal añadiendo solo el evento de Fin (sin paso nuevo).
+ * Se usa cuando, en modo automático, la IA empieza a repetir pasos: así el
+ * diagrama termina siempre sin elementos duplicados.
+ */
+async function finishDiagramNow(laneIdx) {
+  diagramState.steps.push({ id: 'END_0', tipo: 'endEvent', nombre: t('elEnd'), laneIdx });
+  if (!await renderAndImport()) return;
+  fase = 'refine'; updateUI();
+  addMessage(t('diagramComplete'), 'ai', 'ok');
+}
+
 async function handleConfirmStep(stepData, isFinal) {
   const lanes = effectiveLanes();
   const n = diagramState.steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent').length;
-  const isGW     = stepData.tipo === 'exclusiveGateway' || stepData.tipo === 'parallelGateway';
+  const isGW     = stepData.tipo === 'exclusiveGateway' || stepData.tipo === 'parallelGateway' || stepData.tipo === 'inclusiveGateway';
   const isEndMsg = stepData.tipo === 'endMessageEvent';
 
   // "Fin con mensaje": el propio paso ES el evento de fin (con mensaje y,
@@ -1330,14 +797,7 @@ async function handleConfirmStep(stepData, isFinal) {
     diagramState.steps.push({ id: 'END_0', tipo: 'endEvent', nombre: t('elEnd'), laneIdx: stepData.laneIdx });
   }
 
-  try {
-    const xml = renderDiagramFromState(confirmedStructure, diagramState);
-    window._lastGeneratedXML = xml;
-    await modeler.importXML(xml);
-    container.removeClass('with-error').addClass('with-diagram');
-  } catch(err) {
-    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
-  }
+  if (!await renderAndImport()) return;
 
   if (isGW) { await startBranchDefinitionPhase(step); return; }
 
@@ -1361,18 +821,13 @@ async function startBranchDefinitionPhase(gatewayStep) {
   addMessage(t('identifyingCases', { name: gatewayStep.nombre }), 'ai');
   addTyping();
 
-  let casos = [];
-  try {
-    const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
-      [{ role: 'user', content: buildGatewayBranchesPrompt(processFlowDescription, gatewayStep, lanes, ext) }]);
-    removeTyping();
-    const m = reply.match(/\{[\s\S]*\}/);
-    const data = JSON.parse(m ? m[0] : reply);
-    casos = Array.isArray(data.casos)
-      ? data.casos.filter(c => typeof c === 'string' && c.trim()).map(c => c.trim()).slice(0, 8)
-      : [];
-  } catch(e) { removeTyping(); addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err'); }
-  if (casos.length < 2) casos = [t('defaultCaseName', { n: 1 }), t('defaultCaseName', { n: 2 })];
+  const { casos, errorMsg } = await callTool('suggest_gateway_branches', {
+    description: processFlowDescription,
+    gatewayStep: { nombre: gatewayStep.nombre, tipo: gatewayStep.tipo },
+    lanes, externalActors: ext, lang: getLang()
+  });
+  removeTyping();
+  if (errorMsg) addMessage(errorMsg, 'ai', 'err');
 
   if (autoGenerateAll) { handleConfirmBranches(gatewayStep, casos); return; }
 
@@ -1400,30 +855,27 @@ async function startBranchStepFlow(gatewayStep, branchIdx) {
   addMessage(t('caseStepThinking', { branch: branch.nombre, i: branchIdx + 1, total: gatewayStep.branches.length, n: stepNum }), 'ai');
   addTyping();
 
-  let suggestion     = { tipo: 'task', nombre: t('defaultNextStepName'), lane: lanes[gatewayStep.laneIdx], actorExterno: null };
-  let esFinalRama    = branch.steps.length >= MAX_BRANCH_STEPS;
-  let terminaProceso = false;
+  let { suggestion, esFinalRama, terminaProceso, dupPersistente, limitReached, errorMsg } = await callTool('suggest_branch_step', {
+    description: processFlowDescription, lanes, externalActors: ext,
+    gatewayStep: { nombre: gatewayStep.nombre, tipo: gatewayStep.tipo, laneIdx: gatewayStep.laneIdx },
+    branch: { nombre: branch.nombre, steps: branch.steps },
+    lang: getLang()
+  });
+  removeTyping();
 
-  if (!esFinalRama) {
-    try {
-      const reply = await callAPI(DEFAULT_API_KEY, bpmnJsonExpertPrompt(),
-        [{ role: 'user', content: buildBranchStepPrompt(processFlowDescription, lanes, ext, gatewayStep, branch) }]);
-      removeTyping();
-      const m = reply.match(/\{[\s\S]*\}/);
-      const data = JSON.parse(m ? m[0] : reply);
-      if (data.siguiente) suggestion = data.siguiente;
-      esFinalRama    = !!data.esFinalRama;
-      terminaProceso = !!data.terminaProceso;
-    } catch(e) {
-      removeTyping();
-      addMessage(t('errorPrefix', { msg: e.message }), 'ai', 'err');
-      // No se pudo consultar al LLM: cierra esta rama ahora (convergiendo)
-      // en vez de seguir generando pasos de relleno hasta MAX_BRANCH_STEPS.
-      esFinalRama = true;
+  if (limitReached) addMessage(t('limitReachedBranch'), 'ai', 'err');
+  if (errorMsg) addMessage(errorMsg, 'ai', 'err');
+
+  // Solo si tras el reintento la IA SIGUE repitiendo, se cierra el caso
+  // (convergiendo) sin añadir el duplicado.
+  if (dupPersistente) {
+    if (autoGenerateAll) {
+      addMessage(t('dupBranchStepDetected', { branch: branch.nombre }), 'ai', 'err');
+      if (branchIdx + 1 < gatewayStep.branches.length) await startBranchStepFlow(gatewayStep, branchIdx + 1);
+      else await finishBranches(gatewayStep);
+      return;
     }
-  } else {
-    removeTyping();
-    addMessage(t('limitReachedBranch'), 'ai', 'err');
+    esFinalRama = true; // en modo manual la tarjeta propone cerrar el caso; el usuario decide
   }
 
   if (autoGenerateAll) {
@@ -1476,14 +928,7 @@ async function handleConfirmBranchStep(gatewayStep, branchIdx, stepData, esFinal
   }
   addMessage(label, 'user');
 
-  try {
-    const xml = renderDiagramFromState(confirmedStructure, diagramState);
-    window._lastGeneratedXML = xml;
-    await modeler.importXML(xml);
-    container.removeClass('with-error').addClass('with-diagram');
-  } catch(err) {
-    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
-  }
+  if (!await renderAndImport()) return;
 
   if (!esFinalRama) { await startBranchStepFlow(gatewayStep, branchIdx); return; }
 
@@ -1503,14 +948,7 @@ async function finishBranches(gatewayStep) {
     gatewayStep.join = { id: `${gatewayStep.id}_JOIN`, tipo: gatewayStep.tipo, nombre: '', laneIdx: gatewayStep.laneIdx };
   }
 
-  try {
-    const xml = renderDiagramFromState(confirmedStructure, diagramState);
-    window._lastGeneratedXML = xml;
-    await modeler.importXML(xml);
-    container.removeClass('with-error').addClass('with-diagram');
-  } catch(err) {
-    addMessage(t('errDiagramUpdate', { msg: err.message }), 'ai', 'err'); return;
-  }
+  if (!await renderAndImport()) return;
 
   if (converge) {
     addMessage(t('casesCompletedConverge', { name: gatewayStep.nombre }), 'ai');
@@ -1522,35 +960,23 @@ async function finishBranches(gatewayStep) {
 }
 
 // ─── PASO 4: REFINAMIENTO (LLM para modificaciones textuales) ───────────────
-function buildRefinementSystemPrompt() {
-  return `Eres un experto BPMN 2.0. Modifica el diagrama según la instrucción del usuario.
-Devuelve SOLO XML válido completo (desde <?xml hasta </definitions>), sin texto ni markdown.
-Mantén todos los pools, lanes, sendTasks y messageFlows existentes.
-Añade o modifica solo lo que el usuario pida.${langDirective()}`;
-}
-
 async function handleRefine(instruction) {
-  const apiKey = DEFAULT_API_KEY;
-
   const sendBtn = document.getElementById('ai-send'); sendBtn.disabled = true;
   addTyping();
   try {
-    // Usamos el XML programático como base (evitamos el prefijo bpmn: de modeler.saveXML)
-    const currentXML = renderDiagramFromState(confirmedStructure, diagramState);
-    const rawXML = await callAPI(apiKey, buildRefinementSystemPrompt(),
-      [{ role: 'user', content: `Diagrama actual:\n${currentXML}\n\nModificación: "${instruction}"` }]);
+    const { xml } = await callTool('refine_diagram', {
+      structure: confirmedStructure, diagramState, instruction, lang: getLang()
+    });
     removeTyping();
-    const xml = cleanXML(rawXML);
     await modeler.importXML(xml);
     container.removeClass('with-error').addClass('with-diagram');
     addMessage(t('diagramModified'), 'ai', 'ok');
-  } catch(err) { removeTyping(); addMessage(t('errorPrefix', { msg: err.message }), 'ai', 'err'); }
+  } catch(err) { removeTyping(); addMessage(err.message, 'ai', 'err'); }
   finally { sendBtn.disabled = false; updateUI(); }
 }
 
 // ─── DISPATCHER ──────────────────────────────────────────────────────────────
 async function handleSend() {
-  const apiKey  = DEFAULT_API_KEY;
   const input   = document.getElementById('ai-scenario').value.trim();
   const sendBtn = document.getElementById('ai-send');
 
@@ -1629,7 +1055,7 @@ function showPervalActorSelect(clientActors, collaboratorActors, onSelect) {
   });
 }
 
-async function runPervalAnalysis(apiKey, actorName) {
+async function runPervalAnalysis(actorName) {
   const pervalBtn = document.getElementById('ai-perval-btn');
   pervalBtn.disabled = true;
   addTyping();
@@ -1649,32 +1075,24 @@ async function runPervalAnalysis(apiKey, actorName) {
     }
     if (tasks.length === 0) { removeTyping(); addMessage(t('noElementsToAnalyze'), 'ai', 'err'); return; }
 
-    const systemPrompt = buildPervalSystemPrompt(actorName, scope);
-    const rawResponse  = await callAPI(apiKey, systemPrompt,
-      [{ role: 'user', content: buildPervalUserMessage(currentXML, tasks, actorName, scope) }]);
+    const { data } = await callTool('analyze_perval', { xml: currentXML, tasks, actorName, scope, lang: getLang() });
     removeTyping();
-
-    let data;
-    try { const m = rawResponse.match(/\{[\s\S]*\}/); data = JSON.parse(m ? m[0] : rawResponse); }
-    catch(e) { addMessage(t('pervalParseError'), 'ai', 'err'); return; }
 
     showPervalResults(data, actorName);
     pervalAnalisado = true;
-  } catch(err) { removeTyping(); addMessage(t('pervalError', { msg: err.message }), 'ai', 'err'); }
+  } catch(err) { removeTyping(); addMessage(err.message, 'ai', 'err'); }
   finally { pervalBtn.disabled = false; updateUI(); }
 }
 
 async function analyzePerval() {
-  const apiKey = DEFAULT_API_KEY;
-
   const ext = confirmedStructure?.poolExterno || [];
   const clientActors       = ext.filter(p => p.rol === 'cliente').map(p => p.nombre);
   const collaboratorActors = ext.filter(p => p.rol !== 'cliente').map(p => p.nombre);
 
   if (ext.length > 0) {
-    showPervalActorSelect(clientActors, collaboratorActors, actorName => runPervalAnalysis(apiKey, actorName));
+    showPervalActorSelect(clientActors, collaboratorActors, actorName => runPervalAnalysis(actorName));
   } else {
-    runPervalAnalysis(apiKey, null);
+    runPervalAnalysis(null);
   }
 }
 
@@ -1694,45 +1112,6 @@ function extractTasksFromXML(xml) {
     });
     return [...new Set(tasks)];
   } catch(e) { return []; }
-}
-
-function buildPervalSystemPrompt(actorName, scope) {
-  const actorCtx = actorName
-    ? `FOCO: analiza SOLO los elementos que tienen impacto directo o indirecto en la experiencia de "${actorName}". Ignora los elementos puramente internos sin relación con este actor.`
-    : `Analiza todos los elementos indicados.`;
-  const scopeCtx = scope === 'entregas'
-    ? `El valor percibido se calcula sobre LO QUE LA EMPRESA DEVUELVE/ENVÍA AL CLIENTE (mensajes,
-confirmaciones, notificaciones, entregables...), identificado a partir de los flujos de mensaje
-hacia el participante externo del cliente. NO evalúes tareas puramente internas que no generan
-ninguna comunicación o entrega hacia el cliente.`
-    : `No se han identificado comunicaciones o entregas explícitas hacia un participante externo
-cliente, así que se analizan todas las tareas del proceso.`;
-  return `Eres un experto en análisis de valor percibido PERVAL (Sweeney y Soutar, 2001) aplicado a e-commerce.
-
-${scopeCtx}
-
-${actorCtx}
-
-DIMENSIONES PERVAL:
-- Quality (Calidad): fiabilidad, seguridad, rendimiento, satisfacción del servicio
-- Price (Precio): ahorro económico, transparencia de costes, relación calidad-precio
-- Emotional (Emocional): conveniencia, facilidad, personalización, bienestar, tranquilidad
-- Social (Social): reconocimiento, accesibilidad, flexibilidad de entrega/pago
-
-Elementos sin impacto en el actor → clasifícalos como "Interno".
-
-RESPONDE ÚNICAMENTE con JSON:
-{
-  "tareas": [{"nombre":"...","dimensiones":["Quality"],"valor":"...","justificacion":"..."}],
-  "resumen": {"Quality":"...","Price":"...","Emotional":"...","Social":"..."},
-  "valorGeneral": "..."
-}${langDirective()}`;
-}
-
-function buildPervalUserMessage(xml, tasks, actorName, scope) {
-  const actorLine = actorName ? `\nActor a analizar: ${actorName}` : '';
-  const header = scope === 'entregas' ? 'ENTREGAS/COMUNICACIONES DE LA EMPRESA AL CLIENTE:' : 'TAREAS DEL PROCESO:';
-  return `${header}${actorLine}\n${tasks.map((t,i)=>`${i+1}. ${t}`).join('\n')}\n\nXML BPMN:\n${xml}`;
 }
 
 // Extrae los nombres de los elementos del proceso que envían algo al participante

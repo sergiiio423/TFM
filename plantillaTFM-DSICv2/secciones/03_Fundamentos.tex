@@ -1,0 +1,60 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Inicio del capítulo de fundamentos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Fundamentos}
+
+En este capítulo se introducen los conceptos teóricos y tecnológicos necesarios para comprender el resto del trabajo: los modelos de lenguaje de gran escala (LLMs) y su funcionamiento, el estándar BPMN y su notación básica, y la clasificación PERVAL para el análisis del valor percibido por el cliente.
+
+%%---------------------------------------------------------
+\section{Modelos de lenguaje de gran escala (LLMs)}
+%%---------------------------------------------------------
+
+Los modelos de lenguaje de gran escala (LLMs) son modelos de aprendizaje profundo entrenados sobre grandes volúmenes de texto con el objetivo de aprender una representación estadística del lenguaje natural que les permite predecir, generar y comprender secuencias de texto coherentes con su contexto.
+
+La mayoría de los LLMs actuales se basan en la arquitectura \textit{transformer}, propuesta por Vaswani et al. \cite{vaswani2017}, que sustituye las redes recurrentes empleadas tradicionalmente en el procesamiento del lenguaje natural por un mecanismo de \textit{self-attention} (auto-atención). Este mecanismo permite al modelo ponderar, para cada palabra o fragmento de texto (\textit{token}) de una secuencia, la relevancia del resto de elementos de dicha secuencia, lo que facilita capturar dependencias de largo alcance entre palabras de forma eficiente y paralelizable.
+
+El entrenamiento de estos modelos se organiza habitualmente en dos fases. En primer lugar, una fase de \textit{pre-training} (preentrenamiento), en la que el modelo aprende a predecir el siguiente \textit{token} de una secuencia a partir de grandes corpus de texto no etiquetado, adquiriendo así un conocimiento general del lenguaje, de hechos y de patrones de razonamiento. En segundo lugar, opcionalmente, una fase de \textit{fine-tuning} (ajuste fino), en la que el modelo se especializa en tareas concretas mediante conjuntos de datos más reducidos y específicos. Brown et al. \cite{brown2020} mostraron que, a partir de una determinada escala de parámetros, los LLMs son capaces de resolver nuevas tareas a partir de unos pocos ejemplos incluidos en el propio texto de entrada, sin necesidad de reentrenamiento, mediante lo que se denomina \textit{few-shot learning} o, de forma más general, \textit{in-context learning} (aprendizaje en contexto).
+
+La forma habitual de interactuar con un LLM consiste en proporcionarle una instrucción en lenguaje natural, denominada \textit{prompt}, que describe la tarea a realizar y, opcionalmente, el formato esperado de la respuesta. La calidad y precisión de la salida generada depende en gran medida de cómo se formula dicho \textit{prompt}, así como del contexto e instrucciones adicionales que se le proporcionen, dando lugar a la disciplina conocida como \textit{prompt engineering}.
+
+Estas capacidades resultan especialmente relevantes para el presente TFM, ya que permiten que un LLM interprete descripciones de procesos de negocio expresadas en lenguaje natural y genere, a partir de ellas, representaciones estructuradas como modelos BPMN, así como que mantenga un diálogo iterativo con el usuario para refinar dichos modelos a partir de nuevas instrucciones. La aplicación de estas capacidades al ámbito de la gestión de procesos de negocio ha sido objeto de evaluación en trabajos recientes \cite{kourani2025evaluating,kourani2024process,klievtsova2023,abb2023,bise2025bpmn,fillies2024}, cuyo análisis se aborda en detalle en el capítulo de Estado del Arte.
+
+%%---------------------------------------------------------
+\section{BPMN: notación y modelado de procesos de negocio}
+%%---------------------------------------------------------
+
+BPMN es un estándar de modelado gráfico, mantenido por el \textit{Object Management Group} (OMG), que proporciona una notación común para representar procesos de negocio de forma comprensible tanto para perfiles de negocio como técnicos \cite{omg2011bpmn}. Su objetivo principal es ofrecer una notación gráfica fácilmente entendible por todos los usuarios involucrados, desde los analistas que elaboran los borradores iniciales de los procesos hasta los desarrolladores responsables de implementar la tecnología que los ejecutará \cite{dumas2018fundamentals}.
+
+Un diagrama BPMN (\textit{Business Process Diagram}, BPD) se construye a partir de cuatro categorías básicas de elementos:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Objetos de flujo} (\textit{flow objects}): incluyen los \textit{events} (eventos), representados mediante círculos y que indican algo que sucede durante el proceso (inicio, fin o eventos intermedios); las \textit{activities} (actividades), representadas mediante rectángulos de esquinas redondeadas y que representan el trabajo realizado; y los \textit{gateways} (compuertas), representados mediante rombos y que controlan la divergencia y convergencia del flujo, por ejemplo mediante compuertas exclusivas, paralelas o inclusivas.
+    \item[$\bullet$] \textbf{Objetos de conexión} (\textit{connecting objects}): incluyen los \textit{sequence flows} (flujos de secuencia), que indican el orden de ejecución de las actividades; los \textit{message flows} (flujos de mensaje), que representan el intercambio de información entre participantes; y las \textit{associations} (asociaciones), que vinculan artefactos a otros elementos del diagrama.
+    \item[$\bullet$] \textbf{Carriles} (\textit{swimlanes}): los \textit{pools} y \textit{lanes} permiten organizar gráficamente las actividades según el participante o el rol responsable de su ejecución.
+    \item[$\bullet$] \textbf{Artefactos} (\textit{artifacts}): elementos adicionales, como los \textit{data objects} (objetos de datos), los \textit{groups} (grupos) o las \textit{annotations} (anotaciones), que aportan información complementaria sin afectar al flujo del proceso.
+\end{itemize}
+
+Además de su representación gráfica, la especificación BPMN 2.0 define un formato de intercambio basado en XML que permite serializar, almacenar e intercambiar modelos de proceso entre distintas herramientas de modelado \cite{omg2011bpmn}. Esta característica es fundamental para el presente TFM, ya que el LLM integrado en la extensión genera y modifica los modelos de proceso directamente en este formato XML, que posteriormente es interpretado y renderizado por bpmn.io para su visualización y edición dentro del entorno de modelado.
+
+%%---------------------------------------------------------
+\section{La clasificación PERVAL}
+%%---------------------------------------------------------
+
+La clasificación PERVAL (\textit{Perceived Value}) fue propuesta por Sweeney y Soutar \cite{sweeney2001perval} como una escala multidimensional para medir el valor percibido por el cliente en relación con un producto o servicio, entendido como la valoración global que realiza el cliente sobre la utilidad de dicho producto o servicio en función de lo que recibe y lo que entrega a cambio.
+
+La escala PERVAL identifica cuatro dimensiones del valor percibido:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Valor emocional} (\textit{emotional value}): utilidad derivada de los sentimientos o estados afectivos que genera el producto o servicio en el cliente.
+    \item[$\bullet$] \textbf{Valor social} (\textit{social value}): utilidad derivada de la capacidad del producto o servicio para mejorar la autoimagen o el reconocimiento social del cliente.
+    \item[$\bullet$] \textbf{Valor de calidad/rendimiento} (\textit{quality/performance value}): utilidad derivada de la calidad percibida y del rendimiento esperado del producto o servicio.
+    \item[$\bullet$] \textbf{Valor del precio} (\textit{price/value for money}): utilidad derivada del producto o servicio en relación con su coste, es decir, la percepción de obtener un buen retorno por el dinero invertido.
+\end{itemize}
+
+En el contexto de este TFM, la clasificación PERVAL se emplea para analizar las actividades de un proceso de negocio modelado en BPMN e identificar qué actividades contribuyen a la generación de cada uno de estos tipos de valor desde la perspectiva del cliente. Esto permite detectar posibles desalineamientos entre el valor diseñado por la organización y el valor efectivamente percibido por el usuario durante su interacción con el proceso, tal y como se ha planteado en la motivación de este trabajo.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Final del capítulo de fundamentos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

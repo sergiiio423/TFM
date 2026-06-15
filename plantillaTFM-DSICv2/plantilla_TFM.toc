@@ -25,17 +25,17 @@
 \contentsline {section}{\numberline {4.2}Análisis del marco legal y ético}{19}{section.4.2}%
 \contentsline {subsection}{\numberline {4.2.1}Protección de datos}{21}{subsection.4.2.1}%
 \contentsline {subsection}{\numberline {4.2.2}Propiedad intelectual y licencias}{21}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Consideraciones éticas}{22}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.3}Consideraciones éticas}{21}{subsection.4.2.3}%
 \contentsline {section}{\numberline {4.3}Identificación y análisis de soluciones posibles}{22}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Selección del editor BPMN base}{23}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.1}Selección del editor BPMN base}{22}{subsection.4.3.1}%
 \contentsline {subsection}{\numberline {4.3.2}Selección del proveedor de LLM}{23}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Arquitectura de integración: extensión directa frente a servidor MCP}{24}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{25}{subsection.4.3.4}%
-\contentsline {section}{\numberline {4.4}Solución propuesta}{26}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Requisitos funcionales}{26}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Requisitos no funcionales}{27}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}Historias de usuario}{28}{subsection.4.4.3}%
-\contentsline {section}{\numberline {4.5}Plan de trabajo}{33}{section.4.5}%
+\contentsline {subsection}{\numberline {4.3.3}Arquitectura de integración: extensión directa frente a servidor MCP}{23}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{24}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}Solución propuesta}{25}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Requisitos funcionales}{25}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Requisitos no funcionales}{26}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Historias de usuario}{27}{subsection.4.4.3}%
+\contentsline {section}{\numberline {4.5}Plan de trabajo}{32}{section.4.5}%
 \contentsline {chapter}{Bibliografía}{36}{chapter*.5}%
 \contentsline {chapter}{Anexo I}{37}{appendix*.6}%
 \contentsline {chapter}{Anexo II}{39}{appendix*.7}%

@@ -90,59 +90,64 @@ Pasos confirmados hasta ahora (en orden cronológico):
 ${resumen}
 
 ¿Cuál es el SIGUIENTE paso del proceso, según la descripción? Indica:
-- "tipo": uno de task | sendTask | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | timerEvent | endMessageEvent | exclusiveGateway | parallelGateway | inclusiveGateway
+- "tipo": uno de userTask | serviceTask | sendTask | exclusiveGateway | parallelGateway | inclusiveGateway | timerEvent | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | endMessageEvent | errorEndEvent | task
 - "nombre": nombre breve del paso
 - "lane": departamento que lo realiza (uno de los departamentos listados)
-- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre (uno de los actores externos); si no, null
-- "esFinal": true si DESPUÉS de este paso el proceso TERMINA (se añadirá un evento de fin automáticamente)
+- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre; si no, null
+- "esFinal": true si DESPUÉS de este paso el proceso TERMINA
 
-MUY IMPORTANTE — pasos que ENVÍAN algo a un actor externo:
-- Si el paso consiste en ENVIAR un mensaje, notificación, confirmación, factura, aviso o
-  cualquier información a un actor externo (p.ej. el cliente), el "tipo" NUNCA puede ser "task":
-  usa "sendTask" (tarea de envío de mensaje) si el proceso continúa después, o "endMessageEvent"
-  si el proceso termina con ese envío, y rellena SIEMPRE "actorExterno" con el destinatario.
+═══ TIPO DE ELEMENTO — REGLAS OBLIGATORIAS (aplica en orden) ═══
 
-Usa "compensationEvent" (Evento Intermedio de Compensación) cuando el proceso deba deshacer o
-revertir una acción anterior (p.ej. anular un cargo ya realizado tras una cancelación).
-Usa "timerEvent" (Evento Intermedio de Temporizador) cuando el proceso deba ESPERAR un periodo
-de tiempo o hasta un momento determinado antes de continuar (p.ej. "esperar 1 día", "1,5 horas
-antes de la entrega").
-Usa "endMessageEvent" (Evento de Fin de Mensaje) cuando el ÚLTIMO paso del proceso consista en
-ENVIAR un mensaje/notificación final (confirmación, factura, ticket...) y el proceso termine EN
-ESE MISMO momento, en lugar de modelar una tarea de envío seguida de un evento de Fin aparte. Si
-usas "endMessageEvent", "esFinal" debe ser true y, si el mensaje va a un actor externo (p.ej. el
-cliente), indícalo en "actorExterno".
+▸ GATEWAYS — modela SIEMPRE la estructura real del proceso:
+  • "exclusiveGateway" (XOR): cuando el proceso llega a una CONDICIÓN O DECISIÓN que lo bifurca
+    en caminos MUTUAMENTE EXCLUYENTES (solo se sigue UNO). Señales: "si…", "en caso de…",
+    "dependiendo de…", "cuando…", "según si…". NUNCA ignores una bifurcación real.
+  • "parallelGateway" (AND): cuando varias actividades ocurren EN PARALELO o SIMULTÁNEAMENTE y
+    TODAS deben completarse. Señales: "al mismo tiempo", "en paralelo", "simultáneamente",
+    "mientras tanto", "a la vez". OBLIGATORIO cuando el proceso divide en ramas concurrentes.
+  • "inclusiveGateway" (OR): cuando se pueden seguir UNO O VARIOS caminos según condiciones no
+    excluyentes. Señales: "según lo que corresponda", "los que apliquen", "uno o más de…".
+  Si hay una bifurcación o paralelismo en este punto → pon el gateway AHORA, no en otro paso.
 
-PRESTA ESPECIAL ATENCIÓN A LAS DECISIONES Y RAMIFICACIONES DE LA DESCRIPCIÓN:
-- Si, llegados a este punto del proceso, existe una condición que hace que el proceso siga
-  caminos DISTINTOS según el caso (p.ej. "si hay stock... si no hay stock...", "según el método
-  de pago", "el pedido puede ser aprobado o rechazado", "dependiendo de si el cliente...", "en
-  caso de que..."), el SIGUIENTE paso DEBE ser una puerta
-  "exclusiveGateway" (XOR) que represente esa decisión — NO sigas con una tarea que ignore la
-  ramificación ni la des por hecha.
-- Si la descripción indica que, llegados a este punto, dos o más actividades ocurren EN PARALELO
-  o SIMULTÁNEAMENTE (p.ej. "al mismo tiempo", "en paralelo", "simultáneamente", "mientras tanto"),
-  el SIGUIENTE paso DEBE ser una puerta "parallelGateway" (AND).
-- Si la condición permite que se sigan UNO O VARIOS caminos a la vez (no excluyentes entre sí,
-  p.ej. "según lo que haya pedido el cliente se prepara comida y/o bebida", "se aplican los
-  descuentos que correspondan"), usa "inclusiveGateway" (OR) en lugar de XOR/AND.
-- Elige bien entre los tres tipos de puerta: "exclusiveGateway" (XOR, solo UN camino),
-  "parallelGateway" (AND, TODOS los caminos), "inclusiveGateway" (OR, uno o varios caminos).
-- Usa puertas SOLO para decisiones o paralelismos reales, descritos explícita o implícitamente
-  en la descripción; no las inventes si el proceso es estrictamente secuencial sin alternativas.
-- No conviertas un proceso con bifurcaciones en una simple secuencia lineal de tareas: cuando la
-  narrativa llegue a un punto de decisión o de paralelismo, modélalo con el gateway adecuado en
-  ESE momento, no más adelante ni nunca.
+▸ TAREAS — clasifica según quién ejecuta la acción:
+  • "userTask": OBLIGATORIO cuando la acción la realiza una PERSONA (empleado, agente, operario…).
+    Incluye: revisar, aprobar, gestionar, tramitar, atender, validar manualmente, seleccionar,
+    contactar, introducir datos, tomar una decisión, rellenar formulario, inspeccionar físicamente.
+    → Si una persona interviene, SIEMPRE "userTask". NUNCA uses "task" para acciones humanas.
+  • "serviceTask": OBLIGATORIO cuando la acción la realiza el SISTEMA de forma automática, sin
+    intervención humana. Incluye: consultar API, actualizar base de datos, generar documento,
+    procesar pago automáticamente, enviar petición a sistema externo, calcular, transformar datos,
+    integrar sistemas, lanzar webhook, sincronizar inventario.
+    → Si es un sistema automático, SIEMPRE "serviceTask". NUNCA uses "task" para tareas del sistema.
+  • "sendTask": OBLIGATORIO para ENVIAR un mensaje, notificación, email, SMS, confirmación,
+    factura o aviso a un actor EXTERNO cuando el proceso continúa después. Rellena "actorExterno".
+  • "task": SOLO como último recurso si la acción es genuinamente ambigua (ni claramente humana
+    ni claramente automática). En la mayoría de procesos de e-commerce no debería aparecer.
 
-REGLAS:
+▸ EVENTOS INTERMEDIOS — insértalos cuando el proceso necesita esperar o revertir:
+  • "timerEvent": OBLIGATORIO cuando el proceso debe ESPERAR un plazo de tiempo antes de
+    continuar. Señales: "esperar X días/horas", "al cabo de…", "tras N días laborables",
+    "en un plazo de…", "después de…", "pasado el periodo de…", "antes del vencimiento".
+    → Siempre que haya una espera temporal explícita o implícita, modélala con timerEvent.
+  • "compensationEvent": cuando hay que DESHACER o REVERTIR una acción anterior (anular cargo,
+    revertir reserva, devolver stock…).
+  • "intermediateCatchEvent": espera de un mensaje entrante de un actor externo.
+  • "intermediateThrowEvent": lanza un mensaje a un actor externo sin terminar el proceso.
+
+▸ EVENTOS DE FIN especiales:
+  • "endMessageEvent": el proceso TERMINA ENVIANDO un mensaje/notificación final a un actor
+    externo (confirmación de pedido, factura, ticket…). "esFinal" debe ser true.
+  • "errorEndEvent": el proceso TERMINA con error irrecuperable (pago rechazado definitivamente,
+    fraude detectado, cancelación sin solución…). "esFinal" es true automáticamente.
+
+REGLAS ADICIONALES:
 - Si no hay actores externos, "actorExterno" debe ser siempre null.
-- PROHIBIDO repetir un paso ya confirmado (ni el mismo nombre ni una variante del mismo paso):
-  los pasos listados arriba YA ESTÁN en el diagrama. Si la descripción no contiene ningún paso
-  NUEVO después de los confirmados, devuelve el último paso real con "esFinal": true en vez de
-  inventar o repetir pasos.
+- PROHIBIDO repetir un paso ya confirmado. Si no quedan pasos nuevos, devuelve el último paso
+  real con "esFinal": true.
+- "nombre" DEBE ser descriptivo y específico. PROHIBIDO: "Siguiente paso", "Tarea", "Actividad".
 
 RESPONDE SOLO con JSON (sin texto adicional):
-{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinal":false}${langDirective()}`;
+{"siguiente":{"tipo":"userTask","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinal":false}${langDirective()}`;
 }
 
 /**
@@ -194,25 +199,41 @@ Pasos confirmados de ESTA rama hasta ahora:
 ${resumen}
 
 ¿Cuál es el SIGUIENTE paso de esta rama, según la descripción? Indica:
-- "tipo": uno de task | sendTask | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | timerEvent | endMessageEvent
+- "tipo": uno de userTask | serviceTask | sendTask | timerEvent | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | endMessageEvent | errorEndEvent | task
   (NO se permiten gateways dentro de una rama)
 - "nombre": nombre breve del paso
 - "lane": departamento que lo realiza (uno de los departamentos listados)
-- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre (uno de los actores externos); si no, null
+- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre; si no, null
 - "esFinalRama": true si este es el ÚLTIMO paso de esta rama
-- "terminaProceso": SOLO relevante si esFinalRama es true. true si el proceso COMPLETO termina en esta
-  rama (se añadirá un evento de Fin propio); false si la rama CONVERGE con las demás y el proceso
-  continúa después de la puerta de unión.
+- "terminaProceso": SOLO si esFinalRama es true. true si el proceso COMPLETO termina aquí; false si converge.
 
-Usa "endMessageEvent" (Evento de Fin de Mensaje) cuando esta rama termine ENVIANDO un mensaje
-final (p.ej. al cliente) y el proceso completo acabe ahí mismo: en ese caso "esFinalRama" y
-"terminaProceso" deben ser true, y "actorExterno" indica el destinatario si procede.
+═══ TIPO DE ELEMENTO — REGLAS OBLIGATORIAS (aplica en orden) ═══
 
-MUY IMPORTANTE — pasos que ENVÍAN algo a un actor externo:
-- Si el paso consiste en ENVIAR un mensaje, notificación, confirmación, factura, aviso o
-  cualquier información a un actor externo (p.ej. el cliente), el "tipo" NUNCA puede ser "task":
-  usa "sendTask" si la rama continúa después, o "endMessageEvent" si el proceso termina con ese
-  envío, y rellena SIEMPRE "actorExterno" con el destinatario.
+▸ TAREAS — clasifica según quién ejecuta:
+  • "userTask": OBLIGATORIO cuando la acción la realiza una PERSONA (revisar, aprobar, gestionar,
+    tramitar, atender, validar manualmente, contactar, rellenar, inspeccionar, tomar una decisión).
+    → NUNCA uses "task" para acciones que realiza una persona.
+  • "serviceTask": OBLIGATORIO cuando la acción la realiza el SISTEMA automáticamente (consultar
+    API, actualizar BBDD, generar documento, procesar automáticamente, sincronizar, calcular,
+    integrar sistemas, lanzar webhook). → NUNCA uses "task" para acciones automáticas del sistema.
+  • "sendTask": OBLIGATORIO para ENVIAR mensaje/notificación/email a un actor EXTERNO cuando la
+    rama continúa. Rellena siempre "actorExterno".
+  • "task": SOLO si la acción es genuinamente ambigua (ni claramente humana ni automática).
+
+▸ EVENTOS INTERMEDIOS:
+  • "timerEvent": OBLIGATORIO cuando la rama debe ESPERAR un plazo de tiempo (esperar X días,
+    al cabo de N horas, tras el periodo de…, antes del vencimiento…).
+  • "compensationEvent": deshacer/revertir una acción anterior de esta rama.
+  • "intermediateCatchEvent": esperar un mensaje de un actor externo.
+  • "intermediateThrowEvent": lanzar un mensaje a un actor externo sin terminar la rama.
+
+▸ EVENTOS DE FIN de rama (implican esFinalRama=true y terminaProceso=true):
+  • "endMessageEvent": esta rama TERMINA enviando un mensaje/notificación final a un actor externo.
+  • "errorEndEvent": esta rama TERMINA con error irrecuperable (pago rechazado, fraude, cancelación sin solución…).
+
+MUY IMPORTANTE — ENVÍOS a actores externos:
+- NUNCA uses "task" para enviar algo a un actor externo. Usa "sendTask" si la rama continúa,
+  o "endMessageEvent" si termina con ese envío. Rellena siempre "actorExterno".
 
 REGLAS:
 - Si no hay actores externos, "actorExterno" debe ser siempre null.
@@ -220,9 +241,12 @@ REGLAS:
   los pasos listados arriba YA ESTÁN en el diagrama. Si la descripción no contiene ningún paso
   NUEVO para esta rama, devuelve el último paso real con "esFinalRama": true en vez de inventar
   o repetir pasos.
+- El "nombre" del paso DEBE ser descriptivo y específico (p.ej. "Preparar pedido parcial",
+  "Notificar falta de stock"). PROHIBIDO usar nombres genéricos como "Siguiente paso",
+  "Next step", "Tarea", "Actividad", "Paso" o similares.
 
 RESPONDE SOLO con JSON (sin texto adicional):
-{"siguiente":{"tipo":"task","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinalRama":false,"terminaProceso":false}${langDirective()}`;
+{"siguiente":{"tipo":"userTask","nombre":"...","lane":"${lanes[0]}","actorExterno":null},"esFinalRama":false,"terminaProceso":false}${langDirective()}`;
 }
 
 /** Prompt de sistema corto reutilizado en las llamadas "rápidas" (inicio, siguiente paso, ramas). */

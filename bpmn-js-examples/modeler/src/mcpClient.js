@@ -33,7 +33,7 @@ function getClient() {
  */
 export async function callTool(name, args) {
   const client = await getClient();
-  const result = await client.callTool({ name, arguments: args });
+  const result = await client.callTool({ name, arguments: args }, undefined, { timeout: 180000 });
   if (result.isError) {
     throw new Error(result.content?.[0]?.text || 'Error MCP desconocido');
   }

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { setLang, t } from '../../../src/i18n.js';
 import { getApiKey, callAPI, parseLLMJson } from '../llm.js';
 import { buildNextStepPrompt, bpmnJsonExpertPrompt } from '../prompts.js';
-import { normStepName, normalizeSuggestion } from '../stepUtils.js';
+import { normStepName, normalizeSuggestion, isPlaceholderName } from '../stepUtils.js';
 import { MAX_FLOW_STEPS } from '../constants.js';
 
 export const name = 'suggest_next_step';
@@ -37,7 +37,7 @@ export const config = {
 export async function handler({ description, lanes, externalActors, steps, lang }) {
   setLang(lang);
 
-  const mainSteps = steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent');
+  const mainSteps = steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent' && s.tipo !== 'errorEndEvent');
 
   let suggestion = { tipo: 'task', nombre: t('defaultNextStepName'), lane: lanes[0], actorExterno: null };
   let esFinal = mainSteps.length >= MAX_FLOW_STEPS;
@@ -57,10 +57,17 @@ export async function handler({ description, lanes, externalActors, steps, lang 
         const reply = await callAPI(getApiKey(), bpmnJsonExpertPrompt(), [{ role: 'user', content: prompt }]);
         const data = parseLLMJson(reply);
         if (data.siguiente) suggestion = normalizeSuggestion(data.siguiente);
+        if (!suggestion.lane) suggestion.lane = lanes[0] ?? '';
         esFinal = !!data.esFinal;
-        if (!usados.includes(normStepName(suggestion.nombre))) { dupPersistente = false; break; }
+        const esPlaceholder = isPlaceholderName(suggestion.nombre);
+        const esDup = usados.includes(normStepName(suggestion.nombre));
+        if (!esPlaceholder && !esDup) { dupPersistente = false; break; }
         dupPersistente = true;
-        prompt += `\n\nATENCIÓN: sugeriste "${suggestion.nombre}", que YA ESTÁ en el diagrama (paso confirmado). Sugiere el siguiente paso DIFERENTE y NUEVO según la descripción; si ya no quedan pasos nuevos, devuelve el último paso pendiente con "esFinal": true.`;
+        if (esPlaceholder) {
+          prompt += `\n\nATENCIÓN: el nombre "${suggestion.nombre}" es demasiado genérico. Escribe el NOMBRE ESPECÍFICO del paso según la descripción del proceso (p.ej. "Verificar disponibilidad de stock", "Notificar al cliente"...). NUNCA uses nombres como "Siguiente paso", "Tarea" o similares.`;
+        } else {
+          prompt += `\n\nATENCIÓN: sugeriste "${suggestion.nombre}", que YA ESTÁ en el diagrama (paso confirmado). Sugiere el siguiente paso DIFERENTE y NUEVO según la descripción; si ya no quedan pasos nuevos, devuelve el último paso pendiente con "esFinal": true.`;
+        }
       }
     } catch (e) {
       errorMsg = t('errorPrefix', { msg: e.message });
@@ -74,6 +81,7 @@ export async function handler({ description, lanes, externalActors, steps, lang 
   }
 
   normalizeSuggestion(suggestion);
+  if (suggestion.lane == null) suggestion.lane = lanes[0] || '';
 
   const result = { suggestion, esFinal, dupPersistente, limitReached, errorMsg };
   return { content: [{ type: 'text', text: JSON.stringify(result) }], structuredContent: result };

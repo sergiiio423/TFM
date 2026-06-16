@@ -255,6 +255,15 @@
 
     .hint { font-size: 10px; color: rgba(100,160,210,0.38); text-align: center; letter-spacing: 0.2px; }
 
+    .provider-notice {
+      font-size: 9.5px; line-height: 1.45; text-align: center;
+      color: rgba(100,160,210,0.45);
+      background: rgba(14,165,233,0.04);
+      border: 1px solid rgba(14,165,233,0.1);
+      border-radius: 7px; padding: 5px 8px;
+      margin-top: 2px;
+    }
+
     /* ── Value mapping card ── */
     .value-bubble {
       max-width: 100% !important; width: 100%; padding: 12px 14px !important;
@@ -447,7 +456,7 @@
     <!-- Input + botones -->
     <div class="ai-input-area" id="ai-free-input">
       <div class="ai-textarea-row">
-        <textarea id="ai-scenario" rows="2"
+        <textarea id="ai-scenario" rows="4"
           placeholder="Describe el proceso de negocio que quieres modelar..."></textarea>
         <button id="ai-mic" type="button" title="Hablar para dictar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -466,6 +475,7 @@
       <button id="ai-add-info-btn" class="btn-send btn-outline" style="display:none">➕ Añadir información</button>
       <button id="ai-perval-btn">🔍 Analizar valor PERVAL</button>
       <div class="hint" id="ai-hint">Ctrl+Enter para enviar</div>
+      <div class="provider-notice" id="ai-provider-notice"></div>
     </div>
   </div>
 

@@ -10,6 +10,7 @@ export const I18N = {
     langSwitchTitle: 'Cambiar idioma',
     micTitle:        'Hablar para dictar',
     micUnavailable:  'El reconocimiento de voz no está disponible en este navegador',
+    providerNotice:  'ℹ️ El contenido que introduzcas se envía a GitHub Models (Azure / OpenAI) para generar el diagrama. No compartas datos confidenciales.',
     phase1: '1·Usuarios',
     phase2: '2·Funcionalidad',
     phase3: '3·Valores',
@@ -17,18 +18,11 @@ export const I18N = {
 
     // ── Mensajes de bienvenida ──
     welcomeInitial:
-      '¡Hola! Vamos a construir tu diagrama BPMN paso a paso.<br><br>' +
-      '<b>Para empezar</b>, cuéntame en un solo mensaje:<br>' +
-      '• <b>Quiénes participan</b> en el proceso: tus clientes, proveedores, transportistas y los departamentos internos de tu empresa.<br>' +
-      '• <b>Cómo funciona el proceso</b>: qué hace cada uno, qué decisiones se toman y qué mensajes se intercambian con los actores externos.<br><br>' +
-      'Cuanto más detalle des, más preciso será el resultado. Si más adelante se te olvida algo, podrás añadirlo en cualquier momento con el botón «➕ Añadir información».',
+      '¡Hola! Cuéntame el proceso de negocio que quieres modelar: ' +
+      '<b>quiénes participan</b> y a grandes rasgos <b>qué hace cada uno</b>.<br><br>' +
+      'A partir de ahí construiremos juntos el diagrama BPMN, paso a paso.',
     welcomeReset:
-      '¡Hola! Describe el proceso de e-commerce que quieres modelar.<br><br>' +
-      'El flujo iterativo es:<br>' +
-      '<b>1·</b> Identifico los canales/usuarios del sistema (pools y lanes) → los dibujo<br>' +
-      '<b>2·</b> Defines qué entrega el proceso a cada canal externo<br>' +
-      '<b>3·</b> Genero el diagrama centrado en esas entregas de valor<br>' +
-      '<b>4·</b> Opcionalmente, calculas el valor PERVAL para el canal que elijas',
+      '¡Hola de nuevo! Describe el proceso de negocio que quieres modelar y empezamos.',
 
     // ── updateUI(): textos por fase ──
     describeBtn:               '→ Analizar proceso',
@@ -121,12 +115,15 @@ export const I18N = {
 
     // ── Etiquetas de tipo de elemento ──
     elTask:               'Tarea',
+    elUserTask:           'Tarea de usuario',
+    elServiceTask:        'Tarea de servicio',
     elSendTask:           'Envío',
     elIntermediateCatch:  'Espera msg',
     elIntermediateThrow:  'Lanza msg',
     elCompensation:       'Compensación',
     elTimer:              'Temporizador',
     elEndMessage:         'Fin con mensaje',
+    elErrorEnd:           'Fin con error',
     elExclusiveGw:        'Gateway XOR',
     elParallelGw:         'Gateway AND',
     elInclusiveGw:        'Gateway OR',
@@ -210,6 +207,7 @@ export const I18N = {
     langSwitchTitle: 'Switch language',
     micTitle:        'Speak to dictate',
     micUnavailable:  'Speech recognition is not available in this browser',
+    providerNotice:  'ℹ️ The text you enter is sent to GitHub Models (Azure / OpenAI) to generate the diagram. Do not share confidential data.',
     phase1: '1·Users',
     phase2: '2·Functionality',
     phase3: '3·Values',
@@ -217,18 +215,11 @@ export const I18N = {
 
     // ── Welcome messages ──
     welcomeInitial:
-      "Hello! Let's build your BPMN diagram step by step.<br><br>" +
-      '<b>To get started</b>, tell me in a single message:<br>' +
-      '• <b>Who takes part</b> in the process: your clients, suppliers, carriers and your company\'s internal departments.<br>' +
-      '• <b>How the process works</b>: what each one does, what decisions are made and what messages are exchanged with external actors.<br><br>' +
-      'The more detail you give, the more accurate the result will be. If you forget something later, you can add it at any time with the "➕ Add information" button.',
+      "Hello! Tell me about the business process you want to model: " +
+      '<b>who is involved</b> and roughly <b>what each one does</b>.<br><br>' +
+      "From there we'll build the BPMN diagram together, step by step.",
     welcomeReset:
-      'Hello! Describe the e-commerce process you want to model.<br><br>' +
-      'The iterative flow is:<br>' +
-      "<b>1·</b> I identify the system's channels/users (pools and lanes) → I draw them<br>" +
-      '<b>2·</b> You define what the process delivers to each external channel<br>' +
-      '<b>3·</b> I generate the diagram focused on those value deliveries<br>' +
-      '<b>4·</b> Optionally, you calculate the PERVAL value for the channel you choose',
+      "Hello again! Describe the business process you want to model and let's get started.",
 
     // ── updateUI(): texts per phase ──
     describeBtn:               '→ Analyze process',
@@ -321,12 +312,15 @@ export const I18N = {
 
     // ── Element type labels ──
     elTask:               'Task',
+    elUserTask:           'User task',
+    elServiceTask:        'Service task',
     elSendTask:           'Send',
     elIntermediateCatch:  'Wait msg',
     elIntermediateThrow:  'Throw msg',
     elCompensation:       'Compensation',
     elTimer:              'Timer',
     elEndMessage:         'End with message',
+    elErrorEnd:           'Error end',
     elExclusiveGw:        'XOR Gateway',
     elParallelGw:         'AND Gateway',
     elInclusiveGw:        'OR Gateway',

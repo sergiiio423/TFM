@@ -17,32 +17,62 @@ export function getApiKey() {
 
 export async function callOpenAI(apiKey, systemPrompt, messages) {
   let lastErr = null;
-  for (let k = 0; k < LLM_MODELS.length; k++) {
-    const idx   = (_llmModelIdx + k) % LLM_MODELS.length;
-    const model = LLM_MODELS[idx];
-    let response;
-    try {
-      response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'system', content: systemPrompt }, ...messages],
-          temperature: 0.3,
-          max_tokens: 8000
-        })
-      });
-    } catch(e) { lastErr = e; continue; } // fallo de red: probar el siguiente
-    if (response.ok) {
-      _llmModelIdx = idx;
-      const data = await response.json();
-      return data.choices[0].message.content.trim();
+
+  for (let globalRetry = 0; globalRetry < 3; globalRetry++) {
+    let minWaitMs = 0;
+    let allRateLimited = true;
+
+    for (let k = 0; k < LLM_MODELS.length; k++) {
+      const idx   = (_llmModelIdx + k) % LLM_MODELS.length;
+      const model = LLM_MODELS[idx];
+      let response;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000); // 30s por modelo
+      try {
+        response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'system', content: systemPrompt }, ...messages],
+            temperature: 0.3,
+            max_tokens: 8000
+          }),
+          signal: controller.signal
+        });
+      } catch(e) { clearTimeout(timer); lastErr = e; allRateLimited = false; continue; }
+      clearTimeout(timer);
+
+      if (response.ok) {
+        _llmModelIdx = idx;
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+      }
+
+      const err = await response.json().catch(() => ({}));
+      const msg = err.error?.message || `Error ${response.status} en la API`;
+      console.warn(`Modelo "${model}" no disponible (${msg}), probando con el siguiente...`);
+      lastErr = new Error(msg);
+
+      if (response.status === 429) {
+        // Extraer el tiempo de espera sugerido para agrupar el backoff global
+        const waitMatch = msg.match(/wait (\d+) second/i);
+        if (waitMatch) minWaitMs = Math.max(minWaitMs, parseInt(waitMatch[1]) * 1000);
+      } else {
+        allRateLimited = false;
+      }
     }
-    const err = await response.json().catch(() => ({}));
-    const msg = err.error?.message || `Error ${response.status} en la API`;
-    console.warn(`Modelo "${model}" no disponible (${msg}), probando con el siguiente...`);
-    lastErr = new Error(msg);
+
+    // Si todos los modelos dieron 429, esperar el mínimo sugerido antes de reintentar
+    if (allRateLimited && globalRetry < 2) {
+      const wait = minWaitMs > 0 ? Math.min(minWaitMs, 60000) : 15000;
+      console.warn(`Todos los modelos en rate-limit. Reintentando en ${wait / 1000}s...`);
+      await new Promise(r => setTimeout(r, wait));
+    } else if (!allRateLimited) {
+      break; // error no recuperable (no es rate-limit): no reintentar
+    }
   }
+
   throw new Error(`Ningún modelo disponible (cuota agotada o modelos retirados). Espera unas horas o usa otro token. Último error: ${lastErr?.message || '?'}`);
 }
 

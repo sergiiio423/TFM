@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { setLang, t } from '../../../src/i18n.js';
 import { getApiKey, callAPI, parseLLMJson } from '../llm.js';
 import { buildBranchStepPrompt, bpmnJsonExpertPrompt } from '../prompts.js';
-import { normStepName, normalizeSuggestion } from '../stepUtils.js';
+import { normStepName, normalizeSuggestion, isPlaceholderName } from '../stepUtils.js';
 import { MAX_BRANCH_STEPS } from '../constants.js';
 
 export const name = 'suggest_branch_step';
@@ -32,7 +32,7 @@ export const config = {
     suggestion: z.object({
       tipo: z.string(),
       nombre: z.string(),
-      lane: z.string(),
+        lane: z.string(),
       actorExterno: z.string().nullable().optional()
     }),
     esFinalRama: z.boolean(),
@@ -65,11 +65,18 @@ export async function handler({ description, lanes, externalActors, gatewayStep,
         const reply = await callAPI(getApiKey(), bpmnJsonExpertPrompt(), [{ role: 'user', content: prompt }]);
         const data = parseLLMJson(reply);
         if (data.siguiente) suggestion = normalizeSuggestion(data.siguiente);
+        if (!suggestion.lane) suggestion.lane = lanes[gatewayStep.laneIdx] ?? lanes[0] ?? '';
         esFinalRama = !!data.esFinalRama;
         terminaProceso = !!data.terminaProceso;
-        if (!usados.includes(normStepName(suggestion.nombre))) { dupPersistente = false; break; }
+        const esPlaceholder = isPlaceholderName(suggestion.nombre);
+        const esDup = usados.includes(normStepName(suggestion.nombre));
+        if (!esPlaceholder && !esDup) { dupPersistente = false; break; }
         dupPersistente = true;
-        prompt += `\n\nATENCIÓN: sugeriste "${suggestion.nombre}", que YA ESTÁ en esta rama (paso confirmado). Sugiere un paso DIFERENTE y NUEVO de esta rama según la descripción; si la rama no tiene más pasos nuevos, devuelve el último paso pendiente con "esFinalRama": true.`;
+        if (esPlaceholder) {
+          prompt += `\n\nATENCIÓN: el nombre "${suggestion.nombre}" es demasiado genérico. Escribe el NOMBRE ESPECÍFICO del paso según la descripción del proceso. NUNCA uses nombres como "Siguiente paso", "Tarea" o similares.`;
+        } else {
+          prompt += `\n\nATENCIÓN: sugeriste "${suggestion.nombre}", que YA ESTÁ en esta rama (paso confirmado). Sugiere un paso DIFERENTE y NUEVO de esta rama según la descripción; si la rama no tiene más pasos nuevos, devuelve el último paso pendiente con "esFinalRama": true.`;
+        }
       }
     } catch (e) {
       errorMsg = t('errorPrefix', { msg: e.message });
@@ -82,6 +89,7 @@ export async function handler({ description, lanes, externalActors, gatewayStep,
   }
 
   normalizeSuggestion(suggestion);
+  if (suggestion.lane == null) suggestion.lane = (lanes[gatewayStep?.laneIdx] || lanes[0]) || '';
 
   const result = { suggestion, esFinalRama, terminaProceso, dupPersistente, limitReached, errorMsg };
   return { content: [{ type: 'text', text: JSON.stringify(result) }], structuredContent: result };

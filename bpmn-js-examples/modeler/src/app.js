@@ -44,6 +44,11 @@ var pervalAnalisado     = false;
 // true = genera todo el proceso de una vez, con el mismo razonamiento del LLM,
 // auto-confirmando cada sugerencia hasta que el diagrama queda completo.
 var autoGenerateAll     = false;
+var _autoTypingEl       = null; // spinner persistente durante la generación automática
+
+// Función para detener el dictado de voz y limpiar el estado de transcripción.
+// Se asigna en setupVoiceInput(); hasta entonces es un no-op.
+var voiceClear = () => {};
 
 // ─── HELPERS CHAT ─────────────────────────────────────────────────────────────
 function addMessage(text, type = 'ai', style = '') {
@@ -55,8 +60,26 @@ function addMessage(text, type = 'ai', style = '') {
   messages.scrollTop = messages.scrollHeight;
   return div;
 }
-function addTyping()   { const m = document.getElementById('ai-messages'); const d = document.createElement('div'); d.className = 'msg ai'; d.id = 'ai-typing'; d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`; m.appendChild(d); m.scrollTop = m.scrollHeight; }
-function removeTyping(){ const t = document.getElementById('ai-typing'); if (t) t.remove(); }
+function addTyping() {
+  const m = document.getElementById('ai-messages');
+  if (autoGenerateAll) {
+    // En modo auto: un único spinner persistente que se re-ancla al fondo en cada llamada.
+    if (_autoTypingEl) _autoTypingEl.remove();
+    _autoTypingEl = document.createElement('div');
+    _autoTypingEl.className = 'msg ai';
+    _autoTypingEl.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    m.appendChild(_autoTypingEl); m.scrollTop = m.scrollHeight;
+    return;
+  }
+  const d = document.createElement('div'); d.className = 'msg ai'; d.id = 'ai-typing';
+  d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  m.appendChild(d); m.scrollTop = m.scrollHeight;
+}
+function removeTyping() {
+  if (autoGenerateAll) return; // el spinner persistente lo elimina stopAutoTyping()
+  const el = document.getElementById('ai-typing'); if (el) el.remove();
+}
+function stopAutoTyping() { if (_autoTypingEl) { _autoTypingEl.remove(); _autoTypingEl = null; } }
 
 function updateUI() {
   const btn           = document.getElementById('ai-send');
@@ -106,7 +129,7 @@ function updateUI() {
     textarea.placeholder = t('addInfoPlaceholder');
     if (pervalBtn) pervalBtn.style.display = 'none';
     if (addInfoBtn) { addInfoBtn.style.display = 'block'; addInfoBtn.textContent = t('addInfoBtn'); }
-    const stepNum = (diagramState.steps || []).filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent').length + 1;
+    const stepNum = (diagramState.steps || []).filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent' && s.tipo !== 'errorEndEvent').length + 1;
     if (hint) hint.textContent = t('hintFlowStep', { n: stepNum }) + t('hintAddInfoSuffix');
 
   } else if (fase === 'flow_branches') {
@@ -325,13 +348,14 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
   const ext   = confirmedStructure.poolExterno || [];
   const isMsgTipo = t => t === 'sendTask' || t === 'intermediateThrowEvent' || t === 'endMessageEvent';
   const isGwTipo  = t => t === 'exclusiveGateway' || t === 'parallelGateway' || t === 'inclusiveGateway';
-  const isEndMsgTipo = t => t === 'endMessageEvent';
+  // Tipos que terminan el proceso por sí mismos (no necesitan checkbox "último paso")
+  const isSelfFinalTipo = t => t === 'endMessageEvent' || t === 'errorEndEvent';
   const inBranch  = !!branchCtx;
 
   // Dentro de una rama no se permiten gateways anidados
   const tipos = inBranch
-    ? ['task','sendTask','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent']
-    : ['task','sendTask','exclusiveGateway','parallelGateway','inclusiveGateway','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent'];
+    ? ['task','userTask','serviceTask','sendTask','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent','errorEndEvent']
+    : ['task','userTask','serviceTask','sendTask','exclusiveGateway','parallelGateway','inclusiveGateway','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent','errorEndEvent'];
   const TIPOS_HTML = tipos
     .map(t => `<option value="${t}"${t===suggestion.tipo?' selected':''}>${elementIcon(t)} ${elementLabel(t)}</option>`).join('');
 
@@ -367,14 +391,14 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
           ext.map((p, pi) => `<option value="${pi}"${pi===actorIdx?' selected':''}>${p.nombre}</option>`).join('')
         }</select>
       </div>
-      <div class="val-add-row" id="step-final-row" style="margin-top:10px;display:${(!inBranch && isGwTipo(suggestion.tipo)) || isEndMsgTipo(suggestion.tipo) ? 'none' : 'flex'}">
+      <div class="val-add-row" id="step-final-row" style="margin-top:10px;display:${(!inBranch && isGwTipo(suggestion.tipo)) || isSelfFinalTipo(suggestion.tipo) ? 'none' : 'flex'}">
         <label style="font-size:11px;color:#bae6fd;display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="step-final"${esFinal ? ' checked' : ''}>
           ${finalLbl}
         </label>
       </div>
       ${inBranch ? `
-      <div class="val-add-row" id="step-endproc-row" style="margin-top:4px;display:${esFinal && !isEndMsgTipo(suggestion.tipo) ? 'flex' : 'none'}">
+      <div class="val-add-row" id="step-endproc-row" style="margin-top:4px;display:${esFinal && !isSelfFinalTipo(suggestion.tipo) ? 'flex' : 'none'}">
         <label style="font-size:11px;color:#fca5a5;display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="step-end-process"${branchCtx.terminaProceso ? ' checked' : ''}>
           ${t('stepEndProcessLabel')}
@@ -396,7 +420,7 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
 
   function refreshBtn() {
     if (!inBranch && isGwTipo(tipoSel.value)) { confirmBtn.textContent = t('btnConfirmDefineCases'); return; }
-    if (isEndMsgTipo(tipoSel.value)) {
+    if (isSelfFinalTipo(tipoSel.value)) {
       confirmBtn.textContent = inBranch ? t('btnConfirmCloseCaseMsg') : t('btnConfirmFinishMsg');
       return;
     }
@@ -407,9 +431,9 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
 
   tipoSel.addEventListener('change', () => {
     actorRow.style.display = (ext.length > 0 && isMsgTipo(tipoSel.value)) ? 'flex' : 'none';
-    // Para gateways la continuación la deciden sus ramas; un "Fin con mensaje"
-    // termina el paso/rama por sí mismo: en ambos casos se oculta el checkbox.
-    const hideFinal = (!inBranch && isGwTipo(tipoSel.value)) || isEndMsgTipo(tipoSel.value);
+    // Para gateways la continuación la deciden sus ramas; tipos auto-finales
+    // terminan el paso/rama por sí mismos: en ambos casos se oculta el checkbox.
+    const hideFinal = (!inBranch && isGwTipo(tipoSel.value)) || isSelfFinalTipo(tipoSel.value);
     finalRow.style.display = hideFinal ? 'none' : 'flex';
     if (endProcRow) endProcRow.style.display = (!hideFinal && finalChk.checked) ? 'flex' : 'none';
     refreshBtn();
@@ -420,8 +444,8 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
   });
 
   confirmBtn.addEventListener('click', () => {
-    const tipoVal  = tipoSel.value;
-    const isEndMsg = isEndMsgTipo(tipoVal);
+    const tipoVal     = tipoSel.value;
+    const isSelfFinal = isSelfFinalTipo(tipoVal);
     const stepData = {
       tipo:    tipoVal,
       nombre:  wrapper.querySelector('#step-nombre').value.trim() || t('defaultStepName'),
@@ -432,11 +456,11 @@ function showNextStepCard(suggestion, stepNum, esFinal, branchCtx) {
     };
     disableCard(wrapper);
     if (inBranch) {
-      const fin     = isEndMsg ? true : finalChk.checked;
-      const termina = isEndMsg ? true : (fin && !!wrapper.querySelector('#step-end-process')?.checked);
+      const fin     = isSelfFinal ? true : finalChk.checked;
+      const termina = isSelfFinal ? true : (fin && !!wrapper.querySelector('#step-end-process')?.checked);
       branchCtx.onConfirm(stepData, fin, termina);
     } else {
-      handleConfirmStep(stepData, isGwTipo(tipoVal) ? false : (isEndMsg ? true : finalChk.checked));
+      handleConfirmStep(stepData, isGwTipo(tipoVal) ? false : (isSelfFinal ? true : finalChk.checked));
     }
   });
 }
@@ -619,12 +643,15 @@ function effectiveLanes() {
 function elementIcon(tipo) {
   const icons = {
     task:                   '📋',
+    userTask:               '👤',
+    serviceTask:            '⚙️',
     sendTask:               '📤',
     intermediateCatchEvent: '📩',
     intermediateThrowEvent: '📨',
     compensationEvent:      '⏪',
     timerEvent:             '⏱️',
     endMessageEvent:        '✉️',
+    errorEndEvent:          '🔴',
     exclusiveGateway:       '◇',
     parallelGateway:        '╋',
     inclusiveGateway:       '◎',
@@ -636,12 +663,15 @@ function elementIcon(tipo) {
 function elementLabel(tipo) {
   const keys = {
     task:                   'elTask',
+    userTask:               'elUserTask',
+    serviceTask:            'elServiceTask',
     sendTask:               'elSendTask',
     intermediateCatchEvent: 'elIntermediateCatch',
     intermediateThrowEvent: 'elIntermediateThrow',
     compensationEvent:      'elCompensation',
     timerEvent:             'elTimer',
     endMessageEvent:        'elEndMessage',
+    errorEndEvent:          'elErrorEnd',
     exclusiveGateway:       'elExclusiveGw',
     parallelGateway:        'elParallelGw',
     inclusiveGateway:       'elInclusiveGw',
@@ -725,14 +755,14 @@ async function handleConfirmStarts(items) {
 /**
  * Pide al LLM el siguiente paso del proceso y muestra la tarjeta para confirmarlo.
  */
-async function startNextStepFlow() {
+async function startNextStepFlow(consecutiveDups = 0) {
   const lanes = effectiveLanes();
   const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre);
-  const mainSteps = diagramState.steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent');
+  const mainSteps = diagramState.steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent' && s.tipo !== 'errorEndEvent');
   const stepNum = mainSteps.length + 1;
 
   fase = 'flow_step'; updateUI();
-  addMessage(t('thinkingNextStep', { n: stepNum }), 'ai');
+  if (!autoGenerateAll) addMessage(t('thinkingNextStep', { n: stepNum }), 'ai');
   addTyping();
 
   let { suggestion, esFinal, dupPersistente, limitReached, errorMsg } = await callTool('suggest_next_step', {
@@ -740,15 +770,31 @@ async function startNextStepFlow() {
   });
   removeTyping();
 
-  if (limitReached) addMessage(t('limitReachedStep'), 'ai', 'err');
-  if (errorMsg) addMessage(errorMsg, 'ai', 'err');
+  const lastLaneIdx = mainSteps.length > 0 ? mainSteps[mainSteps.length - 1].laneIdx : 0;
+  if (limitReached) {
+    addMessage(t('limitReachedStep'), 'ai', 'err');
+    await finishDiagramNow(lastLaneIdx);
+    return;
+  }
+  if (errorMsg) {
+    addMessage(errorMsg, 'ai', 'err');
+    if (autoGenerateAll) {
+      await finishDiagramNow(lastLaneIdx);
+      return;
+    }
+  }
 
-  // Solo si tras el reintento la IA SIGUE repitiendo, se cierra el proceso.
   if (dupPersistente) {
     if (autoGenerateAll) {
-      // No se añade el paso repetido: se cierra el diagrama aquí mismo.
-      addMessage(t('dupStepDetected', { name: suggestion.nombre }), 'ai', 'err');
-      await finishDiagramNow(mainSteps[mainSteps.length - 1].laneIdx);
+      // Omitir el paso repetido y consultar de nuevo al LLM para que proponga
+      // un camino alternativo. Solo se cierra el diagrama si tras 8 reintentos
+      // consecutivos sigue sin encontrar un paso nuevo (caso extremadamente raro).
+      if (consecutiveDups < 8) {
+        await startNextStepFlow(consecutiveDups + 1);
+        return;
+      }
+      // Límite de seguridad anti-bucle: cerrar solo como último recurso.
+      await finishDiagramNow(lastLaneIdx);
       return;
     }
     esFinal = true; // en modo manual la tarjeta propone cerrar; el usuario decide
@@ -767,33 +813,39 @@ async function startNextStepFlow() {
 async function finishDiagramNow(laneIdx) {
   diagramState.steps.push({ id: 'END_0', tipo: 'endEvent', nombre: t('elEnd'), laneIdx });
   if (!await renderAndImport()) return;
+  stopAutoTyping();
   fase = 'refine'; updateUI();
   addMessage(t('diagramComplete'), 'ai', 'ok');
 }
 
 async function handleConfirmStep(stepData, isFinal) {
   const lanes = effectiveLanes();
-  const n = diagramState.steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent').length;
-  const isGW     = stepData.tipo === 'exclusiveGateway' || stepData.tipo === 'parallelGateway' || stepData.tipo === 'inclusiveGateway';
-  const isEndMsg = stepData.tipo === 'endMessageEvent';
+  const n = diagramState.steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent' && s.tipo !== 'errorEndEvent').length;
+  const isGW       = stepData.tipo === 'exclusiveGateway' || stepData.tipo === 'parallelGateway' || stepData.tipo === 'inclusiveGateway';
+  const isEndMsg   = stepData.tipo === 'endMessageEvent';
+  const isErrorEnd = stepData.tipo === 'errorEndEvent';
+  const isSelfEnd  = isEndMsg || isErrorEnd;
 
-  // "Fin con mensaje": el propio paso ES el evento de fin (con mensaje y,
-  // opcionalmente, destinatario externo) — no se añade una tarea + Fin aparte.
+  // Tipos que son su propio evento de fin: no se añade un Fin aparte.
   const step = isEndMsg
     ? { id: 'END_0', tipo: 'endEvent', nombre: stepData.nombre, laneIdx: stepData.laneIdx, participantIdx: stepData.participantIdx, messageTrigger: true }
+    : isErrorEnd
+    ? { id: 'END_0', tipo: 'errorEndEvent', nombre: stepData.nombre, laneIdx: stepData.laneIdx }
     : { id: `S_${n}`, tipo: stepData.tipo, nombre: stepData.nombre, laneIdx: stepData.laneIdx, participantIdx: stepData.participantIdx };
   if (isGW) { step.branches = []; isFinal = false; }
-  if (isEndMsg) isFinal = true;
+  if (isSelfEnd) isFinal = true;
   diagramState.steps.push(step);
 
-  let label = `${elementIcon(stepData.tipo)} ${stepData.nombre} (${lanes[stepData.laneIdx]})`;
-  if (stepData.participantIdx !== undefined) {
-    const ext = confirmedStructure.poolExterno || [];
-    label += ` → 📨 ${ext[stepData.participantIdx]?.nombre || ''}`;
+  if (!autoGenerateAll) {
+    let label = `${elementIcon(stepData.tipo)} ${stepData.nombre} (${lanes[stepData.laneIdx]})`;
+    if (stepData.participantIdx !== undefined) {
+      const ext = confirmedStructure.poolExterno || [];
+      label += ` → 📨 ${ext[stepData.participantIdx]?.nombre || ''}`;
+    }
+    addMessage(label, 'user');
   }
-  addMessage(label, 'user');
 
-  if (isFinal && !isEndMsg) {
+  if (isFinal && !isSelfEnd) {
     diagramState.steps.push({ id: 'END_0', tipo: 'endEvent', nombre: t('elEnd'), laneIdx: stepData.laneIdx });
   }
 
@@ -802,6 +854,7 @@ async function handleConfirmStep(stepData, isFinal) {
   if (isGW) { await startBranchDefinitionPhase(step); return; }
 
   if (isFinal) {
+    stopAutoTyping();
     fase = 'refine'; updateUI();
     addMessage(t('diagramComplete'), 'ai', 'ok');
   } else {
@@ -818,7 +871,7 @@ async function startBranchDefinitionPhase(gatewayStep) {
   const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre);
 
   fase = 'flow_branches'; updateUI();
-  addMessage(t('identifyingCases', { name: gatewayStep.nombre }), 'ai');
+  if (!autoGenerateAll) addMessage(t('identifyingCases', { name: gatewayStep.nombre }), 'ai');
   addTyping();
 
   const { casos, errorMsg } = await callTool('suggest_gateway_branches', {
@@ -838,21 +891,21 @@ function handleConfirmBranches(gatewayStep, casos) {
   gatewayStep.branches = casos.map((nombre, i) => ({
     id: `${gatewayStep.id}_B${i}`, nombre, steps: [], endsHere: false
   }));
-  addMessage(casos.map(c => `🔀 ${c}`).join('<br>'), 'user');
+  if (!autoGenerateAll) addMessage(casos.map(c => `🔀 ${c}`).join('<br>'), 'user');
   startBranchStepFlow(gatewayStep, 0);
 }
 
 /**
  * Sub-asistente paso a paso dentro de una rama del gateway.
  */
-async function startBranchStepFlow(gatewayStep, branchIdx) {
+async function startBranchStepFlow(gatewayStep, branchIdx, consecutiveDups = 0) {
   const lanes  = effectiveLanes();
   const ext    = (confirmedStructure.poolExterno || []).map(p => p.nombre);
   const branch = gatewayStep.branches[branchIdx];
   const stepNum = branch.steps.length + 1;
 
   fase = 'flow_branch_step'; updateUI();
-  addMessage(t('caseStepThinking', { branch: branch.nombre, i: branchIdx + 1, total: gatewayStep.branches.length, n: stepNum }), 'ai');
+  if (!autoGenerateAll) addMessage(t('caseStepThinking', { branch: branch.nombre, i: branchIdx + 1, total: gatewayStep.branches.length, n: stepNum }), 'ai');
   addTyping();
 
   let { suggestion, esFinalRama, terminaProceso, dupPersistente, limitReached, errorMsg } = await callTool('suggest_branch_step', {
@@ -863,14 +916,29 @@ async function startBranchStepFlow(gatewayStep, branchIdx) {
   });
   removeTyping();
 
-  if (limitReached) addMessage(t('limitReachedBranch'), 'ai', 'err');
-  if (errorMsg) addMessage(errorMsg, 'ai', 'err');
+  if (limitReached) {
+    addMessage(t('limitReachedBranch'), 'ai', 'err');
+    if (branchIdx + 1 < gatewayStep.branches.length) await startBranchStepFlow(gatewayStep, branchIdx + 1);
+    else await finishBranches(gatewayStep);
+    return;
+  }
+  if (errorMsg) {
+    addMessage(errorMsg, 'ai', 'err');
+    if (autoGenerateAll) {
+      if (branchIdx + 1 < gatewayStep.branches.length) await startBranchStepFlow(gatewayStep, branchIdx + 1);
+      else await finishBranches(gatewayStep);
+      return;
+    }
+  }
 
-  // Solo si tras el reintento la IA SIGUE repitiendo, se cierra el caso
-  // (convergiendo) sin añadir el duplicado.
   if (dupPersistente) {
     if (autoGenerateAll) {
-      addMessage(t('dupBranchStepDetected', { branch: branch.nombre }), 'ai', 'err');
+      // Omitir el paso repetido y consultar de nuevo al LLM para un paso alternativo.
+      // Solo se cierra la rama tras 8 reintentos consecutivos sin éxito.
+      if (consecutiveDups < 8) {
+        await startBranchStepFlow(gatewayStep, branchIdx, consecutiveDups + 1);
+        return;
+      }
       if (branchIdx + 1 < gatewayStep.branches.length) await startBranchStepFlow(gatewayStep, branchIdx + 1);
       else await finishBranches(gatewayStep);
       return;
@@ -879,11 +947,13 @@ async function startBranchStepFlow(gatewayStep, branchIdx) {
   }
 
   if (autoGenerateAll) {
-    const allowedTipos = ['task','sendTask','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent'];
+    const allowedTipos = ['task','userTask','serviceTask','sendTask','intermediateCatchEvent','intermediateThrowEvent','compensationEvent','timerEvent','endMessageEvent','errorEndEvent'];
     const stepData = suggestionToStepData(suggestion, allowedTipos);
-    const isEndMsg = stepData.tipo === 'endMessageEvent';
-    const fin     = isEndMsg ? true : esFinalRama;
-    const termina = isEndMsg ? true : (fin && terminaProceso);
+    const isEndMsg   = stepData.tipo === 'endMessageEvent';
+    const isErrorEnd = stepData.tipo === 'errorEndEvent';
+    const isSelfEnd  = isEndMsg || isErrorEnd;
+    const fin     = isSelfEnd ? true : esFinalRama;
+    const termina = isSelfEnd ? true : (fin && terminaProceso);
     await handleConfirmBranchStep(gatewayStep, branchIdx, stepData, fin, termina);
     return;
   }
@@ -897,14 +967,18 @@ async function startBranchStepFlow(gatewayStep, branchIdx) {
 }
 
 async function handleConfirmBranchStep(gatewayStep, branchIdx, stepData, esFinalRama, terminaProceso) {
-  const lanes  = effectiveLanes();
-  const branch = gatewayStep.branches[branchIdx];
-  const isEndMsg = stepData.tipo === 'endMessageEvent';
+  const lanes      = effectiveLanes();
+  const branch     = gatewayStep.branches[branchIdx];
+  const isEndMsg   = stepData.tipo === 'endMessageEvent';
+  const isErrorEnd = stepData.tipo === 'errorEndEvent';
+  const isSelfEnd  = isEndMsg || isErrorEnd;
 
-  if (isEndMsg) {
-    // "Fin con mensaje" dentro de una rama: el propio paso es el evento de
-    // fin de esa rama (con mensaje y, opcionalmente, destinatario externo).
-    branch.steps.push({ id: `${branch.id}_END`, tipo: 'endEvent', nombre: stepData.nombre, laneIdx: stepData.laneIdx, participantIdx: stepData.participantIdx, messageTrigger: true });
+  if (isSelfEnd) {
+    // Tipos auto-finales: el propio paso es el evento de fin de la rama.
+    const endStep = isEndMsg
+      ? { id: `${branch.id}_END`, tipo: 'endEvent', nombre: stepData.nombre, laneIdx: stepData.laneIdx, participantIdx: stepData.participantIdx, messageTrigger: true }
+      : { id: `${branch.id}_END`, tipo: 'errorEndEvent', nombre: stepData.nombre, laneIdx: stepData.laneIdx };
+    branch.steps.push(endStep);
     branch.endsHere = true;
     esFinalRama = true; terminaProceso = true;
   } else {
@@ -921,12 +995,14 @@ async function handleConfirmBranchStep(gatewayStep, branchIdx, stepData, esFinal
     }
   }
 
-  let label = `${elementIcon(stepData.tipo)} [${branch.nombre}] ${stepData.nombre} (${lanes[stepData.laneIdx]})`;
-  if (stepData.participantIdx !== undefined) {
-    const ext = confirmedStructure.poolExterno || [];
-    label += ` → 📨 ${ext[stepData.participantIdx]?.nombre || ''}`;
+  if (!autoGenerateAll) {
+    let label = `${elementIcon(stepData.tipo)} [${branch.nombre}] ${stepData.nombre} (${lanes[stepData.laneIdx]})`;
+    if (stepData.participantIdx !== undefined) {
+      const ext = confirmedStructure.poolExterno || [];
+      label += ` → 📨 ${ext[stepData.participantIdx]?.nombre || ''}`;
+    }
+    addMessage(label, 'user');
   }
-  addMessage(label, 'user');
 
   if (!await renderAndImport()) return;
 
@@ -951,9 +1027,10 @@ async function finishBranches(gatewayStep) {
   if (!await renderAndImport()) return;
 
   if (converge) {
-    addMessage(t('casesCompletedConverge', { name: gatewayStep.nombre }), 'ai');
+    if (!autoGenerateAll) addMessage(t('casesCompletedConverge', { name: gatewayStep.nombre }), 'ai');
     await startNextStepFlow();
   } else {
+    stopAutoTyping();
     fase = 'refine'; updateUI();
     addMessage(t('diagramCompleteAllBranches'), 'ai', 'ok');
   }
@@ -982,15 +1059,15 @@ async function handleSend() {
 
   if (fase === 'describe') {
     if (!input) return;
-    addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
+    voiceClear(); addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
     sendBtn.disabled = true; await handleDescribeProcess(input); sendBtn.disabled = false;
   } else if (fase === 'confirm_structure') {
     if (!input) return;
-    addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
+    voiceClear(); addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
     sendBtn.disabled = true; await handleModifyStructure(input); sendBtn.disabled = false;
   } else if (fase === 'refine') {
     if (!input) return;
-    addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
+    voiceClear(); addMessage(input, 'user'); document.getElementById('ai-scenario').value = '';
     sendBtn.disabled = true; await handleRefine(input); sendBtn.disabled = false;
   } else {
     // Fases de flujo paso a paso: Ctrl+Enter añade información extra
@@ -1003,6 +1080,7 @@ function handleAddInfo() {
   const ta  = document.getElementById('ai-scenario');
   const val = ta.value.trim();
   if (!val) { ta.focus(); return; }
+  voiceClear();
   addMessage(val, 'user');
   processFlowDescription = (processFlowDescription ? processFlowDescription + '\n' : '') + val;
   ta.value = '';
@@ -1306,6 +1384,7 @@ function setupVoiceInput() {
   let finalTranscript = '';
 
   recognition.addEventListener('result', (e) => {
+    if (!listening) return; // ignorar resultados tardíos tras stop()
     let interimTranscript = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const transcript = e.results[i][0].transcript;
@@ -1340,6 +1419,12 @@ function setupVoiceInput() {
     catch(e) { listening = false; micBtn.classList.remove('recording'); }
     textarea.focus();
   });
+
+  voiceClear = () => {
+    if (listening) { try { recognition.stop(); } catch(_) {} listening = false; micBtn.classList.remove('recording'); }
+    baseText = '';
+    finalTranscript = '';
+  };
 }
 
 // ─── BOOTSTRAP ────────────────────────────────────────────────────────────────
@@ -1378,14 +1463,14 @@ $(function() {
     const ta  = document.getElementById('ai-scenario');
     const val = ta.value.trim();
     if (!val) { ta.focus(); return; }
-    addMessage(val, 'user'); ta.value = '';
+    voiceClear(); addMessage(val, 'user'); ta.value = '';
     if (fase === 'confirm_structure') handleModifyStructure(val);
   });
   document.getElementById('ai-perval-btn').addEventListener('click', analyzePerval);
 
   document.getElementById('ai-reset').addEventListener('click', () => {
     fase = 'describe'; processDescription = ''; processFlowDescription = ''; confirmedStructure = null;
-    diagramState = { steps: [] }; pervalAnalisado = false; autoGenerateAll = false;
+    diagramState = { steps: [] }; pervalAnalisado = false; autoGenerateAll = false; stopAutoTyping();
     document.getElementById('ai-messages').innerHTML = `
       <div class="msg ai"><div class="msg-av">🤖</div><div class="msg-bubble">${t('welcomeReset')}</div></div>`;
     updateUI();
@@ -1419,6 +1504,9 @@ function applyStaticTranslations() {
 
   const micBtn = document.getElementById('ai-mic');
   if (micBtn && !micBtn.disabled) micBtn.title = t('micTitle');
+
+  const providerNotice = document.getElementById('ai-provider-notice');
+  if (providerNotice) providerNotice.textContent = t('providerNotice');
 
   for (let i = 1; i <= 4; i++) {
     const el = document.getElementById(`phase-${i}`);

@@ -10,8 +10,8 @@ export function renderDiagramFromState(structure, state) {
   // diagramState.steps ya está en orden cronológico global.
   const steps  = state.steps || [];
   const starts = steps.filter(s => s.tipo === 'startEvent');
-  const ends   = steps.filter(s => s.tipo === 'endEvent');
-  const mains  = steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent');
+  const ends   = steps.filter(s => s.tipo === 'endEvent' || s.tipo === 'errorEndEvent');
+  const mains  = steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent' && s.tipo !== 'errorEndEvent');
 
   // Altura de lane: si hay gateways con ramas, dejar sitio para el abanico vertical
   const maxBranches = Math.max(1, ...mains.filter(m => m.branches?.length).map(m => m.branches.length));
@@ -108,7 +108,11 @@ export function renderDiagramFromState(structure, state) {
       return `    <intermediateThrowEvent id="${t.id}" name="${n}"><compensateEventDefinition id="CED_${t.id}"/></intermediateThrowEvent>`;
     if (t.tipo === 'timerEvent')
       return `    <intermediateCatchEvent id="${t.id}" name="${n}"><timerEventDefinition id="TED_${t.id}"/></intermediateCatchEvent>`;
-    if (t.tipo === 'sendTask') return `    <sendTask id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'sendTask')    return `    <sendTask    id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'userTask')    return `    <userTask    id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'serviceTask') return `    <serviceTask id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'errorEndEvent')
+      return `    <endEvent id="${t.id}" name="${n}"><errorEventDefinition id="EED_${t.id}"/></endEvent>`;
     return `    <task id="${t.id}" name="${n}"/>`;
   }).join('\n');
 
@@ -177,7 +181,7 @@ ${laneSetBlock}${taskXml ? taskXml+'\n' : ''}${seqXml ? seqXml+'\n' : ''}  </pro
   const isGwTipo = t => t === 'exclusiveGateway' || t === 'parallelGateway' || t === 'inclusiveGateway';
   const isEvTipo = t => t === 'intermediateCatchEvent' || t === 'intermediateThrowEvent'
                      || t === 'compensationEvent' || t === 'timerEvent'
-                     || t === 'startEvent' || t === 'endEvent';
+                     || t === 'startEvent' || t === 'endEvent' || t === 'errorEndEvent';
   const shapeW = t => isGwTipo(t.tipo) ? 50 : isEvTipo(t.tipo) ? 36 : 100;
   const shapeH = t => isGwTipo(t.tipo) ? 50 : isEvTipo(t.tipo) ? 36 : 80;
   const elemCY = t => laneCY(t.laneIdx) + (t._yOffset || 0);

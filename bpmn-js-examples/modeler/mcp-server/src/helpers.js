@@ -13,12 +13,15 @@ export function effectiveLanes(structure) {
 export function elementLabel(tipo) {
   const keys = {
     task:                   'elTask',
+    userTask:               'elUserTask',
+    serviceTask:            'elServiceTask',
     sendTask:               'elSendTask',
     intermediateCatchEvent: 'elIntermediateCatch',
     intermediateThrowEvent: 'elIntermediateThrow',
     compensationEvent:      'elCompensation',
     timerEvent:             'elTimer',
     endMessageEvent:        'elEndMessage',
+    errorEndEvent:          'elErrorEnd',
     exclusiveGateway:       'elExclusiveGw',
     parallelGateway:        'elParallelGw',
     inclusiveGateway:       'elInclusiveGw',

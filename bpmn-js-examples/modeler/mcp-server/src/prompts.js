@@ -254,15 +254,79 @@ export function bpmnJsonExpertPrompt() {
   return `Eres experto en modelado BPMN. Responde SOLO con JSON.${langDirective()}`;
 }
 
-export function buildRefinementMessage(instruction, currentXML) {
-  return `Diagrama BPMN actual:\n\n${currentXML}\n\nAplica esta modificación y devuelve el XML COMPLETO con la sección bpmndi:BPMNDiagram:\n"${instruction}"`;
+export function buildRefinementMessage(instruction, currentXML, structure, diagramState) {
+  const lanes = structure?.poolPrincipal?.lanes || [];
+  const ext   = (structure?.poolExterno || []).map(p => p.nombre);
+  const steps = diagramState?.steps || [];
+
+  const laneOf = idx => lanes[idx] || structure?.poolPrincipal?.nombre || '?';
+  const extOf  = idx => ext[idx] || '?';
+
+  let inventory = '';
+  steps.forEach((s, i) => {
+    if (s.tipo === 'startEvent' || s.tipo === 'endEvent' || s.tipo === 'errorEndEvent') return;
+    let line = `  ${i+1}. [${laneOf(s.laneIdx)}] ${elementLabel(s.tipo)}: "${s.nombre}"`;
+    if (s.participantIdx !== undefined) line += ` → ${extOf(s.participantIdx)}`;
+    if (s.branches?.length) {
+      line += '\n' + s.branches.map(b => {
+        const bSteps = (b.steps || [])
+          .filter(bs => bs.tipo !== 'endEvent' && bs.tipo !== 'errorEndEvent')
+          .map(bs => `${elementLabel(bs.tipo)}: "${bs.nombre}" [${laneOf(bs.laneIdx)}]`);
+        return `     · Caso "${b.nombre}": ${bSteps.join(' → ') || '(vacío)'}${b.endsHere ? ' [termina]' : ' [converge]'}`;
+      }).join('\n');
+    }
+    inventory += line + '\n';
+  });
+
+  return `═══ ESTRUCTURA DEL DIAGRAMA ═══
+Organización: ${structure?.poolPrincipal?.nombre || '?'}
+Departamentos (lanes): ${lanes.length > 0 ? lanes.join(', ') : 'ninguno (piscina única)'}
+Actores externos: ${ext.length > 0 ? ext.join(', ') : 'ninguno'}
+
+═══ ELEMENTOS ACTUALES DEL DIAGRAMA ═══
+${inventory || '(vacío)'}
+═══ XML BPMN ACTUAL ═══
+${currentXML}
+
+═══ INSTRUCCIÓN DEL USUARIO ═══
+"${instruction}"
+
+Aplica la modificación y devuelve el XML COMPLETO (desde <?xml hasta </definitions>) con la sección bpmndi:BPMNDiagram.`;
 }
 
 export function buildRefinementSystemPrompt() {
-  return `Eres un experto BPMN 2.0. Modifica el diagrama según la instrucción del usuario.
-Devuelve SOLO XML válido completo (desde <?xml hasta </definitions>), sin texto ni markdown.
-Mantén todos los pools, lanes, sendTasks y messageFlows existentes.
-Añade o modifica solo lo que el usuario pida.${langDirective()}`;
+  return `Eres un experto BPMN 2.0. Tu tarea es modificar un diagrama BPMN existente según las instrucciones del usuario.
+
+REGLAS GENERALES:
+- Devuelve SOLO XML válido completo (<?xml … </definitions>), sin texto ni markdown.
+- Mantén TODOS los pools, lanes y la estructura de piscinas existente.
+- Mantén los messageFlows hacia actores externos que sigan siendo válidos.
+- Modifica, añade o elimina SOLO lo que el usuario pida; no alteres el resto del diagrama.
+- Si el usuario pide eliminar un elemento, elimínalo del proceso, de los sequenceFlows
+  (reconecta los flujos para que el diagrama siga siendo válido) y de la sección BPMNDiagram.
+- Si el usuario pide añadir un elemento, insértalo en el punto correcto del flujo, con los
+  sequenceFlows adecuados, y añádele su BPMNShape en la sección de diagrama con coordenadas
+  razonables (entre el elemento anterior y el siguiente).
+
+TIPOS DE ELEMENTO — usa el correcto según la acción:
+- userTask: acción realizada por una PERSONA (revisar, aprobar, gestionar, atender…).
+- serviceTask: acción automática del SISTEMA (consultar API, procesar, generar, calcular…).
+- sendTask: ENVIAR mensaje/notificación a un actor EXTERNO. Requiere messageFlow.
+- exclusiveGateway: decisión con caminos mutuamente excluyentes (XOR).
+- parallelGateway: actividades que ocurren en paralelo (AND).
+- inclusiveGateway: uno o varios caminos según condiciones (OR).
+- timerEvent (intermediateCatchEvent+timerEventDefinition): espera temporal.
+- endEvent con errorEventDefinition: fin con error irrecuperable.
+- task: SOLO si la acción es genuinamente ambigua.
+
+COHERENCIA:
+- Cada elemento debe tener al menos un sequenceFlow entrante y uno saliente (excepto startEvent
+  y endEvent).
+- Los nombres de los elementos deben ser descriptivos y coherentes con el proceso.
+- Si el usuario pide algo que no tiene sentido en el contexto del proceso (p.ej. añadir una
+  tarea de "cocinar" en un proceso de logística), adáptalo razonablemente al contexto o
+  interpreta la intención más lógica.
+- Asegúrate de que las coordenadas (Bounds) de elementos nuevos no se solapen con los existentes.${langDirective()}`;
 }
 
 export function buildPervalSystemPrompt(actorName, scope) {
@@ -303,3 +367,4 @@ export function buildPervalUserMessage(xml, tasks, actorName, scope) {
   const header = scope === 'entregas' ? 'ENTREGAS/COMUNICACIONES DE LA EMPRESA AL CLIENTE:' : 'TAREAS DEL PROCESO:';
   return `${header}${actorLine}\n${tasks.map((t,i)=>`${i+1}. ${t}`).join('\n')}\n\nXML BPMN:\n${xml}`;
 }
+

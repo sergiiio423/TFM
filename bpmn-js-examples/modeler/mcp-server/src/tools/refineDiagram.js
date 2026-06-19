@@ -30,7 +30,7 @@ export async function handler({ structure, diagramState, instruction, lang }) {
   try {
     const currentXML = renderDiagramFromState(structure, diagramState);
     const rawXML = await callAPI(getApiKey(), buildRefinementSystemPrompt(),
-      [{ role: 'user', content: buildRefinementMessage(instruction, currentXML) }]);
+      [{ role: 'user', content: buildRefinementMessage(instruction, currentXML, structure, diagramState) }]);
     const xml = cleanXML(rawXML);
     const result = { xml };
     return { content: [{ type: 'text', text: JSON.stringify(result) }], structuredContent: result };

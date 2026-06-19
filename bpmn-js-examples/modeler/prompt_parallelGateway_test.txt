@@ -1,0 +1,112 @@
+════════════════════════════════════════════════════════════════════════
+  PROMPT ENVIADO AL LLM — DETECCIÓN DE parallelGateway (e-commerce)
+════════════════════════════════════════════════════════════════════════
+
+Caso: Gestión de pedidos de una tienda de electrónica online.
+Contexto: tras validar el pago, el proceso divide en 3 tareas simultáneas
+(preparar paquete, generar factura, actualizar inventario). El asistente
+debe detectar el paralelismo y sugerir una puerta AND (parallelGateway).
+
+── SYSTEM PROMPT ──────────────────────────────────────────────────────
+Eres experto en modelado BPMN. Responde SOLO con JSON.
+
+── USER PROMPT ────────────────────────────────────────────────────────
+Eres un experto en modelado BPMN 2.0 para e-commerce.
+Departamentos internos: Ventas, Almacén, Facturación, Sistemas
+Actores externos: Cliente, Pasarela de Pago, Transportista
+
+Descripción completa del proceso:
+Proceso de gestión de pedidos de una tienda de electrónica online. El cliente realiza un pedido a través de la web. El departamento de ventas recibe la solicitud y un agente revisa manualmente que los datos del pedido sean correctos. El sistema valida automáticamente el método de pago con la pasarela. Si el pago es correcto, se realizan en paralelo las siguientes actividades: el almacén prepara y embala el producto, el departamento de facturación genera la factura electrónica y el sistema actualiza automáticamente el inventario. Una vez completadas todas las tareas en paralelo, se espera a que el transportista recoja el paquete (plazo máximo 48 horas). El agente de ventas envía al cliente la confirmación de envío con el número de seguimiento.
+
+Pasos confirmados hasta ahora (en orden cronológico):
+1. [Ventas] Inicio: Pedido recibido
+2. [Ventas] Tarea de usuario: Revisar datos del pedido
+3. [Sistemas] Tarea de servicio: Validar método de pago
+4. [Sistemas] Gateway XOR: ¿Pago válido?
+   · Caso "Pago válido": (sin pasos) [converge]
+   · Caso "Pago rechazado": Notificar rechazo de pago → Pedido cancelado por pago inválido [termina el proceso]
+
+¿Cuál es el SIGUIENTE paso del proceso, según la descripción? Indica:
+- "tipo": uno de userTask | serviceTask | sendTask | exclusiveGateway | parallelGateway | inclusiveGateway | timerEvent | intermediateCatchEvent | intermediateThrowEvent | compensationEvent | endMessageEvent | errorEndEvent | task
+- "nombre": nombre breve del paso
+- "lane": departamento que lo realiza (uno de los departamentos listados)
+- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent" y va dirigido a un actor externo, su nombre; si no, null
+- "esFinal": true si DESPUÉS de este paso el proceso TERMINA
+
+═══ TIPO DE ELEMENTO — REGLAS OBLIGATORIAS (aplica en orden) ═══
+
+▸ GATEWAYS — modela SIEMPRE la estructura real del proceso:
+  • "exclusiveGateway" (XOR): cuando el proceso llega a una CONDICIÓN O DECISIÓN que lo bifurca
+    en caminos MUTUAMENTE EXCLUYENTES (solo se sigue UNO). Señales: "si…", "en caso de…",
+    "dependiendo de…", "cuando…", "según si…". NUNCA ignores una bifurcación real.
+  • "parallelGateway" (AND): cuando varias actividades ocurren EN PARALELO o SIMULTÁNEAMENTE y
+    TODAS deben completarse. Señales: "al mismo tiempo", "en paralelo", "simultáneamente",
+    "mientras tanto", "a la vez". OBLIGATORIO cuando el proceso divide en ramas concurrentes.
+  • "inclusiveGateway" (OR): cuando se pueden seguir UNO O VARIOS caminos según condiciones no
+    excluyentes. Señales: "según lo que corresponda", "los que apliquen", "uno o más de…".
+  Si hay una bifurcación o paralelismo en este punto → pon el gateway AHORA, no en otro paso.
+
+▸ TAREAS — clasifica según quién ejecuta la acción:
+  • "userTask": OBLIGATORIO cuando la acción la realiza una PERSONA (empleado, agente, operario…).
+    Incluye: revisar, aprobar, gestionar, tramitar, atender, validar manualmente, seleccionar,
+    contactar, introducir datos, tomar una decisión, rellenar formulario, inspeccionar físicamente.
+    → Si una persona interviene, SIEMPRE "userTask". NUNCA uses "task" para acciones humanas.
+  • "serviceTask": OBLIGATORIO cuando la acción la realiza el SISTEMA de forma automática, sin
+    intervención humana. Incluye: consultar API, actualizar base de datos, generar documento,
+    procesar pago automáticamente, enviar petición a sistema externo, calcular, transformar datos,
+    integrar sistemas, lanzar webhook, sincronizar inventario.
+    → Si es un sistema automático, SIEMPRE "serviceTask". NUNCA uses "task" para tareas del sistema.
+  • "sendTask": OBLIGATORIO para ENVIAR un mensaje, notificación, email, SMS, confirmación,
+    factura o aviso a un actor EXTERNO cuando el proceso continúa después. Rellena "actorExterno".
+  • "task": SOLO como último recurso si la acción es genuinamente ambigua (ni claramente humana
+    ni claramente automática). En la mayoría de procesos de e-commerce no debería aparecer.
+
+▸ EVENTOS INTERMEDIOS — insértalos cuando el proceso necesita esperar o revertir:
+  • "timerEvent": OBLIGATORIO cuando el proceso debe ESPERAR un plazo de tiempo antes de
+    continuar. Señales: "esperar X días/horas", "al cabo de…", "tras N días laborables",
+    "en un plazo de…", "después de…", "pasado el periodo de…", "antes del vencimiento".
+    → Siempre que haya una espera temporal explícita o implícita, modélala con timerEvent.
+  • "compensationEvent": cuando hay que DESHACER o REVERTIR una acción anterior (anular cargo,
+    revertir reserva, devolver stock…).
+  • "intermediateCatchEvent": espera de un mensaje entrante de un actor externo.
+  • "intermediateThrowEvent": lanza un mensaje a un actor externo sin terminar el proceso.
+
+▸ EVENTOS DE FIN especiales:
+  • "endMessageEvent": el proceso TERMINA ENVIANDO un mensaje/notificación final a un actor
+    externo (confirmación de pedido, factura, ticket…). "esFinal" debe ser true.
+  • "errorEndEvent": el proceso TERMINA con error irrecuperable (pago rechazado definitivamente,
+    fraude detectado, cancelación sin solución…). "esFinal" es true automáticamente.
+
+REGLAS ADICIONALES:
+- Si no hay actores externos, "actorExterno" debe ser siempre null.
+- PROHIBIDO repetir un paso ya confirmado. Si no quedan pasos nuevos, devuelve el último paso
+  real con "esFinal": true.
+- "nombre" DEBE ser descriptivo y específico. PROHIBIDO: "Siguiente paso", "Tarea", "Actividad".
+
+RESPONDE SOLO con JSON (sin texto adicional):
+{"siguiente":{"tipo":"userTask","nombre":"...","lane":"Ventas","actorExterno":null},"esFinal":false}
+
+── RESPUESTA DEL LLM ──────────────────────────────────────────────────
+{"siguiente":{"tipo":"parallelGateway","nombre":"Dividir en tareas paralelas: preparación, facturación y actualización de inventario","lane":"Sistemas","actorExterno":null},"esFinal":false}
+
+════════════════════════════════════════════════════════════════════════
+  ANÁLISIS
+════════════════════════════════════════════════════════════════════════
+
+El LLM detecta correctamente que, tras la convergencia de la puerta XOR
+(pago válido), el proceso describe tres actividades que se realizan
+"en paralelo": preparar/embalar, generar factura y actualizar inventario.
+
+La palabra clave "en paralelo" en la descripción del proceso activa la
+regla obligatoria del prompt:
+
+  ▸ "parallelGateway" (AND): cuando varias actividades ocurren EN PARALELO
+    o SIMULTÁNEAMENTE y TODAS deben completarse. Señales: "al mismo tiempo",
+    "en paralelo", "simultáneamente", "mientras tanto", "a la vez".
+    OBLIGATORIO cuando el proceso divide en ramas concurrentes.
+
+En lugar de modelar las tres actividades como tareas secuenciales (que
+sería incorrecto según la descripción), el asistente propone una puerta
+AND que posteriormente generará tres ramas paralelas, cada una con su
+tarea correspondiente (userTask para embalar, serviceTask para generar
+factura, serviceTask para actualizar inventario).

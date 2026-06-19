@@ -1088,10 +1088,6 @@ function handleAddInfo() {
 }
 
 // ─── PERVAL: selección de actor → análisis ───────────────────────────────────
-/**
- * clientActors: actores externos con rol "cliente" (destinatarios del valor) → opción principal.
- * collaboratorActors: resto de actores externos (pasarela de pago, transportista...) → opción secundaria.
- */
 function showPervalActorSelect(clientActors, collaboratorActors, onSelect) {
   const messages = document.getElementById('ai-messages');
   const div = document.createElement('div');
@@ -1142,9 +1138,6 @@ async function runPervalAnalysis(actorName) {
   try {
     const { xml: currentXML } = await modeler.saveXML({ format: true });
 
-    // El valor se calcula sobre lo que la empresa ENTREGA/COMUNICA AL CLIENTE
-    // (mensajes salientes hacia el participante externo con rol "cliente"),
-    // no sobre todas las tareas internas del proceso.
     let scope = 'entregas';
     let tasks = extractClientDeliverablesFromXML(currentXML, confirmedStructure);
     if (tasks.length === 0) {
@@ -1192,9 +1185,6 @@ function extractTasksFromXML(xml) {
   } catch(e) { return []; }
 }
 
-// Extrae los nombres de los elementos del proceso que envían algo al participante
-// externo "cliente" (o, si ninguno está marcado como tal, a cualquier participante
-// externo), localizando los <messageFlow> cuyo targetRef apunta a ese participante.
 function extractClientDeliverablesFromXML(xml, structure) {
   try {
     const parser = new DOMParser();
@@ -1209,8 +1199,6 @@ function extractClientDeliverablesFromXML(xml, structure) {
       .filter(p => p.rol === 'cliente')
       .map(p => p.id);
 
-    // Si ningún participante externo está marcado como "cliente", se consideran
-    // destinatarios del valor todos los participantes externos.
     if (clientIds.length === 0) clientIds = ext.map((_, i) => `Part_Ext${i+1}`);
 
     const byId = {};
@@ -1232,9 +1220,6 @@ function extractClientDeliverablesFromXML(xml, structure) {
   } catch(e) { return []; }
 }
 
-// Paleta PERVAL: una identidad de color por dimensión, compartida entre los
-// badges del chat (rgba translúcido sobre fondo oscuro) y el coloreado de
-// las figuras del diagrama (hex sólido, requerido por modeling.setColor).
 const PERVAL_DIM = {
   Quality:   { icon:'🔵', label:'Calidad',   text:'#93c5fd', diagram:{ fill:'#dbeafe', stroke:'#3b82f6' } },
   Price:     { icon:'🟢', label:'Precio',    text:'#86efac', diagram:{ fill:'#dcfce7', stroke:'#22c55e' } },
@@ -1258,108 +1243,18 @@ function showPervalResults(data, actorName) {
   });
   const taskRows = (data.tareas||[]).map(t => {
     const badges = (t.dimensiones||[]).map(d => { const c=dim[d]||dim.Interno; return`<span class="pv-badge" style="background:${c.bg};border:1px solid ${c.border};color:${c.text}">${c.icon} ${c.label}</span>`; }).join('');
-    return`<div class="pv-row"><div class="pv-name">${t.nombre}</div><div class="pv-badges">${badges}</div><div class="pv-desc">${t.valor||''}</div></div>`;
+    const valorHtml = t.valor ? `<div class="pv-desc"><b>Valor:</b> ${t.valor}</div>` : '';
+    const justHtml  = t.justificacion ? `<div class="pv-desc"><b>Justificación:</b> ${t.justificacion}</div>` : '';
+    return`<div class="pv-row"><div class="pv-name">${t.nombre}</div><div class="pv-badges">${badges}</div>${valorHtml}${justHtml}</div>`;
   }).join('');
   const summaryCards = Object.entries(data.resumen||{}).map(([d,text]) => { const c=dim[d]||dim.Interno; return`<div class="pv-sum-card" style="background:${c.bg};border:1px solid ${c.border}"><div class="pv-sum-title" style="color:${c.text}">${c.icon} ${c.label}</div><div class="pv-sum-text">${text}</div></div>`; }).join('');
   const generalHtml = data.valorGeneral ? `<div class="pv-general"><span class="pv-general-lbl">${t('pervalGlobalLbl')}${actorName ? ` · ${actorName}` : ''} · </span>${data.valorGeneral}</div>` : '';
 
-  const hasTasks = (data.tareas||[]).length > 0;
-  const legendChips = Object.values(dim).map(c =>
-    `<span class="pv-legend-chip" style="background:${c.diagram.fill};border:1px solid ${c.diagram.stroke}">${c.icon} ${c.label}</span>`
-  ).join('');
-  const colorActions = hasTasks ? `
-    <div class="pv-actions">
-      <div class="pv-legend">${legendChips}</div>
-      <div class="val-confirm-row" style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn-send btn-green" id="pv-apply-colors" style="flex:1">${t('pervalPaintBtn')}</button>
-        <button class="btn-send" id="pv-clear-colors" style="flex:0 0 auto;background:rgba(255,255,255,0.08)">${t('pervalRemoveBtn')}</button>
-      </div>
-    </div>` : '';
-
-  const html = `<div class="pv-results"><div class="pv-header">${t('pervalHeader')}${actorName ? ` — ${actorName}` : ''}</div><div class="pv-section-lbl">${t('pervalClassifByTask')}</div><div class="pv-tasks">${taskRows}</div><div class="pv-section-lbl" style="margin-top:10px">${t('pervalSummaryByDim')}</div><div class="pv-summary">${summaryCards}</div>${generalHtml}${colorActions}</div>`;
+  const html = `<div class="pv-results"><div class="pv-header">${t('pervalHeader')}${actorName ? ` — ${actorName}` : ''}</div><div class="pv-section-lbl">${t('pervalClassifByTask')}</div><div class="pv-tasks">${taskRows}</div><div class="pv-section-lbl" style="margin-top:10px">${t('pervalSummaryByDim')}</div><div class="pv-summary">${summaryCards}</div>${generalHtml}</div>`;
   const messages = document.getElementById('ai-messages');
   const div = document.createElement('div'); div.className = 'msg ai';
   div.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble pv-bubble">${html}</div>`;
   messages.appendChild(div); messages.scrollTop = messages.scrollHeight;
-
-  if (hasTasks) {
-    div.querySelector('#pv-apply-colors').addEventListener('click', () => applyPervalColors(data.tareas, dim));
-    div.querySelector('#pv-clear-colors').addEventListener('click', () => clearPervalColors(data.tareas));
-  }
-}
-
-// ─── PERVAL: pintar el diagrama con los colores de cada dimensión ───────────
-function findElementsByName(nombre) {
-  const elementRegistry = modeler.get('elementRegistry');
-  const target = (nombre || '').trim();
-  return elementRegistry.filter(el =>
-    el.businessObject && !el.labelTarget && (el.businessObject.name || '').trim() === target
-  );
-}
-
-// IDs de las anotaciones de texto creadas al "pintar" el diagrama por valor,
-// para poder eliminarlas de nuevo con "↩️ Quitar".
-let _pervalAnnotationIds = [];
-
-function applyPervalColors(tareas, dim) {
-  const modeling = modeler.get('modeling');
-  clearPervalAnnotations();
-  (tareas || []).forEach(t => {
-    const dimKey = (t.dimensiones || [])[0] || 'Interno';
-    const c = dim[dimKey] || dim.Interno;
-    const els = findElementsByName(t.nombre);
-    if (!els.length) return;
-    modeling.setColor(els, { fill: c.diagram.fill, stroke: c.diagram.stroke });
-    if (t.valor) {
-      const annotation = createPervalAnnotation(els[0], t.valor, c.diagram);
-      if (annotation) _pervalAnnotationIds.push(annotation.id);
-    }
-  });
-}
-
-function clearPervalColors(tareas) {
-  const modeling = modeler.get('modeling');
-  (tareas || []).forEach(t => {
-    const els = findElementsByName(t.nombre);
-    if (els.length) modeling.setColor(els, { fill: null, stroke: null });
-  });
-  clearPervalAnnotations();
-}
-
-// Crea una bpmn:TextAnnotation con el texto de valor mostrado en el chat,
-// asociada (bpmn:Association) al elemento correspondiente del diagrama.
-function createPervalAnnotation(el, text, color) {
-  const modeling      = modeler.get('modeling');
-  const bpmnFactory   = modeler.get('bpmnFactory');
-
-  const len    = (text || '').length;
-  const width  = Math.min(220, Math.max(120, Math.ceil(len / 3) * 6));
-  const lines  = Math.max(1, Math.ceil(len / 40));
-  const height = Math.max(40, lines * 18 + 14);
-
-  const businessObject = bpmnFactory.create('bpmn:TextAnnotation', { text: text });
-  const position = { x: el.x + el.width / 2, y: el.y - height / 2 - 40 };
-
-  let annotation;
-  try {
-    annotation = modeling.createShape(
-      { type: 'bpmn:TextAnnotation', businessObject: businessObject, width: width, height: height },
-      position,
-      el.parent
-    );
-    if (color) modeling.setColor([annotation], { fill: color.fill, stroke: color.stroke });
-    modeling.connect(el, annotation, { type: 'bpmn:Association' });
-  } catch(e) { return null; }
-  return annotation;
-}
-
-function clearPervalAnnotations() {
-  if (!_pervalAnnotationIds.length) return;
-  const elementRegistry = modeler.get('elementRegistry');
-  const modeling = modeler.get('modeling');
-  const els = _pervalAnnotationIds.map(id => elementRegistry.get(id)).filter(Boolean);
-  if (els.length) modeling.removeElements(els);
-  _pervalAnnotationIds = [];
 }
 
 // ─── Dictado por voz (Web Speech API) ────────────────────────────────────────

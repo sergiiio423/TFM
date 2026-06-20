@@ -1227,6 +1227,13 @@ const PERVAL_DIM = {
   Social:    { icon:'🟣', label:'Social',    text:'#d8b4fe', diagram:{ fill:'#f3e8ff', stroke:'#a855f7' } },
   Interno:   { icon:'⚪', label:'Interno',   text:'#9ca3af', diagram:{ fill:'#f3f4f6', stroke:'#9ca3af' } }
 };
+const PERVAL_NIVEL = {
+  muy_bueno: { label:'Muy bueno', fill:'#dcfce7', stroke:'#22c55e', text:'#86efac', icon:'🟢' },
+  bueno:     { label:'Bueno',     fill:'#dbeafe', stroke:'#3b82f6', text:'#93c5fd', icon:'🔵' },
+  regular:   { label:'Regular',   fill:'#fef9c3', stroke:'#eab308', text:'#fde047', icon:'🟡' },
+  malo:      { label:'Malo',      fill:'#ffedd5', stroke:'#f97316', text:'#fdba74', icon:'🟠' },
+  muy_malo:  { label:'Muy malo',  fill:'#fee2e2', stroke:'#ef4444', text:'#fca5a5', icon:'🔴' }
+};
 function pervalRgba(hex, alpha) {
   const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${alpha})`;
@@ -1243,18 +1250,98 @@ function showPervalResults(data, actorName) {
   });
   const taskRows = (data.tareas||[]).map(t => {
     const badges = (t.dimensiones||[]).map(d => { const c=dim[d]||dim.Interno; return`<span class="pv-badge" style="background:${c.bg};border:1px solid ${c.border};color:${c.text}">${c.icon} ${c.label}</span>`; }).join('');
+    const niv = PERVAL_NIVEL[t.nivel] || PERVAL_NIVEL.regular;
+    const nivelBadge = `<span class="pv-badge" style="background:${pervalRgba(niv.stroke,0.15)};border:1px solid ${pervalRgba(niv.stroke,0.35)};color:${niv.text}">${niv.icon} ${niv.label}</span>`;
     const valorHtml = t.valor ? `<div class="pv-desc"><b>Valor:</b> ${t.valor}</div>` : '';
     const justHtml  = t.justificacion ? `<div class="pv-desc"><b>Justificación:</b> ${t.justificacion}</div>` : '';
-    return`<div class="pv-row"><div class="pv-name">${t.nombre}</div><div class="pv-badges">${badges}</div>${valorHtml}${justHtml}</div>`;
+    return`<div class="pv-row"><div class="pv-name">${t.nombre} ${nivelBadge}</div><div class="pv-badges">${badges}</div>${valorHtml}${justHtml}</div>`;
   }).join('');
   const summaryCards = Object.entries(data.resumen||{}).map(([d,text]) => { const c=dim[d]||dim.Interno; return`<div class="pv-sum-card" style="background:${c.bg};border:1px solid ${c.border}"><div class="pv-sum-title" style="color:${c.text}">${c.icon} ${c.label}</div><div class="pv-sum-text">${text}</div></div>`; }).join('');
   const generalHtml = data.valorGeneral ? `<div class="pv-general"><span class="pv-general-lbl">${t('pervalGlobalLbl')}${actorName ? ` · ${actorName}` : ''} · </span>${data.valorGeneral}</div>` : '';
 
-  const html = `<div class="pv-results"><div class="pv-header">${t('pervalHeader')}${actorName ? ` — ${actorName}` : ''}</div><div class="pv-section-lbl">${t('pervalClassifByTask')}</div><div class="pv-tasks">${taskRows}</div><div class="pv-section-lbl" style="margin-top:10px">${t('pervalSummaryByDim')}</div><div class="pv-summary">${summaryCards}</div>${generalHtml}</div>`;
+  const legendChips = Object.values(PERVAL_NIVEL).map(n =>
+    `<span class="pv-legend-chip" style="background:${n.fill};border:1px solid ${n.stroke};color:#1f2937">${n.icon} ${n.label}</span>`
+  ).join('');
+  const legendHtml = `<div class="pv-actions"><div class="pv-legend">${legendChips}</div></div>`;
+
+  const html = `<div class="pv-results"><div class="pv-header">${t('pervalHeader')}${actorName ? ` — ${actorName}` : ''}</div><div class="pv-section-lbl">${t('pervalClassifByTask')}</div><div class="pv-tasks">${taskRows}</div><div class="pv-section-lbl" style="margin-top:10px">${t('pervalSummaryByDim')}</div><div class="pv-summary">${summaryCards}</div>${generalHtml}${legendHtml}</div>`;
   const messages = document.getElementById('ai-messages');
   const div = document.createElement('div'); div.className = 'msg ai';
   div.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bubble pv-bubble">${html}</div>`;
   messages.appendChild(div); messages.scrollTop = messages.scrollHeight;
+
+  if ((data.tareas||[]).length > 0) {
+    applyPervalColors(data.tareas);
+  }
+}
+
+// ─── PERVAL: colorear diagrama por NIVEL de rendimiento (método Tatiane) ─────
+function findElementsByName(nombre) {
+  const elementRegistry = modeler.get('elementRegistry');
+  const target = (nombre || '').trim();
+  return elementRegistry.filter(el =>
+    el.businessObject && !el.labelTarget && (el.businessObject.name || '').trim() === target
+  );
+}
+
+let _pervalAnnotationIds = [];
+
+function applyPervalColors(tareas) {
+  const modeling = modeler.get('modeling');
+  clearPervalAnnotations();
+  (tareas || []).forEach(tarea => {
+    const niv = PERVAL_NIVEL[tarea.nivel] || PERVAL_NIVEL.regular;
+    const els = findElementsByName(tarea.nombre);
+    if (!els.length) return;
+    modeling.setColor(els, { fill: niv.fill, stroke: niv.stroke });
+    const dims = (tarea.dimensiones || []).map(d => { const c = PERVAL_DIM[d] || PERVAL_DIM.Interno; return c.icon + ' ' + t(PERVAL_DIM_LABEL_KEYS[d] || 'dimInterno'); }).join(', ');
+    const nivelLabel = niv.icon + ' ' + niv.label;
+    const text = nivelLabel + '\n' + dims + (tarea.valor ? '\n' + tarea.valor : '');
+    const annotation = createPervalAnnotation(els[0], text, niv);
+    if (annotation) _pervalAnnotationIds.push(annotation.id);
+  });
+}
+
+function clearPervalColors(tareas) {
+  const modeling = modeler.get('modeling');
+  (tareas || []).forEach(tarea => {
+    const els = findElementsByName(tarea.nombre);
+    if (els.length) modeling.setColor(els, { fill: null, stroke: null });
+  });
+  clearPervalAnnotations();
+}
+
+function createPervalAnnotation(el, text, color) {
+  const modeling    = modeler.get('modeling');
+  const bpmnFactory = modeler.get('bpmnFactory');
+
+  const len    = (text || '').length;
+  const width  = Math.min(220, Math.max(120, Math.ceil(len / 3) * 6));
+  const lines  = Math.max(1, Math.ceil(len / 40));
+  const height = Math.max(40, lines * 18 + 14);
+
+  const businessObject = bpmnFactory.create('bpmn:TextAnnotation', { text });
+  const position = { x: el.x + el.width / 2, y: el.y - height / 2 - 40 };
+
+  let annotation;
+  try {
+    annotation = modeling.createShape(
+      { type: 'bpmn:TextAnnotation', businessObject, width, height },
+      position, el.parent
+    );
+    if (color) modeling.setColor([annotation], { fill: color.fill, stroke: color.stroke });
+    modeling.connect(el, annotation, { type: 'bpmn:Association' });
+  } catch(e) { return null; }
+  return annotation;
+}
+
+function clearPervalAnnotations() {
+  if (!_pervalAnnotationIds.length) return;
+  const elementRegistry = modeler.get('elementRegistry');
+  const modeling = modeler.get('modeling');
+  const els = _pervalAnnotationIds.map(id => elementRegistry.get(id)).filter(Boolean);
+  if (els.length) modeling.removeElements(els);
+  _pervalAnnotationIds = [];
 }
 
 // ─── Dictado por voz (Web Speech API) ────────────────────────────────────────

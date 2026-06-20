@@ -354,9 +354,17 @@ DIMENSIONES PERVAL:
 
 Elementos sin impacto en el actor → clasifícalos como "Interno".
 
+NIVEL DE RENDIMIENTO — para cada tarea, evalúa cómo de bien el proceso entrega valor
+percibido al actor en esa tarea y asigna un nivel:
+- "muy_bueno": la tarea entrega un valor percibido excelente al actor
+- "bueno": la tarea entrega un buen valor percibido
+- "regular": el valor percibido es neutro o mejorable
+- "malo": el valor percibido es bajo o deficiente
+- "muy_malo": la tarea genera una percepción muy negativa
+
 RESPONDE ÚNICAMENTE con JSON:
 {
-  "tareas": [{"nombre":"...","dimensiones":["Quality"],"valor":"...","justificacion":"..."}],
+  "tareas": [{"nombre":"...","dimensiones":["Quality"],"nivel":"bueno","valor":"...","justificacion":"..."}],
   "resumen": {"Quality":"...","Price":"...","Emotional":"...","Social":"..."},
   "valorGeneral": "..."
 }${langDirective()}`;

@@ -103,6 +103,8 @@ export const I18N = {
     pervalHeader:        '📊 Análisis PERVAL',
     pervalClassifByTask: 'Clasificación por tarea',
     pervalSummaryByDim:  'Resumen por dimensión',
+    pervalPaintBtn:      '🎨 Colorear diagrama por rendimiento',
+    pervalRemoveBtn:     '↩️ Quitar colores',
 
     // ── Dimensiones PERVAL ──
     dimQuality:   'Calidad',
@@ -298,6 +300,8 @@ export const I18N = {
     pervalHeader:        '📊 PERVAL Analysis',
     pervalClassifByTask: 'Classification by task',
     pervalSummaryByDim:  'Summary by dimension',
+    pervalPaintBtn:      '🎨 Color diagram by performance',
+    pervalRemoveBtn:     '↩️ Remove colors',
 
     // ── PERVAL dimensions ──
     dimQuality:   'Quality',

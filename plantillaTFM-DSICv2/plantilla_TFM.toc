@@ -19,20 +19,20 @@
 \contentsline {section}{\numberline {3.2}Síntesis del estado del arte y oportunidades de investigación}{16}{section.3.2}%
 \contentsline {chapter}{\numberline {4}Análisis del problema}{19}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Modelado funcional del sistema}{19}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Diagrama de actores}{19}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Diagramas de contexto}{20}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.1}Diagrama de actores}{20}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Diagramas de contexto}{21}{subsection.4.1.2}%
 \contentsline {subsection}{\numberline {4.1.3}Diagramas de casos de uso}{21}{subsection.4.1.3}%
 \contentsline {section}{\numberline {4.2}Análisis del marco legal y ético}{22}{section.4.2}%
 \contentsline {subsection}{\numberline {4.2.1}Protección de datos}{23}{subsection.4.2.1}%
 \contentsline {subsection}{\numberline {4.2.2}Propiedad intelectual y licencias}{23}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Consideraciones éticas}{23}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.3}Consideraciones éticas}{24}{subsection.4.2.3}%
 \contentsline {section}{\numberline {4.3}Identificación y análisis de soluciones posibles}{24}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Selección del editor BPMN base}{24}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.1}Selección del editor BPMN base}{25}{subsection.4.3.1}%
 \contentsline {subsection}{\numberline {4.3.2}Selección del proveedor de LLM}{25}{subsection.4.3.2}%
 \contentsline {subsection}{\numberline {4.3.3}Arquitectura de integración: extensión directa frente a servidor MCP}{26}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{26}{subsection.4.3.4}%
-\contentsline {section}{\numberline {4.4}Solución propuesta}{27}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Requisitos funcionales}{27}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{27}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}Solución propuesta}{28}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Requisitos funcionales}{28}{subsection.4.4.1}%
 \contentsline {subsection}{\numberline {4.4.2}Requisitos no funcionales}{28}{subsection.4.4.2}%
 \contentsline {subsection}{\numberline {4.4.3}Historias de usuario}{29}{subsection.4.4.3}%
 \contentsline {section}{\numberline {4.5}Plan de trabajo}{34}{section.4.5}%

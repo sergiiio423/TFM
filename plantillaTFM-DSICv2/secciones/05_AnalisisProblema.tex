@@ -24,7 +24,11 @@ Posteriormente, se  analiza el marco legal y ético asociado al uso de modelos d
 \section{Modelado funcional del sistema}
 \label{sec:modeladoFuncional}
 
-Con el objetivo de delimitar de forma precisa el alcance funcional del sistema desarrollado, se ha realizado un modelado funcional basado en diagramas UML simplificados, identificando los actores que interactúan con el sistema, los diagramas de contexto que delimitan los subsistemas considerados y sus relaciones con dichos actores, y los diagramas de casos de uso que describen las funcionalidades ofrecidas por cada subsistema.
+Con el objetivo de delimitar de forma precisa el alcance funcional de la solución propuesta y comprender las interacciones entre sus diferentes componentes{{ sistema desarrollado}}, se ha realizado un modelado funcional {del sistema utilizando}{{basado en}} diagramas UML simplificados{. El modelado funcional constituye una actividad fundamental durante el análisis de}{{, identificando los actores que interactúan con el}} sistema{s}, {{los diagramas de contexto que delimitan los subsistemas considerados y sus relaciones con dichos actores, y los diagramas de casos de uso que describen las funcionalidades ofrecidas por cada subsistema}} {ya que permite identificar los actores involucrados, especificar las responsabilidades de cada componente y describir las funcionalidades que el sistema debe proporcionar para satisfacer las necesidades de los usuarios}.
+
+{En el contexto del presente TFM, el modelado funcional resulta especialmente relevante debido a la naturaleza híbrida de la solución desarrollada, que integra una extensión sobre bpmn.io, un servidor intermedio basado en Model Context Protocol (MCP) y uno o varios proveedores externos de modelos de LLMs. La interacción coordinada entre estos componentes requiere definir de manera explícita las fronteras del sistema, las responsabilidades de cada subsistema y los flujos de información intercambiados entre ellos.}
+
+{Para ello, el análisis se estructura en tres niveles complementarios. En primer lugar, se identifican los actores que participan en el sistema y las relaciones existentes entre ellos mediante un diagrama de actores. En segundo lugar, se presentan los diagramas de contexto, cuyo objetivo es delimitar el alcance de cada subsistema y representar las interacciones establecidas con los actores identificados. Finalmente, se describen los diagramas de casos de uso, que permiten especificar las funcionalidades ofrecidas por cada subsistema y la forma en que dichas funcionalidades son utilizadas para satisfacer los objetivos del usuario.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Diagrama de actores}
@@ -447,7 +451,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US01 -- Selección tecnológica y planificación del proyecto}
 
-\textit{Descripción}: como desarrollador, quiero analizar las alternativas tecnológicas disponibles para la generación de modelos BPMN mediante LLM y para el análisis PERVAL, con el fin de seleccionar el editor BPMN base, el o los proveedores de LLM, y la arquitectura de integración, y planificar el desarrollo del proyecto por \textit{sprints}.
+\textit{Descripción}: como desarrollador, quiero analizar las alternativas tecnológicas disponibles para la generación de modelos BPMN mediante LLM y para el análisis PERVAL, para seleccionar el editor BPMN base, el o los proveedores de LLM y la arquitectura de integración, y planificar el desarrollo del proyecto por \textit{sprints}.
 
 \textit{Estimación}: 8h.
 
@@ -460,7 +464,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US02 -- Configuración del entorno de desarrollo}
 
-\textit{Descripción}: como desarrollador, quiero configurar un entorno de desarrollo a partir del ejemplo \texttt{modeler} de \texttt{bpmn-js-examples}, de forma que disponga de un editor BPMN funcional sobre el que construir la extensión.
+\textit{Descripción}: como desarrollador, quiero configurar un entorno de desarrollo a partir del ejemplo \texttt{modeler} de \texttt{bpmn-js-examples}, para disponer de un editor BPMN funcional sobre el que construir la extensión.
 
 \textit{Estimación}: 6h.
 
@@ -473,7 +477,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US03 -- Diseño e implementación del servidor MCP}
 
-\textit{Descripción}: como desarrollador, quiero implementar un servidor \textit{backend} que siga la especificación de \textit{Model Context Protocol}~\cite{anthropic2024mcp}, de forma que actúe como intermediario seguro entre la extensión cliente y los proveedores de LLM.
+\textit{Descripción}: como desarrollador, quiero implementar un servidor \textit{backend} que siga la especificación de \textit{Model Context Protocol}~\cite{anthropic2024mcp}, para que actúe como intermediario seguro entre la extensión cliente y los proveedores de LLM.
 
 \textit{Estimación}: 12h.
 
@@ -487,7 +491,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US04 -- Integración con \textit{GitHub Models}}
 
-\textit{Descripción}: como desarrollador, quiero integrar el servidor MCP con la API de \textit{GitHub Models}, de forma que pueda invocar distintos modelos de LLM (\texttt{gpt-4.1}, \texttt{gpt-4o}, etc.) para la generación de modelos BPMN y el análisis PERVAL.
+\textit{Descripción}: como desarrollador, quiero integrar el servidor MCP con la API de \textit{GitHub Models}, para poder invocar distintos modelos de LLM (\texttt{gpt-4.1}, \texttt{gpt-4o}, etc.) para la generación de modelos BPMN y el análisis PERVAL.
 
 \textit{Estimación}: 10h.
 
@@ -501,7 +505,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US05 -- Generación de modelos BPMN a partir de lenguaje natural}
 
-\textit{Descripción}: como usuario, quiero describir un proceso de negocio en lenguaje natural y obtener automáticamente un modelo BPMN 2.0 que lo represente, de forma que pueda partir de un primer borrador del modelo sin tener que construirlo manualmente.
+\textit{Descripción}: como usuario, quiero describir un proceso de negocio en lenguaje natural y obtener automáticamente un modelo BPMN 2.0 que lo represente, para poder partir de un primer borrador del modelo sin tener que construirlo manualmente.
 
 \textit{Estimación}: 14h.
 
@@ -516,7 +520,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US06 -- Edición conversacional iterativa del modelo}
 
-\textit{Descripción}: como usuario, quiero poder solicitar modificaciones sobre el modelo BPMN actual mediante mensajes en lenguaje natural, de forma que pueda refinar iterativamente el modelo a través de una conversación con el sistema.
+\textit{Descripción}: como usuario, quiero poder solicitar modificaciones sobre el modelo BPMN actual mediante mensajes en lenguaje natural, para poder refinar iterativamente el modelo a través de una conversación con el sistema.
 
 \textit{Estimación}: 12h.
 
@@ -530,7 +534,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US07 -- Validación y reparación automática del XML BPMN}
 
-\textit{Descripción}: como usuario, quiero que el sistema detecte y corrija automáticamente los errores habituales en el XML BPMN devuelto por el LLM (etiquetas sin cerrar, XML truncado), de forma que el modelo se cargue correctamente en el editor incluso cuando la respuesta del LLM no es perfecta.
+\textit{Descripción}: como usuario, quiero que el sistema detecte y corrija automáticamente los errores habituales en el XML BPMN devuelto por el LLM (etiquetas sin cerrar, XML truncado), para que el modelo se cargue correctamente en el editor incluso cuando la respuesta del LLM no es perfecta.
 
 \textit{Estimación}: 10h.
 
@@ -546,7 +550,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US08 -- Diseño del módulo de análisis PERVAL}
 
-\textit{Descripción}: como desarrollador, quiero diseñar un módulo capaz de analizar el valor percibido por el cliente de las tareas o entregables de un modelo BPMN, según la clasificación de Sweeney y Soutar~\cite{sweeney2001perval}, de forma que el usuario pueda obtener información sobre el valor que aporta cada elemento del proceso.
+\textit{Descripción}: como desarrollador, quiero diseñar un módulo capaz de analizar el valor percibido por el cliente de las tareas o entregables de un modelo BPMN, según la clasificación de Sweeney y Soutar~\cite{sweeney2001perval}, para que el usuario pueda obtener información sobre el valor que aporta cada elemento del proceso.
 
 \textit{Estimación}: 10h.
 
@@ -560,7 +564,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US09 -- Implementación de la herramienta \texttt{analyzePerval}}
 
-\textit{Descripción}: como desarrollador, quiero implementar en el servidor MCP la herramienta de análisis PERVAL diseñada en US08, de forma que, dado un modelo BPMN y un conjunto de tareas, el sistema devuelva la clasificación por dimensiones, el resumen agregado y el valor general.
+\textit{Descripción}: como desarrollador, quiero implementar en el servidor MCP la herramienta de análisis PERVAL diseñada en US08, para que, dado un modelo BPMN y un conjunto de tareas, el sistema devuelva la clasificación por dimensiones, el resumen agregado y el valor general.
 
 \textit{Estimación}: 10h.
 
@@ -574,7 +578,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US10 -- Visualización de los resultados del análisis PERVAL}
 
-\textit{Descripción}: como usuario, quiero visualizar de forma clara los resultados del análisis PERVAL (resumen por dimensión, valor general y justificación de cada tarea), de forma que pueda interpretar fácilmente el valor percibido de cada elemento del proceso.
+\textit{Descripción}: como usuario, quiero visualizar de forma clara los resultados del análisis PERVAL (resumen por dimensión, valor general y justificación de cada tarea), para poder interpretar fácilmente el valor percibido de cada elemento del proceso.
 
 \textit{Estimación}: 10h.
 
@@ -588,7 +592,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US11 -- Diseño e implementación de la interfaz del panel conversacional}
 
-\textit{Descripción}: como usuario, quiero disponer de un panel conversacional integrado en el editor con un diseño visual coherente y agradable, de forma que la interacción con el sistema resulte intuitiva y profesional.
+\textit{Descripción}: como usuario, quiero disponer de un panel conversacional integrado en el editor con un diseño visual coherente y agradable, para que la interacción con el sistema resulte intuitiva y profesional.
 
 \textit{Estimación}: 10h.
 
@@ -602,7 +606,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US12 -- Internacionalización de la interfaz y de los \textit{prompts}}
 
-\textit{Descripción}: como usuario, quiero poder utilizar el sistema en español o en inglés, tanto en la interfaz como en las respuestas generadas por el LLM, de forma que pueda trabajar en el idioma de su preferencia.
+\textit{Descripción}: como usuario, quiero poder utilizar el sistema en español o en inglés, tanto en la interfaz como en las respuestas generadas por el LLM, para poder trabajar en el idioma de su preferencia.
 
 \textit{Estimación}: 8h.
 
@@ -615,7 +619,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US13 -- Pruebas \textit{end-to-end} con \textit{Playwright}}
 
-\textit{Descripción}: como desarrollador, quiero disponer de un conjunto de pruebas automatizadas \textit{end-to-end}, de forma que pueda verificar que los flujos principales del sistema (generación, edición conversacional y análisis PERVAL) funcionan correctamente en un navegador real.
+\textit{Descripción}: como desarrollador, quiero disponer de un conjunto de pruebas automatizadas \textit{end-to-end}, para poder verificar que los flujos principales del sistema (generación, edición conversacional y análisis PERVAL) funcionan correctamente en un navegador real.
 
 \textit{Estimación}: 8h.
 
@@ -629,7 +633,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US14 -- Despliegue en \textit{Render} y documentación}
 
-\textit{Descripción}: como desarrollador, quiero desplegar la extensión y el servidor MCP en \textit{Render}, de forma que el sistema sea accesible públicamente y pueda ser utilizado y evaluado fuera del entorno de desarrollo local.
+\textit{Descripción}: como desarrollador, quiero desplegar la extensión y el servidor MCP en \textit{Render}, para que el sistema sea accesible públicamente y pueda ser utilizado y evaluado fuera del entorno de desarrollo local.
 
 \textit{Estimación}: 7h.
 
@@ -642,7 +646,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US15 -- Validación de la solución con usuarios mediante TAM}
 
-\textit{Descripción}: como desarrollador, quiero validar la solución desarrollada mediante una evaluación con un grupo de aproximadamente quince usuarios, empleando el modelo de aceptación de la tecnología (\textit{Technology Acceptance Model}, TAM), de forma que pueda valorar la utilidad percibida, la facilidad de uso percibida y la intención de uso del sistema.
+\textit{Descripción}: como desarrollador, quiero validar la solución desarrollada mediante una evaluación con un grupo de aproximadamente quince usuarios, empleando el modelo de aceptación de la tecnología (\textit{Technology Acceptance Model}, TAM), para poder valorar la utilidad percibida, la facilidad de uso percibida y la intención de uso del sistema.
 
 \textit{Estimación}: 10h.
 

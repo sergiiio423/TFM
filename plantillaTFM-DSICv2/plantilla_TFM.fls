@@ -416,11 +416,17 @@ INPUT .\secciones\03_Fundamentos.tex
 INPUT .\secciones\03_Fundamentos.tex
 INPUT .\secciones\03_Fundamentos.tex
 INPUT secciones\03_Fundamentos.tex
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8t.tfm
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkdi8t.vf
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8r.tfm
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8t.tfm
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT secciones\04_EstadoDelArte.tex
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkdi8t.vf
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8r.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkd8t.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkd8t.vf
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkd8r.tfm
@@ -429,9 +435,6 @@ INPUT .\secciones\05_AnalisisProblema.tex
 INPUT .\secciones\05_AnalisisProblema.tex
 INPUT .\secciones\05_AnalisisProblema.tex
 INPUT secciones\05_AnalisisProblema.tex
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8t.tfm
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkdi8t.vf
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8r.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkl8t.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkl8t.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\t1pcr.fd

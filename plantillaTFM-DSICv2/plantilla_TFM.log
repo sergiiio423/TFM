@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  25 JUN 2026 13:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  26 JUN 2026 10:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -746,7 +746,7 @@ Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 ))
 \c@lstlisting=\count365
  (include/Portada.tex
-<include/logo-upv.png, id=166, 136.8312pt x 158.2713pt>
+<include/logo-upv.png, id=170, 136.8312pt x 158.2713pt>
 File: include/logo-upv.png Graphic file (type png)
 <use include/logo-upv.png>
 Package pdftex.def Info: include/logo-upv.png  used on input line 12.
@@ -775,7 +775,7 @@ LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/l/n' tried instead on input line 18.
 LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/db/n' tried instead on input line 18.
-<include/DSIC.png, id=168, 92.7465pt x 64.3203pt>
+<include/DSIC.png, id=172, 92.7465pt x 64.3203pt>
 File: include/DSIC.png Graphic file (type png)
 <use include/DSIC.png>
 Package pdftex.def Info: include/DSIC.png  used on input line 22.
@@ -861,24 +861,32 @@ LaTeX Info: Redefining \% on input line 6.
 ]
 Cap\'{\i }tulo 2.
 [7]
-LaTeX Info: Redefining \. on input line 37.
-LaTeX Info: Redefining \% on input line 37.
+LaTeX Info: Redefining \. on input line 31.
+LaTeX Info: Redefining \% on input line 31.
  [8]
-LaTeX Info: Redefining \. on input line 59.
-LaTeX Info: Redefining \% on input line 59.
+LaTeX Info: Redefining \. on input line 50.
+LaTeX Info: Redefining \% on input line 50.
  [9]
-LaTeX Info: Redefining \. on input line 79.
-LaTeX Info: Redefining \% on input line 79.
- [10]) (secciones/04_EstadoDelArte.tex
+LaTeX Info: Redefining \. on input line 69.
+LaTeX Info: Redefining \% on input line 69.
+ [10]
+LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <14.4> not available
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 89.
+LaTeX Info: Redefining \. on input line 94.
+LaTeX Info: Redefining \% on input line 94.
+ [11]
+LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <10.95> not available
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 102.
+) (secciones/04_EstadoDelArte.tex
 LaTeX Info: Redefining \. on input line 6.
 LaTeX Info: Redefining \% on input line 6.
- [11] [12
-
-]
+ [12]
 Cap\'{\i }tulo 3.
 LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <12> not available
 (Font)              Font shape `T1/pbk/db/n' tried instead on input line 17.
-[13]
+[13
+
+]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 LaTeX Info: Redefining \. on input line 82.
@@ -900,8 +908,6 @@ Cap\'{\i }tulo 4.
 LaTeX Info: Redefining \. on input line 76.
 LaTeX Info: Redefining \% on input line 76.
  [20]
-LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <10.95> not available
-(Font)              Font shape `T1/pbk/db/it' tried instead on input line 77.
 LaTeX Info: Redefining \. on input line 157.
 LaTeX Info: Redefining \% on input line 157.
  [21]
@@ -1066,7 +1072,17 @@ Underfull \hbox (badness 2142) in paragraph at lines 40--41
  []
 
 
-Underfull \hbox (badness 1721) in paragraph at lines 63--67
+Underfull \hbox (badness 1215) in paragraph at lines 46--47
+[]\T1/pbk/l/n/10.95 A. Kar-pathy, ``The-re's a new kind of co-ding I call `vi-be co-ding'...,'' [Pu-
+ []
+
+
+Underfull \hbox (badness 2418) in paragraph at lines 46--47
+\T1/pbk/l/n/10.95 bli-ca-ción en X (an-tes Twit-ter)], 2 de fe-bre-ro de 2025. Dis-po-ni-ble en:
+ []
+
+
+Underfull \hbox (badness 1721) in paragraph at lines 66--70
 []\T1/pbk/l/n/10.95 Feuerriegel, S., Hart-mann, J., Ja-niesch, C., & Zs-chech, P. (2024). Ge-
  []
 
@@ -1091,20 +1107,20 @@ L3 programming layer <2025-11-06>
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `plantilla_TFM.out' has not changed.
-(rerunfilecheck)             Checksum: 78B7EB53DED31BF8B3CB1B49579409F6;8301.
+(rerunfilecheck)             Checksum: DD1EA333F72D10703D29CA6DED64A0C0;8582.
  ) 
 Here is how much of TeX's memory you used:
- 27071 strings out of 467871
- 500118 string characters out of 5417408
- 916212 words of memory out of 5000000
- 55311 multiletter control sequences out of 15000+600000
- 663282 words of font info for 106 fonts, out of 8000000 for 9000
+ 27079 strings out of 467871
+ 500230 string characters out of 5417408
+ 915323 words of memory out of 5000000
+ 55316 multiletter control sequences out of 15000+600000
+ 664937 words of font info for 108 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,12n,107p,1130b,970s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,12n,107p,1143b,970s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkdi8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrb8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on plantilla_TFM.pdf (51 pages, 330554 bytes).
+Output written on plantilla_TFM.pdf (51 pages, 337382 bytes).
 PDF statistics:
- 594 PDF objects out of 1000 (max. 8388607)
- 128 named destinations out of 1000 (max. 500000)
- 343 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 602 PDF objects out of 1000 (max. 8388607)
+ 130 named destinations out of 1000 (max. 500000)
+ 351 words of extra memory for PDF output out of 10000 (max. 10000000)
 

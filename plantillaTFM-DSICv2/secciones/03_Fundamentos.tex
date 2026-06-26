@@ -5,7 +5,7 @@
 
 \chapter{Fundamentos}
 
-En este capítulo se introducen los conceptos teóricos y tecnológicos necesarios para comprender el resto del trabajo: los modelos de lenguaje de gran escala (LLMs) y su funcionamiento, el estándar BPMN y su notación básica, y la clasificación PERVAL para el análisis del valor percibido por el cliente.
+En este capítulo se introducen los conceptos teóricos y tecnológicos necesarios para comprender el resto del trabajo: los modelos de lenguaje de gran escala (LLMs) y su funcionamiento, los paradigmas de prompting iterativo con validación humana y vibe modeling aplicados al modelado de procesos, el estándar BPMN y su notación básica, la clasificación PERVAL para el análisis del valor percibido por el cliente, y el protocolo MCP como mecanismo de integración entre la extensión desarrollada y los proveedores de LLM.
 
 %%---------------------------------------------------------
 \section{Modelos de lenguaje de gran escala (LLMs)}
@@ -24,6 +24,14 @@ La forma habitual de interactuar con un LLM consiste en proporcionarle una instr
 A pesar de sus capacidades, los LLMs también presentan limitaciones importantes. Entre ellas destacan la generación de información incorrecta o no fundamentada (\textit{hallucinations), la sensibilidad a pequeñas variaciones en la formulación de las instrucciones y la dificultad para garantizar la corrección semántica de los artefactos generados \cite{ji2023, feuerriegel2024}. Estas limitaciones resultan especialmente relevantes cuando los modelos se utilizan en tareas de ingeniería del software y modelado de procesos de negocio, en las que la precisión y la consistencia de los artefactos producidos constituyen requisitos fundamentales.}
 
 Estas capacidades   y limitaciones son especialmente relevantes para el presente TFM. Por una parte,  los LLMs ofrecen la posibilidad de interpretar descripciones de procesos de negocio expresadas en lenguaje natural y genere, a partir de ellas, representaciones estructuradas, como modelos BPMN. Por otra parte, su naturaleza conversacional permite mantener un diálogo iterativo con el usuario para refinar progresivamente dichos modelos a partir de nuevas instrucciones  y restricciones. La aplicación de estas capacidades al ámbito de la gestión de procesos de negocio ha sido objeto de  creciente atención en investigaciones  recientes \cite{kourani2025evaluating, kourani2024process, klievtsova2023, abb2023, bise2025bpmn, fillies2024}, cuyo  principales avances y limitaciones se analizan con mayor  detalle en el capítulo dedicado al Estado del Arte.
+
+Una estrategia de especial relevancia en el contexto de este TFM es el \textbf{prompting iterativo con validación humana en bucle} (\textit{human-in-the-loop iterative prompting}). Este enfoque consiste en emplear el LLM no como un generador de respuestas únicas y definitivas, sino como un colaborador dentro de un ciclo iterativo de generación y refinamiento. En cada iteración, el usuario evalúa el artefacto generado, identifica posibles errores o carencias y proporciona instrucciones adicionales para guiar la mejora progresiva del resultado. Este ciclo se repite hasta que el artefacto satisface los criterios de calidad y corrección esperados, convirtiendo al usuario en un validador activo del proceso de generación.
+
+Esta estrategia resulta especialmente adecuada para tareas de modelado de procesos, en las que la complejidad del dominio y la ambigüedad inherente al lenguaje natural dificultan la obtención de resultados correctos y completos en una única interacción. Además, el prompting iterativo mitiga parcialmente las limitaciones propias de los LLMs, como la generación de información incorrecta o semánticamente incoherente, ya que la intervención del usuario actúa como mecanismo de corrección continua durante el proceso de generación.
+
+Íntimamente relacionado con el prompting iterativo, el concepto de \textbf{vibe modeling} surge por analogía con el término \textit{vibe coding}, acuñado por Andrej Karpathy en 2025 \cite{karpathy2025vibe} para describir un paradigma de desarrollo de software en el que el programador delega la generación del código en un LLM mediante instrucciones en lenguaje natural, limitando su intervención a la guía de alto nivel y la validación del resultado. De manera análoga, el \textit{vibe modeling} hace referencia a la práctica emergente de construir modelos de procesos de negocio mediante un diálogo iterativo con un LLM, en el que el usuario no diseña el modelo elemento a elemento, sino que expresa su intención a través de descripciones en lenguaje natural y permite que el modelo genere, ajuste y refine el artefacto resultante. El usuario adopta, en este paradigma, el rol de director o validador del proceso de modelado, mientras que el LLM actúa como modelador automático.
+
+Este enfoque reduce la barrera de acceso al modelado de procesos, ya que no exige que el usuario domine en profundidad la notación BPMN ni las herramientas de modelado convencionales. Al mismo tiempo, plantea preguntas sobre la calidad, la corrección y la trazabilidad de los modelos generados, así como sobre el grado de supervisión humana necesario para garantizar que los resultados sean adecuados para los fines perseguidos. La herramienta desarrollada en este TFM se inscribe en este paradigma, al permitir al usuario construir y refinar de forma iterativa modelos BPMN a partir de descripciones en lenguaje natural.
 
 %%---------------------------------------------------------
 \section{BPMN: notación y modelado de procesos de negocio}
@@ -76,6 +84,29 @@ La naturaleza multidimensional de PERVAL resulta especialmente adecuada para el 
 En el contexto de este TFM, la clasificación PERVAL se emplea como marco conceptual  para analizar las actividades de un proceso de negocio modelado en BPMN e identificar de qué manera dichas actividades contribuyen a la generación de las distintas dimensiones  de valor percibido desde la perspectiva del cliente. Este análisis permite detectar posibles desalineamientos entre el valor  que la organización pretende ofrecer y el valor que efectivamente percibe el usuario durante su interacción con el proceso.
 
 La incorporación de PERVAL en el presente trabajo adquiere una relevancia particular, ya que permite complementar la generación automática de modelos BPMN mediante LLMs con una perspectiva explícitamente orientada al cliente. De esta manera, el análisis no se limita únicamente a la representación estructural del proceso, sino que también considera las implicaciones que las diferentes actividades y decisiones del proceso pueden tener sobre la experiencia de valor del usuario final.
+
+%%---------------------------------------------------------
+\section{El protocolo \textit{Model Context Protocol} (MCP)}
+\label{sec:mcp}
+%%---------------------------------------------------------
+
+El \textit{Model Context Protocol} (MCP) es un protocolo abierto propuesto por Anthropic en 2024 con el objetivo de estandarizar la comunicación entre aplicaciones de usuario y modelos de lenguaje de gran escala, facilitando la integración de herramientas externas, fuentes de datos y lógica de aplicación en el flujo de trabajo del LLM \cite{anthropic2024mcp}. Su adopción por parte de la industria ha sido progresiva desde su publicación, constituyendo hoy una referencia en el diseño de arquitecturas de integración de LLMs.
+
+La arquitectura MCP se organiza en torno a tres componentes principales:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Host o cliente MCP:} la aplicación que desea hacer uso de las capacidades del LLM. En el presente TFM, el cliente es la extensión desarrollada sobre bpmn.io, responsable de enviar las instrucciones del usuario al servidor MCP e integrar en la interfaz de modelado las respuestas generadas por el modelo.
+
+    \item[$\bullet$] \textbf{Servidor MCP:} el componente intermedio que actúa como puente entre el cliente y el proveedor del LLM. El servidor recibe las solicitudes del cliente, construye el contexto adecuado para el modelo, gestiona las llamadas a la API del LLM y devuelve los resultados al cliente. En este TFM, el servidor MCP está implementado como un servicio Node.js desplegado en Render.com.
+
+    \item[$\bullet$] \textbf{Herramientas (\textit{tools}):} funciones con esquemas de entrada y salida definidos de forma estructurada (habitualmente mediante JSON Schema o Zod) que el LLM puede invocar durante el procesamiento de una solicitud. Cada herramienta tiene un nombre, una descripción y un conjunto de parámetros que permiten al modelo determinar cuándo y cómo utilizarla.
+\end{itemize}
+
+El flujo de comunicación básico del protocolo funciona del siguiente modo: el cliente envía una solicitud al servidor MCP con el mensaje del usuario; el servidor transmite la solicitud al proveedor de LLM junto con la lista de herramientas disponibles; el LLM genera una respuesta, que puede incluir la invocación de una o varias herramientas; el servidor ejecuta las herramientas indicadas, obtiene los resultados y los incorpora al contexto del modelo para que elabore la respuesta definitiva; finalmente, el resultado se devuelve al cliente.
+
+Esta arquitectura ofrece varias ventajas para el presente TFM. En primer lugar, desacopla la interfaz de usuario de los detalles de la API del LLM, lo que facilita el cambio de proveedor de modelo sin modificar la lógica del cliente. En segundo lugar, centraliza en el servidor la gestión de herramientas, el manejo de errores y la seguridad de las credenciales, evitando que estas queden expuestas en el código del cliente. En tercer lugar, la estandarización del protocolo facilita la interoperabilidad entre distintas herramientas y proveedores de LLM, contribuyendo a la portabilidad y extensibilidad de la solución desarrollada.
+
+En la solución implementada en este TFM, el servidor MCP expone herramientas específicas para la generación y edición de modelos BPMN en formato XML y para el análisis PERVAL de los procesos modelados. La extensión sobre bpmn.io actúa como cliente MCP, transmitiendo las instrucciones del usuario al servidor y recibiendo los modelos generados por el LLM para su renderización y visualización en el entorno de modelado.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de fundamentos

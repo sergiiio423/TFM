@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  26 JUN 2026 10:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  28 JUN 2026 12:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -746,7 +746,7 @@ Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 ))
 \c@lstlisting=\count365
  (include/Portada.tex
-<include/logo-upv.png, id=170, 136.8312pt x 158.2713pt>
+<include/logo-upv.png, id=174, 136.8312pt x 158.2713pt>
 File: include/logo-upv.png Graphic file (type png)
 <use include/logo-upv.png>
 Package pdftex.def Info: include/logo-upv.png  used on input line 12.
@@ -775,7 +775,7 @@ LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/l/n' tried instead on input line 18.
 LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/db/n' tried instead on input line 18.
-<include/DSIC.png, id=172, 92.7465pt x 64.3203pt>
+<include/DSIC.png, id=176, 92.7465pt x 64.3203pt>
 File: include/DSIC.png Graphic file (type png)
 <use include/DSIC.png>
 Package pdftex.def Info: include/DSIC.png  used on input line 22.
@@ -905,114 +905,145 @@ LaTeX Info: Redefining \% on input line 6.
 ]
 Cap\'{\i }tulo 4.
 [19]
-LaTeX Info: Redefining \. on input line 76.
-LaTeX Info: Redefining \% on input line 76.
- [20]
-LaTeX Info: Redefining \. on input line 157.
-LaTeX Info: Redefining \% on input line 157.
- [21]
 LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <10> not available
-(Font)              Font shape `T1/pbk/l/n' tried instead on input line 200.
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 53.
+LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <10> not available
+(Font)              Font shape `T1/pbk/l/it' tried instead on input line 53.
+LaTeX Info: Redefining \. on input line 79.
+LaTeX Info: Redefining \% on input line 79.
+ [20]
+LaTeX Info: Redefining \. on input line 166.
+LaTeX Info: Redefining \% on input line 166.
+ [21]
 LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <8> not available
-(Font)              Font shape `T1/pbk/l/n' tried instead on input line 200.
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 205.
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 201.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 206.
  (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-LaTeX Info: Redefining \. on input line 268.
-LaTeX Info: Redefining \% on input line 268.
-[22]
-LaTeX Info: Redefining \. on input line 279.
-LaTeX Info: Redefining \% on input line 279.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 263.
+LaTeX Info: Redefining \% on input line 263.
+ [22]
+LaTeX Info: Redefining \. on input line 273.
+LaTeX Info: Redefining \% on input line 273.
  [23]
-LaTeX Info: Redefining \. on input line 300.
-LaTeX Info: Redefining \% on input line 300.
+LaTeX Info: Redefining \. on input line 294.
+LaTeX Info: Redefining \% on input line 294.
  [24]
 LaTeX Info: Redefining \. on input line 325.
 LaTeX Info: Redefining \% on input line 325.
  [25]
-LaTeX Info: Redefining \. on input line 346.
-LaTeX Info: Redefining \% on input line 346.
+LaTeX Info: Redefining \. on input line 344.
+LaTeX Info: Redefining \% on input line 344.
  [26]
-Overfull \hbox (9.48253pt too wide) in paragraph at lines 346--347
+Overfull \hbox (9.48253pt too wide) in paragraph at lines 347--348
 \T1/pbk/l/n/10.95 so, co-mo dos ser-vi-cios de \T1/pbk/l/it/10.95 Ren-der \T1/pbk/l/n/10.95 (\T1/pcr/m/n/10.95 tfm-bpmn-frontend \T1/pbk/l/n/10.95 y \T1/pcr/m/n/10.95 tfm-bpmn-mcp-server\T1/pbk/l/n/10.95 )--
  []
 
 LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <12> not available
-(Font)              Font shape `T1/pbk/db/it' tried instead on input line 350.
-LaTeX Info: Redefining \. on input line 369.
-LaTeX Info: Redefining \% on input line 369.
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 351.
+LaTeX Info: Redefining \. on input line 361.
+LaTeX Info: Redefining \% on input line 361.
 [27]
-LaTeX Info: Redefining \. on input line 444.
-LaTeX Info: Redefining \% on input line 444.
+secciones/05_AnalisisProblema.tex:410: ignored error: Infinite glue shrinkage found in box being split
+LaTeX Info: Redefining \. on input line 410.
+LaTeX Info: Redefining \% on input line 410.
  [28]
-LaTeX Info: Redefining \. on input line 456.
-LaTeX Info: Redefining \% on input line 456.
+secciones/05_AnalisisProblema.tex:445: ignored error: Infinite glue shrinkage found in box being split
+LaTeX Info: Redefining \. on input line 445.
+LaTeX Info: Redefining \% on input line 445.
  [29]
-LaTeX Info: Redefining \. on input line 502.
-LaTeX Info: Redefining \% on input line 502.
+LaTeX Info: Redefining \. on input line 470.
+LaTeX Info: Redefining \% on input line 470.
  [30]
-LaTeX Info: Redefining \. on input line 545.
-LaTeX Info: Redefining \% on input line 545.
+LaTeX Info: Redefining \. on input line 484.
+LaTeX Info: Redefining \% on input line 484.
  [31]
-Overfull \hbox (30.91061pt too wide) in paragraph at lines 559--560
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <10> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 506.
+
+Underfull \hbox (badness 3219) in paragraph at lines 513--513
+[]|\T1/pbk/l/n/10 01, 02, 03,
+ []
+
+
+Underfull \hbox (badness 3209) in paragraph at lines 517--517
+[]|\T1/pbk/l/n/10 Configuración/UX (RF-
+ []
+
+
+Underfull \hbox (badness 2103) in paragraph at lines 540--540
+[]|\T1/pbk/l/n/10 Arquitectura y ca-li-dad
+ []
+
+secciones/05_AnalisisProblema.tex:544: ignored error: Infinite glue shrinkage found in box being split
+LaTeX Info: Redefining \. on input line 544.
+LaTeX Info: Redefining \% on input line 544.
+ [32]
+LaTeX Info: Redefining \. on input line 589.
+LaTeX Info: Redefining \% on input line 589.
+ [33]
+LaTeX Info: Redefining \. on input line 631.
+LaTeX Info: Redefining \% on input line 631.
+ [34]
+Overfull \hbox (30.91061pt too wide) in paragraph at lines 660--661
 []\T1/pbk/l/n/10.95 Estudio de las di-men-sio-nes de va-lor per-ci-bi-do (emo-cio-nal, so-cial, ca-li-dad/rendimiento,
  []
 
 
-Overfull \hbox (1.59607pt too wide) in paragraph at lines 561--562
+Overfull \hbox (1.59607pt too wide) in paragraph at lines 662--663
 []\T1/pbk/l/n/10.95 Diseño del \T1/pbk/l/it/10.95 prompt \T1/pbk/l/n/10.95 de aná-li-sis PER-VAL, in-clu-yen-do el ám-bi-to (ta-reas/entregables)
  []
 
-LaTeX Info: Redefining \. on input line 589.
-LaTeX Info: Redefining \% on input line 589.
-[32]
-LaTeX Info: Redefining \. on input line 636.
-LaTeX Info: Redefining \% on input line 636.
- [33]
-Overfull \hbox (9.12006pt too wide) in paragraph at lines 642--643
+LaTeX Info: Redefining \. on input line 675.
+LaTeX Info: Redefining \% on input line 675.
+[35]
+LaTeX Info: Redefining \. on input line 719.
+LaTeX Info: Redefining \% on input line 719.
+ [36]
+Overfull \hbox (9.12006pt too wide) in paragraph at lines 743--744
 []\T1/pbk/l/n/10.95 Configuración del fi-che-ro \T1/pcr/m/n/10.95 render.yaml \T1/pbk/l/n/10.95 con los dos ser-vi-cios (\T1/pcr/m/n/10.95 tfm-bpmn-frontend
  []
 
-LaTeX Info: Redefining \. on input line 669.
-LaTeX Info: Redefining \% on input line 669.
-[34]
-LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <10> not available
-(Font)              Font shape `T1/pbk/db/n' tried instead on input line 675.
-
-Underfull \hbox (badness 3449) in paragraph at lines 682--682
+LaTeX Info: Redefining \. on input line 759.
+LaTeX Info: Redefining \% on input line 759.
+[37]
+Underfull \hbox (badness 3449) in paragraph at lines 783--783
 \T1/pbk/l/n/10 ni-fi-ca-ción), US02 (Con-fi-gu-ra-ción
  []
 
-LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <10> not available
-(Font)              Font shape `T1/pbk/l/it' tried instead on input line 684.
 
-Underfull \hbox (badness 7326) in paragraph at lines 686--686
+Underfull \hbox (badness 7326) in paragraph at lines 787--787
 []|\T1/pbk/l/n/10 US05 (Ge-ne-ra-ción de mo-de-los
  []
 
 
-Underfull \hbox (badness 1490) in paragraph at lines 690--690
+Underfull \hbox (badness 1490) in paragraph at lines 791--791
 []|\T1/pbk/l/n/10 US08 (Di-se-ño del mó-du-lo PER-
  []
 
 
-Underfull \hbox (badness 2213) in paragraph at lines 690--690
+Underfull \hbox (badness 2213) in paragraph at lines 791--791
 \T1/pbk/l/n/10 VAL), US09 (Im-ple-men-ta-ción de
  []
 
 
-Underfull \hbox (badness 2512) in paragraph at lines 696--696
+Underfull \hbox (badness 2512) in paragraph at lines 797--797
 []|\T1/pbk/l/n/10 US14 (Des-plie-gue en \T1/pbk/l/it/10 Ren-der \T1/pbk/l/n/10 y
  []
 
-)
+LaTeX Info: Redefining \. on input line 805.
+LaTeX Info: Redefining \% on input line 805.
+[38])
 LaTeX Info: Redefining \. on input line 63.
 LaTeX Info: Redefining \% on input line 63.
- [35] [36
+ [39] [40
 
 ] (secciones/06_Bibliografia.tex
 Underfull \hbox (badness 1107) in paragraph at lines 16--17
@@ -1054,7 +1085,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 31--32
 \T1/pbk/l/n/10.95 No-ta-tion (BPMN), Ver-sion 2.0,'' enero de 2011. Dis-po-ni-ble en:
  []
 
-[37
+[41
 
 ]
 Underfull \hbox (badness 1661) in paragraph at lines 40--41
@@ -1089,12 +1120,12 @@ Underfull \hbox (badness 1721) in paragraph at lines 66--70
 )
 LaTeX Info: Redefining \. on input line 70.
 LaTeX Info: Redefining \% on input line 70.
- [38] (secciones/AnexoI.tex) (secciones/AnexoII.tex [39
+ [42] (secciones/AnexoI.tex) (secciones/AnexoII.tex [43
 
 
-] [40
+] [44
 
-]) [41] (plantilla_TFM.aux
+]) [45] (plantilla_TFM.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 )
@@ -1107,20 +1138,20 @@ L3 programming layer <2025-11-06>
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `plantilla_TFM.out' has not changed.
-(rerunfilecheck)             Checksum: DD1EA333F72D10703D29CA6DED64A0C0;8582.
+(rerunfilecheck)             Checksum: F557D213A101F4C2740B7270A7FB3AD6;8828.
  ) 
 Here is how much of TeX's memory you used:
- 27079 strings out of 467871
- 500230 string characters out of 5417408
- 915323 words of memory out of 5000000
- 55316 multiletter control sequences out of 15000+600000
+ 27097 strings out of 467871
+ 500448 string characters out of 5417408
+ 917729 words of memory out of 5000000
+ 55323 multiletter control sequences out of 15000+600000
  664937 words of font info for 108 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,12n,107p,1143b,970s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,11n,107p,1261b,970s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkdi8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrb8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on plantilla_TFM.pdf (51 pages, 337382 bytes).
+Output written on plantilla_TFM.pdf (55 pages, 352544 bytes).
 PDF statistics:
- 602 PDF objects out of 1000 (max. 8388607)
- 130 named destinations out of 1000 (max. 500000)
- 351 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 633 PDF objects out of 1000 (max. 8388607)
+ 141 named destinations out of 1000 (max. 500000)
+ 359 words of extra memory for PDF output out of 10000 (max. 10000000)
 

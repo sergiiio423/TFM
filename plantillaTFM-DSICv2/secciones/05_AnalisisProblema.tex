@@ -34,39 +34,48 @@ Con el objetivo de delimitar de forma precisa el alcance funcional de la soluci�
 \subsection{Diagrama de actores}
 \label{subsec:diagramaActores}
 
-En el sistema propuesto se identifican tres actores principales, representados en la figura~\ref{fig:diagramaActores}:
+En el sistema propuesto se identifican dos actores externos, representados en la figura~\ref{fig:diagramaActores}:
 
 \begin{itemize}
     \item \textbf{Usuario}: persona que utiliza la extensión sobre \textit{bpmn.io} para describir, generar, editar y analizar modelos de procesos de negocio en notación BPMN. Puede ser un analista de procesos, un consultor o cualquier perfil que necesite modelar procesos sin un conocimiento profundo de la notación BPMN.
-    \item \textbf{Sistema}: conjunto de componentes \textit{software} desarrollados en este TFM, integrado por la extensión cliente sobre \textit{bpmn.io} y el servidor MCP (\textit{Model Context Protocol}) que actúa como intermediario entre dicha extensión y los proveedores de LLM. El actor \textbf{Sistema} engloba, por tanto, los procesos automáticos de construcción de \textit{prompts}, validación y reparación de XML, y cálculo del análisis PERVAL.
-    \item \textbf{LLM}: proveedor externo de modelos de lenguaje (\textit{GitHub Models}) utilizado por el sistema para interpretar las descripciones en lenguaje natural del usuario y generar o modificar los modelos BPMN, así como para realizar el análisis de valor PERVAL.
+    \item \textbf{Proveedor de LLM}: servicio externo de modelos de lenguaje (\textit{GitHub Models}) utilizado por el sistema para interpretar las descripciones en lenguaje natural del usuario y generar o modificar los modelos BPMN, así como para realizar el análisis de valor PERVAL.
 \end{itemize}
+
+Los componentes internos de la solución ---la extensión sobre \textit{bpmn.io}, el servidor MCP y el módulo de análisis PERVAL--- se representan dentro de la frontera del sistema. En UML, los actores son entidades externas que interactúan con el sistema; por tanto, estos componentes no se modelan como actores sino como partes internas de la solución desarrollada.
 
 \begin{figure}[h!]
 \centering
-\begin{tikzpicture}[scale=1.1]
+\begin{tikzpicture}[scale=1.0, >=Stealth, line width=0.8pt]
 
-\begin{scope}[shift={(0,0)}]
+% Frontera del sistema (componentes internos)
+\draw[thick, dashed] (2.0,-2.0) rectangle (7.0,1.8);
+\node[font=\bfseries] at (4.5,2.1) {Sistema};
+\node[align=center, font=\small] at (4.5,1.1) {Extensión \textit{bpmn.io}};
+\node[align=center, font=\small] at (4.5,0.2) {Servidor MCP};
+\node[align=center, font=\small] at (4.5,-0.7) {Módulo PERVAL};
+
+% Actor externo: Usuario (izquierda)
+\begin{scope}[shift={(-1.5,0)}]
   \stickman
   \node[below=0.15cm] at (0,-0.8) {Usuario};
 \end{scope}
 
-\begin{scope}[shift={(4,0)}]
+% Actor externo: Proveedor de LLM (derecha)
+\begin{scope}[shift={(10.5,0)}]
   \stickman
-  \node[below=0.15cm] at (0,-0.8) {Sistema};
+  \node[below=0.15cm, align=center] at (0,-0.8) {Proveedor\\de LLM};
 \end{scope}
 
-\begin{scope}[shift={(8,0)}]
-  \stickman
-  \node[below=0.15cm] at (0,-0.8) {LLM};
-\end{scope}
+% Relaciones actor-sistema
+\draw[<->] (-0.3,0) -- (2.0,0);
+\draw[<->] (7.0,0) -- (9.8,0);
 
 \end{tikzpicture}
 \caption{Diagrama de actores del sistema.}
 \label{fig:diagramaActores}
 \end{figure}
 
-El actor \textbf{Usuario} interactúa exclusivamente con la extensión cliente sobre \textit{bpmn.io}, sin tener visibilidad directa de las comunicaciones entre el \textbf{Sistema} y el \textbf{LLM}. Esta separación de responsabilidades es la que da lugar a los diferentes diagramas de contexto que delimitan cada subsistema, presentados a continuación.
+El \textbf{Usuario} interactúa exclusivamente con la extensión cliente sobre \textit{bpmn.io}, sin tener visibilidad directa de las comunicaciones internas entre el servidor MCP y el \textbf{Proveedor de LLM}. Esta separación de responsabilidades da lugar a los diferentes diagramas de contexto que delimitan cada subsistema, presentados a continuación.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Diagramas de contexto}
@@ -74,7 +83,7 @@ El actor \textbf{Usuario} interactúa exclusivamente con la extensión cliente s
 
 Para delimitar con claridad el alcance de cada subsistema y sus relaciones con los actores identificados en la sección anterior, se presentan a continuación tres diagramas de contexto: el de la extensión cliente sobre \textit{bpmn.io}, el del servidor MCP que actúa de \textit{backend}, y el del módulo de análisis PERVAL.
 
-La figura~\ref{fig:contextoExtension} muestra el contexto de la \textbf{extensión sobre \textit{bpmn.io}}, que constituye la interfaz con la que interactúa el \textbf{Usuario}. Esta extensión se comunica con el \textbf{Servidor MCP} (representado como un componente del actor \textbf{Sistema}) para delegar en él la generación y edición de modelos BPMN, así como el análisis PERVAL.
+La figura~\ref{fig:contextoExtension} muestra el contexto de la \textbf{extensión sobre \textit{bpmn.io}}, que constituye la interfaz con la que interactúa el \textbf{Usuario}. Esta extensión se comunica con el \textbf{Servidor MCP} (componente interno del sistema) para delegar en él la generación y edición de modelos BPMN, así como el análisis PERVAL.
 
 \begin{figure}[h!]
 \centering
@@ -91,7 +100,7 @@ La figura~\ref{fig:contextoExtension} muestra el contexto de la \textbf{extensi�
   \node[below=0.2cm] at (0,-0.8) {Usuario};
 \end{scope}
 
-\node[extbox] (mcp) at (5,0) {Servidor MCP\\(\textit{Sistema})};
+\node[extbox] (mcp) at (5,0) {Servidor MCP\\(\textit{backend})};
 
 \draw[<->] (-3.6,0.3) -- (-2.6,0.3);
 \draw[<->] (2.6,0) -- (3.2,0);
@@ -113,7 +122,7 @@ La figura~\ref{fig:contextoMCP} muestra el contexto del \textbf{servidor MCP}, q
 
 \node[sysbox] (mcp) at (0,0) {Servidor MCP\\(\textit{backend})};
 
-\node[extbox] (cliente) at (-5,0) {Extensión \textit{bpmn.io}\\(\textit{Sistema}, cliente)};
+\node[extbox] (cliente) at (-5,0) {Extensión \textit{bpmn.io}\\(cliente)};
 
 \node[extbox] (llm) at (5,0) {LLM\\(\textit{GitHub Models}};
 
@@ -137,7 +146,7 @@ Por último, la figura~\ref{fig:contextoPerval} muestra el contexto del \textbf{
 
 \node[sysbox] (perval) at (0,0) {Módulo de análisis\\PERVAL};
 
-\node[extbox] (mcp) at (-5,0) {Servidor MCP\\(\textit{Sistema})};
+\node[extbox] (mcp) at (-5,0) {Servidor MCP};
 
 \node[extbox] (llm) at (5,0) {LLM};
 
@@ -153,7 +162,7 @@ Por último, la figura~\ref{fig:contextoPerval} muestra el contexto del \textbf{
 \subsection{Diagramas de casos de uso}
 \label{subsec:diagramasCasosUso}
 
-Una vez delimitado el contexto de cada subsistema, se detallan a continuación los casos de uso correspondientes. La figura~\ref{fig:casosUsoExtension} muestra los casos de uso de la \textbf{extensión sobre \textit{bpmn.io}}, en la que el actor \textbf{Usuario} interactúa con las funcionalidades de descripción y edición conversacional del modelo, visualización y exportación del diagrama, configuración del análisis PERVAL y selección de idioma. Tanto la descripción inicial del proceso como la solicitud de modificaciones incluyen (\textit{\textless\textless include\textgreater\textgreater}) el caso de uso interno ``Renderizar diagrama y actualizar historial'', realizado de forma automática por el actor \textbf{Sistema}. Si dicho proceso falla, se extiende (\textit{\textless\textless extend\textgreater\textgreater}) con el caso de uso ``Mostrar estado de carga o error''.
+Una vez delimitado el contexto de cada subsistema, se detallan a continuación los casos de uso correspondientes. La figura~\ref{fig:casosUsoExtension} muestra los casos de uso de la \textbf{extensión sobre \textit{bpmn.io}}, en la que el actor \textbf{Usuario} interactúa con las funcionalidades de descripción y edición conversacional del modelo, visualización y exportación del diagrama, configuración del análisis PERVAL y selección de idioma. Tanto la descripción inicial del proceso como la solicitud de modificaciones incluyen (\textit{\textless\textless include\textgreater\textgreater}) el caso de uso interno ``Renderizar diagrama y actualizar historial'', que el propio sistema ejecuta de forma automática. Si dicho proceso falla, se extiende (\textit{\textless\textless extend\textgreater\textgreater}) con el caso de uso ``Mostrar estado de carga o error''.
 
 \begin{figure}[h!]
 \centering
@@ -181,17 +190,9 @@ Una vez delimitado el contexto de cada subsistema, se detallan a continuación l
   \node[below=0.2cm] at (0,-0.8) {Usuario};
 \end{scope}
 
-\begin{scope}[shift={(12.0,-2.25)}]
-  \stickman
-  \node[below=0.2cm] at (0,-0.8) {Sistema};
-\end{scope}
-
 \foreach \i in {1,...,6}{
   \draw (-0.9,-3.75) -- (uc\i.west);
 }
-
-\draw (uc7.east) -- (11.3,-2.25);
-\draw (uc8.east) -- (11.3,-2.25);
 
 \draw[dashed,->] (uc1.east) to[bend left=20] node[pos=0.5, font=\scriptsize, fill=white, inner sep=1pt] {\textless\textless include\textgreater\textgreater} (uc7.west);
 \draw[dashed,->] (uc2.east) to[bend right=20] node[pos=0.5, font=\scriptsize, fill=white, inner sep=1pt] {\textless\textless include\textgreater\textgreater} (uc7.west);
@@ -202,7 +203,7 @@ Una vez delimitado el contexto de cada subsistema, se detallan a continuación l
 \label{fig:casosUsoExtension}
 \end{figure}
 
-La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MCP} y del \textbf{módulo de análisis PERVAL}. El actor \textbf{Sistema} (la propia extensión cliente) invoca dos casos de uso principales: ``Generar o editar modelo BPMN'' y ``Analizar valor PERVAL''. El primero incluye la construcción del \textit{prompt} de generación y la invocación al LLM, y se extiende con la limpieza y reparación del XML cuando la respuesta del modelo es incompleta o malformada (función \texttt{cleanXML}). De forma análoga, ``Analizar valor PERVAL'' incluye la construcción de un \textit{prompt} específico y la invocación al LLM para obtener la clasificación de cada tarea o entregable según las dimensiones de valor. En ambos casos, la invocación al LLM puede extenderse con la selección de un modelo de respaldo (\textit{fallback}) cuando el modelo principal no está disponible o devuelve un error.
+La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MCP} y del \textbf{módulo de análisis PERVAL}. La \textbf{extensión bpmn.io} (en su rol de cliente MCP) invoca dos casos de uso principales: ``Generar o editar modelo BPMN'' y ``Analizar valor PERVAL''. El primero incluye la construcción del \textit{prompt} de generación y la invocación al LLM, y se extiende con la limpieza y reparación del XML cuando la respuesta del modelo es incompleta o malformada (función \texttt{cleanXML}). De forma análoga, ``Analizar valor PERVAL'' incluye la construcción de un \textit{prompt} específico y la invocación al LLM para obtener la clasificación de cada tarea o entregable según las dimensiones de valor. En ambos casos, la invocación al LLM puede extenderse con la selección de un modelo de respaldo (\textit{fallback}) cuando el modelo principal no está disponible o devuelve un error.
 
 \begin{figure}[h!]
 \centering
@@ -228,7 +229,7 @@ La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MC
 
 \begin{scope}[shift={(-2.2,-1.5)}]
   \stickman
-  \node[below=0.2cm] at (0,-0.8) {Sistema};
+  \node[below=0.2cm, align=center, font=\small] at (0,-0.9) {Extensión\\\textit{bpmn.io}};
 \end{scope}
 
 \begin{scope}[shift={(14.8,-1.5)}]
@@ -324,7 +325,7 @@ La generación de modelos BPMN a partir de lenguaje natural y el análisis PERVA
     \item \textbf{\textit{GitHub Models}}: servicio de Microsoft/GitHub que ofrece acceso gratuito (dentro de unos límites de uso) a una amplia variedad de modelos de distintos proveedores (\texttt{gpt-4.1}, \texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano}, \texttt{Phi-4}, entre otros) a través de una API compatible con el formato de \textit{OpenAI}.
 \end{itemize}
 
-Se optó por \textbf{\textit{GitHub Models}} como proveedor principal de LLM, al ofrecer un plan gratuito que permite realizar un número elevado de peticiones durante el desarrollo y las pruebas sin coste económico, además de dar acceso a varios modelos de distintos proveedores a través de una única API. Para mejorar la resiliencia del sistema, se implementa además un mecanismo de \textbf{selección automática de modelo de respaldo} (\textit{fallback}) entre los distintos modelos disponibles en \textit{GitHub Models} ante errores o límites de uso.
+Se optó por \textbf{\textit{GitHub Models}} como proveedor principal de LLM, al ofrecer un plan gratuito que permite realizar un número elevado de peticiones durante el desarrollo y las pruebas sin coste económico, además de dar acceso a varios modelos de distintos proveedores a través de una única API compatible con el formato de \textit{OpenAI}. Dentro de los modelos disponibles, se seleccionó \textbf{\texttt{gpt-4.1}} como modelo principal, por ser el más capaz de la familia GPT disponible en \textit{GitHub Models} en el momento del desarrollo. Para mejorar la resiliencia del sistema, se implementa además un mecanismo de \textbf{selección automática de modelo de respaldo} (\textit{fallback}) que, ante errores o límites de uso del modelo activo, prueba secuencialmente con los siguientes modelos de la lista (\texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano} y \texttt{Phi-4}), de más a menos capaz, lanzando un error únicamente si fallan todos.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Arquitectura de integración: extensión directa frente a servidor MCP}
@@ -442,6 +443,106 @@ RNF-08 & \textbf{Privacidad}: el sistema debe minimizar los datos enviados a los
 \caption{Requisitos no funcionales del sistema.}
 \label{tab:requisitosNoFuncionales}
 \end{longtable}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Priorización de requisitos. MoSCoW}
+\label{subsec:priorizacion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Con el objetivo de establecer un orden claro de implementación y gestionar los recursos disponibles dentro de los límites de un proyecto académico, se ha aplicado la metodología MoSCoW para priorizar los requisitos identificados en las secciones anteriores. Esta metodología clasifica los requisitos en cuatro categorías según su importancia crítica para el éxito del proyecto:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Must have} (debe tener): funcionalidades absolutamente esenciales cuya ausencia impediría que el sistema cumpla su propósito fundamental.
+    \item[$\bullet$] \textbf{Should have} (debería tener): funcionalidades importantes que aportan valor significativo pero cuya ausencia no impide el funcionamiento básico del sistema.
+    \item[$\bullet$] \textbf{Could have} (podría tener): funcionalidades deseables que pueden implementarse si los recursos lo permiten, sin comprometer los objetivos principales.
+    \item[$\bullet$] \textbf{Won't have} (no tendrá): funcionalidades descartadas explícitamente para la versión actual del proyecto, ya sea por limitaciones de tiempo, recursos o decisiones estratégicas de desarrollo.
+\end{itemize}
+
+\subsubsection*{Must have}
+
+Se consideran imprescindibles aquellos requisitos sin los cuales el sistema no puede cumplir su propósito fundamental: la generación y el análisis iterativo de modelos BPMN mediante LLM.
+
+La generación de modelos BPMN a partir de descripciones en lenguaje natural (RF-01) constituye el núcleo de la propuesta; sin esta funcionalidad, la herramienta pierde su razón de ser. Íntimamente ligada a ella, la modificación iterativa del modelo mediante instrucciones conversacionales (RF-02) es igualmente esencial, ya que materializa el paradigma de \textit{vibe modeling} sobre el que se fundamenta el proyecto e impide que el sistema sea un mero generador estático de diagramas. La visualización del modelo resultante en el lienzo de \textit{bpmn.io} (RF-03) es también imprescindible: sin ella el usuario no puede validar el resultado generado ni interactuar con el editor.
+
+La validación y reparación automática del XML BPMN (RF-05) es un requisito crítico, dado que los LLMs producen con frecuencia XML malformado o truncado; sin este mecanismo, los modelos generados serían inutilizables en la mayoría de los casos. El análisis del valor percibido según la clasificación PERVAL (RF-07) constituye el segundo objetivo central del proyecto académico; su ausencia eliminaría la componente de análisis orientado al cliente que diferencia esta herramienta de otros asistentes de modelado basados en LLM. La presentación visual de los resultados del análisis con justificación textual (RF-09) es igualmente esencial: sin ella el análisis PERVAL no aporta valor interpretable al usuario.
+
+En cuanto a los requisitos no funcionales, la integración del panel conversacional directamente en el entorno de \textit{bpmn.io} sin requerir conocimientos previos de la notación BPMN (RNF-01) es el requisito de usabilidad fundamental que materializa el concepto de \textit{vibe modeling}. El almacenamiento de las claves de API exclusivamente como variables de entorno del servidor MCP (RNF-02) es crítico desde el punto de vista de la seguridad: exponer dichas credenciales en el código del cliente pondría en riesgo las cuentas de los usuarios y comprometería la viabilidad de la herramienta en producción.
+
+\subsubsection*{Should have}
+
+Esta categoría engloba requisitos que aportan valor significativo a la utilidad, la resiliencia y la calidad del sistema, sin ser estrictamente imprescindibles para el funcionamiento básico.
+
+La exportación del modelo BPMN en formato XML (RF-04) incrementa considerablemente la utilidad práctica de la herramienta, al permitir al usuario conservar y reutilizar los modelos fuera del entorno de \textit{bpmn.io}. El mecanismo de selección automática de modelo de respaldo (RF-06) es importante para garantizar la continuidad del servicio ante los límites de uso de la API de \textit{GitHub Models}, especialmente frecuentes durante el desarrollo y las pruebas; sin él, el sistema fallaría con mayor frecuencia ante picos de peticiones. La configuración del ámbito (tareas o entregables) y del actor sobre el que se realiza el análisis PERVAL (RF-08) es relevante para adaptar el análisis a distintos contextos de proceso, aunque podría implementarse con valores predeterminados en una primera versión. La información del estado de cada petición mediante indicadores visuales (RF-11) mejora notablemente la experiencia de usuario en interacciones con latencias elevadas, habituales en llamadas a LLMs.
+
+Desde el punto de vista técnico, la organización del servidor MCP como conjunto de herramientas independientes con esquemas validados mediante \textit{Zod} (RNF-04) facilita la incorporación de nuevas funcionalidades sin alterar la arquitectura general. La modularidad del código, con separación clara entre el cliente, el servidor MCP, el módulo de llamada al LLM y las herramientas individuales (RNF-06), facilita el mantenimiento y la evolución del sistema. La conformidad de los modelos generados con el estándar BPMN 2.0 (RNF-07) garantiza la interoperabilidad con otras herramientas de modelado, aunque está parcialmente cubierta por el mecanismo de validación de RF-05.
+
+\subsubsection*{Could have}
+
+Los siguientes requisitos añaden valor pero pueden implementarse de forma diferida sin comprometer los objetivos principales del proyecto.
+
+La selección del idioma de la interfaz y de las respuestas generadas (RF-10) amplía el alcance de la herramienta a usuarios de diferentes entornos lingüísticos. Sin embargo, el sistema es plenamente funcional en un único idioma, y su implementación puede postergarse hasta que las funcionalidades principales estén consolidadas. La realimentación visual inmediata ante cualquier petición al LLM —más allá del indicador de carga básico— (RNF-03) mejoraría la percepción de la capacidad de respuesta del sistema, pero no afecta a su comportamiento funcional. La portabilidad del sistema mediante un único fichero de configuración para su despliegue en \textit{Render} (RNF-05) es deseable para las pruebas de aceptación TAM con usuarios reales, aunque durante el desarrollo basta con ejecutar el sistema en local. La gestión explícita de la minimización de datos personales conforme al RGPD (RNF-08) está parcialmente cubierta por el requisito de seguridad de las claves de API (RNF-02); los mecanismos adicionales de privacidad son deseables pero no bloquean el funcionamiento de la herramienta.
+
+\subsubsection*{Won't have}
+
+Esta categoría incluye funcionalidades descartadas de forma explícita para la versión actual del proyecto, ya sea por limitaciones de tiempo y recursos, o por decisiones estratégicas orientadas a validar el concepto fundamental antes de ampliar el alcance.
+
+El soporte para proveedores de LLM adicionales distintos de \textit{GitHub Models} ---como la integración directa con la API de Anthropic Claude o de OpenAI mediante clave propia--- fue considerado durante el análisis de alternativas y descartado (véase \S\ref{subsec:seleccionLLM}): el plan gratuito de \textit{GitHub Models} ofrece acceso a modelos GPT de alta calidad con límites suficientes para los objetivos del proyecto, y añadir proveedores adicionales incrementaría la complejidad del servidor MCP sin aportar valor diferencial en esta primera versión. La persistencia del historial de conversación entre sesiones fue igualmente descartada: el historial se gestiona en memoria del cliente durante la sesión activa, lo cual es suficiente para los ciclos de refinamiento iterativo previstos; una persistencia duradera requeriría una base de datos, lo que excede el alcance del proyecto. Por último, la exportación del diagrama en formatos alternativos (imagen PNG/SVG, PDF) no forma parte de los objetivos del TFM y puede cubrirse mediante las funcionalidades nativas del propio \textit{bpmn.io}.
+
+\vspace{0.5em}
+\noindent\textbf{Resumen por prioridad:}
+
+Must (8): RF-01, RF-02, RF-03, RF-05, RF-07, RF-09, RNF-01, RNF-02
+
+Should (7): RF-04, RF-06, RF-08, RF-11, RNF-04, RNF-06, RNF-07
+
+Could (4): RF-10, RNF-03, RNF-05, RNF-08
+
+Won't (3 funcionalidades): integración con otros proveedores de LLM, persistencia del historial entre sesiones, exportación en formatos alternativos
+
+\vspace{0.5em}
+\begingroup\small
+\begin{longtable}{|p{4.2cm}|p{2.3cm}|p{2.3cm}|p{2.3cm}|p{2.3cm}|}
+\hline
+\rowcolor{gray!20} \textbf{Funcionales} & \textbf{Must} & \textbf{Should} & \textbf{Could} & \textbf{Won't} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{gray!20} \textbf{Funcionales} & \textbf{Must} & \textbf{Should} & \textbf{Could} & \textbf{Won't} \\
+\hline
+\endhead
+Generación BPMN (RF-01 a RF-06) & 01, 02, 03, 05 & 04, 06 & --- & --- \\
+\hline
+Análisis PERVAL (RF-07 a RF-09) & 07, 09 & 08 & --- & --- \\
+\hline
+Configuración/UX (RF-10 a RF-11) & --- & 11 & 10 & --- \\
+\hline
+\caption{Resumen de priorización MoSCoW de requisitos funcionales.}
+\label{tab:moscowFuncionales}
+\end{longtable}
+\endgroup
+
+\begingroup\small
+\begin{longtable}{|p{4.2cm}|p{2.3cm}|p{2.3cm}|p{2.3cm}|p{2.3cm}|}
+\hline
+\rowcolor{gray!20} \textbf{No funcionales} & \textbf{Must} & \textbf{Should} & \textbf{Could} & \textbf{Won't} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{gray!20} \textbf{No funcionales} & \textbf{Must} & \textbf{Should} & \textbf{Could} & \textbf{Won't} \\
+\hline
+\endhead
+Usabilidad (RNF-01) & 01 & --- & --- & --- \\
+\hline
+Seguridad y privacidad (RNF-02, 08) & 02 & --- & 08 & --- \\
+\hline
+Rendimiento (RNF-03) & --- & --- & 03 & --- \\
+\hline
+Arquitectura y calidad (RNF-04 a RNF-07) & --- & 04, 06, 07 & 05 & --- \\
+\hline
+\caption{Resumen de priorización MoSCoW de requisitos no funcionales.}
+\label{tab:moscowNoFuncionales}
+\end{longtable}
+\endgroup
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Historias de usuario}

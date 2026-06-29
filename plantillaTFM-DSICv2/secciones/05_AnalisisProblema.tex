@@ -24,24 +24,24 @@ Posteriormente, se  analiza el marco legal y ético asociado al uso de modelos d
 \section{Modelado funcional del sistema}
 \label{sec:modeladoFuncional}
 
-Con el objetivo de delimitar de forma precisa el alcance funcional de la solución propuesta y comprender las interacciones entre sus diferentes componentes{{ sistema desarrollado}}, se ha realizado un modelado funcional {del sistema utilizando}{{basado en}} diagramas UML simplificados{. El modelado funcional constituye una actividad fundamental durante el análisis de}{{, identificando los actores que interactúan con el}} sistema{s}, {{los diagramas de contexto que delimitan los subsistemas considerados y sus relaciones con dichos actores, y los diagramas de casos de uso que describen las funcionalidades ofrecidas por cada subsistema}} {ya que permite identificar los actores involucrados, especificar las responsabilidades de cada componente y describir las funcionalidades que el sistema debe proporcionar para satisfacer las necesidades de los usuarios}.
+Con el objetivo de delimitar de forma precisa el alcance funcional de l{a solución propuesta y comprender las interacciones entre sus diferentes componentes, se ha realizado un modelado funcional del sistema utilizando basado en diagramas UML simplificados. El modelado funcional constituye una actividad fundamental durante el análisis de sistemas, ya que permite identificar los actores involucrados, especificar las responsabilidades de cada componente y describir las funcionalidades que el sistema debe proporcionar para satisfacer las necesidades de los usuarios.
 
-{En el contexto del presente TFM, el modelado funcional resulta especialmente relevante debido a la naturaleza híbrida de la solución desarrollada, que integra una extensión sobre bpmn.io, un servidor intermedio basado en Model Context Protocol (MCP) y uno o varios proveedores externos de modelos de LLMs. La interacción coordinada entre estos componentes requiere definir de manera explícita las fronteras del sistema, las responsabilidades de cada subsistema y los flujos de información intercambiados entre ellos.}
+En el contexto del presente TFM, el modelado funcional resulta especialmente relevante debido a la naturaleza híbrida de la solución desarrollada, que integra una extensión sobre bpmn.io, un servidor intermedio basado en Model Context Protocol (MCP) y uno o varios proveedores externos de modelos de LLMs. La interacción coordinada entre estos componentes requiere definir de manera explícita las fronteras del sistema, las responsabilidades de cada subsistema y los flujos de información intercambiados entre ellos.
 
-{Para ello, el análisis se estructura en tres niveles complementarios. En primer lugar, se identifican los actores que participan en el sistema y las relaciones existentes entre ellos mediante un diagrama de actores. En segundo lugar, se presentan los diagramas de contexto, cuyo objetivo es delimitar el alcance de cada subsistema y representar las interacciones establecidas con los actores identificados. Finalmente, se describen los diagramas de casos de uso, que permiten especificar las funcionalidades ofrecidas por cada subsistema y la forma en que dichas funcionalidades son utilizadas para satisfacer los objetivos del usuario.}
+Para ello, el análisis se estructura en tres niveles complementarios. En primer lugar, se identifican los actores que participan en el sistema y las relaciones existentes entre ellos mediante un diagrama de actores. En segundo lugar, se presentan los diagramas de contexto, cuyo objetivo es delimitar el alcance de cada subsistema y representar las interacciones establecidas con los actores identificados. Finalmente, se describen los diagramas de casos de uso, que permiten especificar las funcionalidades ofrecidas por cada subsistema y la forma en que dichas funcionalidades son utilizadas para satisfacer los objetivos del usuario.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Diagrama de actores}
 \label{subsec:diagramaActores}
 
-En el sistema propuesto se identifican dos actores externos, representados en la figura~\ref{fig:diagramaActores}:
+En el sistema propuesto se identifican dos actores principales, representados en la figura~\ref{fig:diagramaActores}:
 
 \begin{itemize}
     \item \textbf{Usuario}: persona que utiliza la extensión sobre \textit{bpmn.io} para describir, generar, editar y analizar modelos de procesos de negocio en notación BPMN. Puede ser un analista de procesos, un consultor o cualquier perfil que necesite modelar procesos sin un conocimiento profundo de la notación BPMN.
-    \item \textbf{Proveedor de LLM}: servicio externo de modelos de lenguaje (\textit{GitHub Models}) utilizado por el sistema para interpretar las descripciones en lenguaje natural del usuario y generar o modificar los modelos BPMN, así como para realizar el análisis de valor PERVAL.
+    \item \textbf{LLM}: servicio externo de modelos de lenguaje (\textit{GitHub Models}) utilizado por el sistema para interpretar las descripciones en lenguaje natural del usuario y generar o modificar los modelos BPMN, así como para realizar el análisis de valor PERVAL.
 \end{itemize}
 
-Los componentes internos de la solución ---la extensión sobre \textit{bpmn.io}, el servidor MCP y el módulo de análisis PERVAL--- se representan dentro de la frontera del sistema. En UML, los actores son entidades externas que interactúan con el sistema; por tanto, estos componentes no se modelan como actores sino como partes internas de la solución desarrollada.
+Los componentes internos de la solución son la extensión sobre bpmn.io, el servidor MCP y el módulo de análisis PERVAL y se representan dentro de la frontera del sistema.
 
 \begin{figure}[h!]
 \centering
@@ -75,7 +75,7 @@ Los componentes internos de la solución ---la extensión sobre \textit{bpmn.io}
 \label{fig:diagramaActores}
 \end{figure}
 
-El \textbf{Usuario} interactúa exclusivamente con la extensión cliente sobre \textit{bpmn.io}, sin tener visibilidad directa de las comunicaciones internas entre el servidor MCP y el \textbf{Proveedor de LLM}. Esta separación de responsabilidades da lugar a los diferentes diagramas de contexto que delimitan cada subsistema, presentados a continuación.
+El actor \textbf{Usuario} interactúa exclusivamente con la extensión cliente sobre \textit{bpmn.io}, sin tener visibilidad directa de las comunicaciones entre el servidor MCP y el \textbf{Proveedor de LLM}. Esta separación de responsabilidades da lugar a los diferentes diagramas de contexto que delimitan cada subsistema, presentados a continuación.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Diagramas de contexto}
@@ -84,6 +84,7 @@ El \textbf{Usuario} interactúa exclusivamente con la extensión cliente sobre \
 Para delimitar con claridad el alcance de cada subsistema y sus relaciones con los actores identificados en la sección anterior, se presentan a continuación tres diagramas de contexto: el de la extensión cliente sobre \textit{bpmn.io}, el del servidor MCP que actúa de \textit{backend}, y el del módulo de análisis PERVAL.
 
 La figura~\ref{fig:contextoExtension} muestra el contexto de la \textbf{extensión sobre \textit{bpmn.io}}, que constituye la interfaz con la que interactúa el \textbf{Usuario}. Esta extensión se comunica con el \textbf{Servidor MCP} (componente interno del sistema) para delegar en él la generación y edición de modelos BPMN, así como el análisis PERVAL.
+
 
 \begin{figure}[h!]
 \centering
@@ -122,7 +123,7 @@ La figura~\ref{fig:contextoMCP} muestra el contexto del \textbf{servidor MCP}, q
 
 \node[sysbox] (mcp) at (0,0) {Servidor MCP\\(\textit{backend})};
 
-\node[extbox] (cliente) at (-5,0) {Extensión \textit{bpmn.io}\\(cliente)};
+\node[extbox] (cliente) at (-5,0) {Extensión \textit{bpmn.io}\\(\textit{Sistema}, cliente)};
 
 \node[extbox] (llm) at (5,0) {LLM\\(\textit{GitHub Models}};
 
@@ -327,6 +328,7 @@ La generación de modelos BPMN a partir de lenguaje natural y el análisis PERVA
 
 Se optó por \textbf{\textit{GitHub Models}} como proveedor principal de LLM, al ofrecer un plan gratuito que permite realizar un número elevado de peticiones durante el desarrollo y las pruebas sin coste económico, además de dar acceso a varios modelos de distintos proveedores a través de una única API compatible con el formato de \textit{OpenAI}. Dentro de los modelos disponibles, se seleccionó \textbf{\texttt{gpt-4.1}} como modelo principal, por ser el más capaz de la familia GPT disponible en \textit{GitHub Models} en el momento del desarrollo. Para mejorar la resiliencia del sistema, se implementa además un mecanismo de \textbf{selección automática de modelo de respaldo} (\textit{fallback}) que, ante errores o límites de uso del modelo activo, prueba secuencialmente con los siguientes modelos de la lista (\texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano} y \texttt{Phi-4}), de más a menos capaz, lanzando un error únicamente si fallan todos.
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Arquitectura de integración: extensión directa frente a servidor MCP}
 \label{subsec:arquitecturaIntegracion}
@@ -444,6 +446,7 @@ RNF-08 & \textbf{Privacidad}: el sistema debe minimizar los datos enviados a los
 \label{tab:requisitosNoFuncionales}
 \end{longtable}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Priorización de requisitos. MoSCoW}
 \label{subsec:priorizacion}
@@ -552,7 +555,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US01 -- Selección tecnológica y planificación del proyecto}
 
-\textit{Descripción}: como desarrollador, quiero analizar las alternativas tecnológicas disponibles para la generación de modelos BPMN mediante LLM y para el análisis PERVAL, para seleccionar el editor BPMN base, el o los proveedores de LLM y la arquitectura de integración, y planificar el desarrollo del proyecto por \textit{sprints}.
+\textit{Descripción}: como desarrollador, quiero analizar las alternativas tecnológicas disponibles para la generación de modelos BPMN mediante LLM y para el análisis PERVAL, para seleccionar el editor BPMN base, el o los proveedores de LLM, y la arquitectura de integración, y planificar el desarrollo del proyecto por \textit{sprints}.
 
 \textit{Estimación}: 8h.
 
@@ -565,7 +568,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 \textbf{US02 -- Configuración del entorno de desarrollo}
 
-\textit{Descripción}: como desarrollador, quiero configurar un entorno de desarrollo a partir del ejemplo \texttt{modeler} de \texttt{bpmn-js-examples}, para disponer de un editor BPMN funcional sobre el que construir la extensión.
+\textit{Descripción}: como desarrollador, quiero configurar un entorno de desarrollo a partir del ejemplo \texttt{modeler} de \texttt{bpmn-js-examples}, para que disponga de un editor BPMN funcional sobre el que construir la extensión.
 
 \textit{Estimación}: 6h.
 

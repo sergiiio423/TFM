@@ -416,17 +416,11 @@ INPUT .\secciones\03_Fundamentos.tex
 INPUT .\secciones\03_Fundamentos.tex
 INPUT .\secciones\03_Fundamentos.tex
 INPUT secciones\03_Fundamentos.tex
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8t.tfm
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkdi8t.vf
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8r.tfm
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8t.tfm
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT .\secciones\04_EstadoDelArte.tex
 INPUT secciones\04_EstadoDelArte.tex
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkdi8t.vf
-INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8r.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkd8t.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkd8t.vf
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkd8r.tfm
@@ -441,6 +435,9 @@ INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkl
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkl8r.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkli8t.vf
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkli8r.tfm
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8t.tfm
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\bookman\pbkdi8t.vf
+INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkdi8r.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\bookman\pbkl8t.tfm
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\t1pcr.fd
 INPUT C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\t1pcr.fd

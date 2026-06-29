@@ -1,43 +1,38 @@
 \babel@toc {spanish}{}\relax 
 \contentsline {chapter}{\numberline {1}Introducción}{1}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Motivación}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.1}Motivación}{2}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Objetivos}{2}{section.1.2}%
 \contentsline {section}{\numberline {1.3}Impacto Esperado}{3}{section.1.3}%
 \contentsline {section}{\numberline {1.4}Metodología}{3}{section.1.4}%
 \contentsline {section}{\numberline {1.5}Estructura}{4}{section.1.5}%
 \contentsline {section}{\numberline {1.6}Convenciones}{5}{section.1.6}%
-\contentsline {chapter}{\numberline {2}Fundamentos}{7}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Modelos de lenguaje de gran escala (LLMs)}{7}{section.2.1}%
-\contentsline {section}{\numberline {2.2}BPMN: notación y modelado de procesos de negocio}{9}{section.2.2}%
-\contentsline {section}{\numberline {2.3}La clasificación PERVAL}{10}{section.2.3}%
-\contentsline {section}{\numberline {2.4}El protocolo \textit {Model Context Protocol} (MCP)}{11}{section.2.4}%
-\contentsline {chapter}{\numberline {3}Estado del arte}{13}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Análisis de trabajos relacionados}{13}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}LLMs en la gestión de procesos de negocio}{13}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}Generación automática de modelos BPMN 2.0 desde descripciones textuales}{14}{subsection.3.1.2}%
-\contentsline {subsection}{\numberline {3.1.3}IA generativa y modelado conversacional de procesos}{15}{subsection.3.1.3}%
-\contentsline {subsection}{\numberline {3.1.4}BPMN-Chatbot: modelado de procesos mediante interfaz conversacional}{15}{subsection.3.1.4}%
-\contentsline {section}{\numberline {3.2}Síntesis del estado del arte y oportunidades de investigación}{16}{section.3.2}%
-\contentsline {chapter}{\numberline {4}Análisis del problema}{19}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Modelado funcional del sistema}{19}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Diagrama de actores}{20}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Diagramas de contexto}{21}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}Diagramas de casos de uso}{22}{subsection.4.1.3}%
-\contentsline {section}{\numberline {4.2}Análisis del marco legal y ético}{23}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Protección de datos}{23}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Propiedad intelectual y licencias}{24}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Consideraciones éticas}{24}{subsection.4.2.3}%
-\contentsline {section}{\numberline {4.3}Identificación y análisis de soluciones posibles}{25}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Selección del editor BPMN base}{25}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Selección del proveedor de LLM}{25}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Arquitectura de integración: extensión directa frente a servidor MCP}{26}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{27}{subsection.4.3.4}%
-\contentsline {section}{\numberline {4.4}Solución propuesta}{28}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Requisitos funcionales}{28}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Requisitos no funcionales}{29}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}Priorización de requisitos. MoSCoW}{30}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.4.4}Historias de usuario}{33}{subsection.4.4.4}%
-\contentsline {section}{\numberline {4.5}Plan de trabajo}{38}{section.4.5}%
-\contentsline {chapter}{Bibliografía}{42}{chapter*.9}%
-\contentsline {chapter}{Anexo I}{43}{appendix*.10}%
-\contentsline {chapter}{Anexo II}{45}{appendix*.11}%
+\contentsline {chapter}{\numberline {2}Estado del arte}{7}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Análisis de trabajos relacionados}{7}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}LLMs en la gestión de procesos de negocio}{7}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Generación automática de modelos BPMN 2.0 desde descripciones textuales}{8}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}IA generativa y modelado conversacional de procesos}{9}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}BPMN-Chatbot: modelado de procesos mediante interfaz conversacional}{9}{subsection.2.1.4}%
+\contentsline {section}{\numberline {2.2}Síntesis del estado del arte y oportunidades de investigación}{10}{section.2.2}%
+\contentsline {chapter}{\numberline {3}Análisis del problema}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Modelado funcional del sistema}{13}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Diagrama de actores}{14}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Diagramas de contexto}{15}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}Diagramas de casos de uso}{15}{subsection.3.1.3}%
+\contentsline {section}{\numberline {3.2}Análisis del marco legal y ético}{16}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Protección de datos}{17}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Propiedad intelectual y licencias}{18}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Consideraciones éticas}{18}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Identificación y análisis de soluciones posibles}{19}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Selección del editor BPMN base}{19}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Selección del proveedor de LLM}{19}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Arquitectura de integración: extensión directa frente a servidor MCP}{20}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{21}{subsection.3.3.4}%
+\contentsline {section}{\numberline {3.4}Solución propuesta}{22}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Requisitos funcionales}{22}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Requisitos no funcionales}{23}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Priorización de requisitos. MoSCoW}{24}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Historias de usuario}{27}{subsection.3.4.4}%
+\contentsline {section}{\numberline {3.5}Plan de trabajo}{32}{section.3.5}%
+\contentsline {chapter}{Bibliografía}{36}{chapter*.9}%
+\contentsline {chapter}{Anexo I}{37}{appendix*.10}%
+\contentsline {chapter}{Anexo II}{39}{appendix*.11}%

@@ -157,6 +157,9 @@ export const I18N = {
     flowModeManualChosen: 'Paso a paso ✅',
     flowModeAutoChosen:   'Generar todo de una vez ✅',
     autoModeRunningMsg:   '🤖 Generando el proceso completo automáticamente, sin pedir confirmación en cada paso...',
+    switchToAutoBtn:      '⚡ Generar el resto automáticamente',
+    switchToAutoChosen:   '⚡ Generando el resto automáticamente ✅',
+    switchToAutoFromStart: '⚡ Cuando confirmes el inicio, generaré el resto del proceso automáticamente sin pedir más confirmaciones.',
 
     errModify:     '❌ No pude aplicar los cambios. Intenta de nuevo.',
     structUpdated: 'Estructura actualizada ✅ ¿Está bien ahora?',
@@ -354,6 +357,9 @@ export const I18N = {
     flowModeManualChosen: 'Step by step ✅',
     flowModeAutoChosen:   'Generate it all at once ✅',
     autoModeRunningMsg:   "🤖 Generating the whole process automatically, without asking for confirmation at each step...",
+    switchToAutoBtn:      '⚡ Generate the rest automatically',
+    switchToAutoChosen:   '⚡ Generating the rest automatically ✅',
+    switchToAutoFromStart: "⚡ Once you confirm the start, I'll generate the rest of the process automatically without asking for more confirmations.",
 
     errModify:     "❌ I couldn't apply the changes. Try again.",
     structUpdated: 'Structure updated ✅ Is it correct now?',

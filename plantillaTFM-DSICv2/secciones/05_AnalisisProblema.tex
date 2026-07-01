@@ -41,18 +41,17 @@ En el sistema propuesto se identifican dos actores principales, representados en
     \item \textbf{LLM}: servicio externo de modelos de lenguaje (\textit{GitHub Models}) utilizado por el sistema para interpretar las descripciones en lenguaje natural del usuario y generar o modificar los modelos BPMN, así como para realizar el análisis de valor PERVAL.
 \end{itemize}
 
-Los componentes internos de la solución son la extensión sobre bpmn.io, el servidor MCP y el módulo de análisis PERVAL y se representan dentro de la frontera del sistema.
+Los componentes internos de la solución son la extensión sobre bpmn.io y el servidor MCP y se representan dentro de la frontera del sistema.
 
 \begin{figure}[h!]
 \centering
 \begin{tikzpicture}[scale=1.0, >=Stealth, line width=0.8pt]
 
 % Frontera del sistema (componentes internos)
-\draw[thick, dashed] (2.0,-2.0) rectangle (7.0,1.8);
+\draw[thick, dashed] (2.0,-0.8) rectangle (7.0,1.8);
 \node[font=\bfseries] at (4.5,2.1) {Sistema};
 \node[align=center, font=\small] at (4.5,1.1) {Extensión \textit{bpmn.io}};
 \node[align=center, font=\small] at (4.5,0.2) {Servidor MCP};
-\node[align=center, font=\small] at (4.5,-0.7) {Módulo PERVAL};
 
 % Actor externo: Usuario (izquierda)
 \begin{scope}[shift={(-1.5,0)}]
@@ -75,13 +74,11 @@ Los componentes internos de la solución son la extensión sobre bpmn.io, el ser
 \label{fig:diagramaActores}
 \end{figure}
 
-El actor \textbf{Usuario} interactúa exclusivamente con la extensión cliente sobre \textit{bpmn.io}, sin tener visibilidad directa de las comunicaciones entre el servidor MCP y el \textbf{Proveedor de LLM}. Esta separación de responsabilidades da lugar a los diferentes diagramas de contexto que delimitan cada subsistema, presentados a continuación.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Diagramas de contexto}
 \label{subsec:diagramasContexto}
 
-Para delimitar con claridad el alcance de cada subsistema y sus relaciones con los actores identificados en la sección anterior, se presentan a continuación tres diagramas de contexto: el de la extensión cliente sobre \textit{bpmn.io}, el del servidor MCP que actúa de \textit{backend}, y el del módulo de análisis PERVAL.
+Para delimitar con claridad el alcance de cada subsistema y sus relaciones con los actores identificados en la sección anterior, se presentan a continuación dos diagramas de contexto: el de la extensión cliente sobre \textit{bpmn.io} y el del servidor MCP que actúa de \textit{backend}.
+
 
 La figura~\ref{fig:contextoExtension} muestra el contexto de la \textbf{extensión sobre \textit{bpmn.io}}, que constituye la interfaz con la que interactúa el \textbf{Usuario}. Esta extensión se comunica con el \textbf{Servidor MCP} (componente interno del sistema) para delegar en él la generación y edición de modelos BPMN, así como el análisis PERVAL.
 
@@ -135,30 +132,6 @@ La figura~\ref{fig:contextoMCP} muestra el contexto del \textbf{servidor MCP}, q
 \label{fig:contextoMCP}
 \end{figure}
 
-Por último, la figura~\ref{fig:contextoPerval} muestra el contexto del \textbf{módulo de análisis PERVAL}, integrado dentro del servidor MCP. Este módulo recibe el modelo BPMN, el conjunto de tareas a evaluar, el ámbito de análisis (tareas o entregas) y el actor sobre el que se desea estimar el valor percibido, y delega en el LLM la clasificación de cada elemento según las dimensiones de valor de Sweeney y Soutar~\cite{sweeney2001perval} (emocional, social, calidad/rendimiento y precio).
-
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}[
-  sysbox/.style={draw, thick, rectangle, minimum width=5.2cm, minimum height=2cm, align=center, fill=gray!8},
-  extbox/.style={draw, thick, rectangle, minimum width=3.6cm, minimum height=1.6cm, align=center},
-  >=Stealth, line width=0.8pt
-]
-
-\node[sysbox] (perval) at (0,0) {Módulo de análisis\\PERVAL};
-
-\node[extbox] (mcp) at (-5,0) {Servidor MCP};
-
-\node[extbox] (llm) at (5,0) {LLM};
-
-\draw[<->] (-3.2,0) -- (-2.6,0);
-\draw[<->] (2.6,0) -- (3.2,0);
-
-\end{tikzpicture}
-\caption{Diagrama de contexto del módulo de análisis PERVAL.}
-\label{fig:contextoPerval}
-\end{figure}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Diagramas de casos de uso}
 \label{subsec:diagramasCasosUso}
@@ -204,7 +177,8 @@ Una vez delimitado el contexto de cada subsistema, se detallan a continuación l
 \label{fig:casosUsoExtension}
 \end{figure}
 
-La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MCP} y del \textbf{módulo de análisis PERVAL}. La \textbf{extensión bpmn.io} (en su rol de cliente MCP) invoca dos casos de uso principales: ``Generar o editar modelo BPMN'' y ``Analizar valor PERVAL''. El primero incluye la construcción del \textit{prompt} de generación y la invocación al LLM, y se extiende con la limpieza y reparación del XML cuando la respuesta del modelo es incompleta o malformada (función \texttt{cleanXML}). De forma análoga, ``Analizar valor PERVAL'' incluye la construcción de un \textit{prompt} específico y la invocación al LLM para obtener la clasificación de cada tarea o entregable según las dimensiones de valor. En ambos casos, la invocación al LLM puede extenderse con la selección de un modelo de respaldo (\textit{fallback}) cuando el modelo principal no está disponible o devuelve un error.
+La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MCP}. La \textbf{extensión bpmn.io} (en su rol de cliente MCP) invoca dos casos de uso principales: ``Generar o editar modelo BPMN'' y ``Analizar valor PERVAL''. El primero incluye la construcción del \textit{prompt} de generación y la invocación al LLM, y se extiende con la limpieza y reparación del XML cuando la respuesta del modelo es incompleta o malformada (función \texttt{cleanXML}). De forma análoga, ``Analizar valor PERVAL'' incluye la construcción de un \textit{prompt} específico y la invocación al LLM para obtener la clasificación de cada tarea o entregable según las dimensiones de valor. En ambos casos, la invocación al LLM puede extenderse con la selección de un modelo de respaldo (\textit{fallback}) cuando el modelo principal no está disponible o devuelve un error.
+
 
 \begin{figure}[h!]
 \centering
@@ -252,7 +226,7 @@ La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MC
 \draw[dashed,->] (uc4.north) -- node[midway, right, font=\scriptsize, fill=white, inner sep=1pt] {\textless\textless extend\textgreater\textgreater} (uc3.south);
 
 \end{tikzpicture}}
-\caption{Diagrama de casos de uso del servidor MCP y del módulo de análisis PERVAL.}
+\caption{Diagrama de casos de uso del servidor MCP}
 \label{fig:casosUsoMCP}
 \end{figure}
 
@@ -270,7 +244,7 @@ El sistema desarrollado permite al usuario describir, en lenguaje natural, proce
 
 En primer lugar, cabe señalar que el sistema no requiere registro ni autenticación de usuarios, por lo que no se almacena de forma persistente ningún dato personal identificativo (nombre, correo electrónico, etc.) en los servidores de la aplicación. El servidor MCP actúa como un componente \textit{stateless}: recibe una petición, la reenvía al proveedor de LLM correspondiente, y devuelve la respuesta sin persistirla en una base de datos propia. El historial de la conversación se mantiene únicamente en el lado del cliente (en el navegador del usuario), por lo que su gestión depende del propio usuario.
 
-No obstante, los textos introducidos por el usuario sí se transmiten a los proveedores externos de LLM, que actúan como encargados del tratamiento conforme a sus respectivas políticas de privacidad. La base legal aplicable a este tratamiento es el \textbf{consentimiento del interesado} (artículo 6.1.a del RGPD~\cite{rgpd2016}): el usuario, al introducir voluntariamente una descripción de un proceso de negocio y enviarla al sistema, consiente de forma implícita su procesamiento por parte del LLM seleccionado con el fin de obtener el modelo BPMN o el análisis PERVAL solicitados.
+No obstante, los textos introducidos por el usuario sí se transmiten a los proveedores externos de LLM, que actúan como encargados del tratamiento conforme a sus respectivas políticas de privacidad. A efectos del RGPD~\cite{rgpd2016}, la herramienta informa al usuario de que las descripciones introducidas serán enviadas a un proveedor externo de LLM para su procesamiento, de modo que el uso del sistema presupone la aceptación de estas condiciones de funcionamiento. Esta aproximación resulta más prudente que invocar un consentimiento implícito, ya que el RGPD (artículo 4.11) exige que el consentimiento sea libre, específico, informado e inequívoco, requisitos cuya acreditación formal excede el alcance de este trabajo.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -346,7 +320,7 @@ Se optó por la segunda alternativa: un \textbf{servidor MCP} como intermediario
     \item \textbf{Seguridad}: las claves de API de los proveedores de LLM (\texttt{GITHUB\_TOKEN}) se almacenan exclusivamente como variables de entorno del servidor, sin exponerse en ningún momento al cliente.
     \item \textbf{Centralización de la lógica}: la construcción de \textit{prompts}, el \textit{parsing} robusto de las respuestas del LLM , la reparación de XML BPMN truncado o malformado  y el mecanismo de selección de modelo de respaldo (con \textit{fallback} entre los modelos de \texttt{LLM\_MODELS}) se implementan una única vez en el servidor, en lugar de duplicarse en el cliente.
     \item \textbf{Extensibilidad}: el protocolo MCP define un formato estandarizado de herramientas (\textit{tools}) con esquemas de entrada y salida validados mediante \textit{Zod}, lo que facilita añadir nuevas funcionalidades --como el módulo de análisis PERVAL como nuevas herramientas del mismo servidor, sin modificar la arquitectura general.
-    \item \textbf{Despliegue independiente}: al tratarse de dos componentes independientes (extensión estática y servidor MCP), pueden desplegarse por separado --en este caso, como dos servicios de \textit{Render} (\texttt{tfm-bpmn-frontend} y \texttt{tfm-bpmn-mcp-server})-- y escalarse o sustituirse de forma independiente.
+    \item \textbf{Despliegue independiente}: al tratarse de dos componentes independientes (extensión estática y servidor MCP), pueden desplegarse por separado en este caso, como dos servicios de \textit{Render} (\texttt{tfm-bpmn-frontend} y \texttt{tfm-bpmn-mcp-server}) y escalarse o sustituirse de forma independiente.
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -363,6 +337,58 @@ Por último, se analizaron las tecnologías concretas a emplear tanto en la exte
     \item \textbf{Pruebas}: se incorporó \textbf{\textit{Playwright}} para la realización de pruebas \textit{end-to-end} sobre la extensión, permitiendo automatizar la verificación de los flujos principales (generación de un modelo a partir de una descripción, edición conversacional, análisis PERVAL) en un navegador real.
     \item \textbf{Despliegue}: se seleccionó \textbf{\textit{Render}} como plataforma de despliegue, por ofrecer un nivel gratuito adecuado para un proyecto académico y por permitir definir, mediante un único archivo \texttt{render.yaml}, los dos servicios necesarios: un sitio estático para la extensión (\texttt{tfm-bpmn-frontend}) y un servicio \textit{web} de tipo Node.js para el servidor MCP (\texttt{tfm-bpmn-mcp-server}).
 \end{itemize}
+
+{Como resultado del análisis realizado en las secciones anteriores, se seleccionaron las alternativas tecnológicas que mejor satisfacen los requisitos funcionales y no funcionales identificados para el desarrollo de la solución propuesta. En todos los casos, la elección se fundamentó en criterios relacionados con la interoperabilidad, la extensibilidad, la mantenibilidad y la adecuación a los objetivos del presente TFM. La Tabla \ref{tab:design_decisions} resume las principales decisiones de diseño adoptadas, las alternativas consideradas durante el análisis y los criterios que justificaron cada elección. Sobre esta base, en la siguiente sección se presenta la solución propuesta.}
+
+
+\begin{table}[htbp]
+\centering
+\caption{Resumen de las principales decisiones de diseño adoptadas.}
+\label{tab:design_decisions}
+\renewcommand{\arraystretch}{1.25}
+\footnotesize
+\begin{tabularx}{\textwidth}{|p{3.1cm}|X|X|p{3.1cm}|}
+\hline
+\textbf{Decisión de diseño} &
+\textbf{Alternativas consideradas} &
+\textbf{Criterio principal de evaluación} &
+\textbf{Decisión adoptada} \\
+\hline
+
+Editor de modelado BPMN &
+draw.io, Camunda Modeler, bpmn.io &
+Capacidad de extensión, edición interactiva, acceso al modelo BPMN y disponibilidad de API. &
+\textbf{bpmn.io} \\
+\hline
+
+Proveedor de LLM &
+API de OpenAI (ChatGPT), API de Google (Gemini), GitHub Models &
+Disponibilidad de plan gratuito, acceso a múltiples modelos y API unificada compatible con el formato OpenAI. &
+\textbf{GitHub Models} (modelo principal \texttt{gpt-4.1} con mecanismo de \textit{fallback} automático) \\
+\hline
+
+Arquitectura de integración &
+Llamadas directas del cliente al proveedor de LLM; servidor MCP intermedio (Node.js/Express) &
+Seguridad de credenciales, centralización de la lógica de construcción de \textit{prompts} y reparación de XML. &
+\textbf{Servidor MCP} (Node.js + Express) \\
+\hline
+
+Comunicación con el LLM &
+SDK nativo de cada proveedor (OpenAI SDK, Google AI SDK\ldots); API REST compatible con formato OpenAI &
+Unificación de llamadas multi-modelo y compatibilidad directa con GitHub Models sin dependencias adicionales. &
+\textbf{API REST compatible con OpenAI} (punto de acceso único para todos los modelos de GitHub Models) \\
+\hline
+
+Tecnologías de desarrollo &
+React/Vue + Python/Flask; JavaScript + Node.js/Express; otras combinaciones &
+Coherencia con el ejemplo base de \textit{bpmn-js}, lenguaje compartido cliente-servidor e integración nativa con el MCP SDK. &
+\textbf{JavaScript}: cliente (bpmn-js, jQuery, Webpack); servidor (Node.js, Express, Zod) \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+\denis{Las decisiones sintetizadas en la Tabla \ref{tab:design_decisions} constituyen la base tecnológica sobre la que se construye la solución desarrollada en este trabajo. A partir de ellas se derivan los requisitos funcionales y no funcionales que se presentan en la siguiente sección, los cuales concretan el comportamiento esperado del sistema y las características de calidad que deberá satisfacer.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Solución propuesta}
@@ -411,6 +437,7 @@ RF-11 & El sistema debe informar al usuario del estado de cada petición (cargan
 \label{tab:requisitosFuncionales}
 \end{longtable}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Requisitos no funcionales}
 \label{subsec:requisitosNoFuncionales}
@@ -438,7 +465,8 @@ RNF-05 & \textbf{Portabilidad}: el sistema debe poder desplegarse en una platafo
 \hline
 RNF-06 & \textbf{Mantenibilidad}: el código debe organizarse de forma modular, separando claramente la extensión cliente, el servidor MCP, la lógica de llamada a los LLM (\texttt{llm.js}) y cada herramienta MCP (\texttt{tools/}). \\
 \hline
-RNF-07 & \textbf{Conformidad}: los modelos BPMN generados o modificados deben ser conformes al estándar BPMN 2.0~\cite{omg2011bpmn}, de forma que puedan importarse en otras herramientas compatibles. \\
+
+RNF-07 & \textbf{Conformidad}: los modelos BPMN generados o modificados deben generarse en un formato compatible con BPMN 2.0~\cite{omg2011bpmn} y susceptible de ser importado por herramientas compatibles. \\
 \hline
 RNF-08 & \textbf{Privacidad}: el sistema debe minimizar los datos enviados a los proveedores de LLM (principio de minimización de datos del RGPD~\cite{rgpd2016}) y no debe almacenar de forma persistente datos personales de los usuarios. \\
 \hline
@@ -489,7 +517,7 @@ La selección del idioma de la interfaz y de las respuestas generadas (RF-10) am
 
 Esta categoría incluye funcionalidades descartadas de forma explícita para la versión actual del proyecto, ya sea por limitaciones de tiempo y recursos, o por decisiones estratégicas orientadas a validar el concepto fundamental antes de ampliar el alcance.
 
-El soporte para proveedores de LLM adicionales distintos de \textit{GitHub Models} ---como la integración directa con la API de Anthropic Claude o de OpenAI mediante clave propia--- fue considerado durante el análisis de alternativas y descartado (véase \S\ref{subsec:seleccionLLM}): el plan gratuito de \textit{GitHub Models} ofrece acceso a modelos GPT de alta calidad con límites suficientes para los objetivos del proyecto, y añadir proveedores adicionales incrementaría la complejidad del servidor MCP sin aportar valor diferencial en esta primera versión. La persistencia del historial de conversación entre sesiones fue igualmente descartada: el historial se gestiona en memoria del cliente durante la sesión activa, lo cual es suficiente para los ciclos de refinamiento iterativo previstos; una persistencia duradera requeriría una base de datos, lo que excede el alcance del proyecto. Por último, la exportación del diagrama en formatos alternativos (imagen PNG/SVG, PDF) no forma parte de los objetivos del TFM y puede cubrirse mediante las funcionalidades nativas del propio \textit{bpmn.io}.
+El soporte para proveedores de LLM adicionales distintos de \textit{GitHub Models} fue considerado durante el análisis de alternativas y descartado (véase \S\ref{subsec:seleccionLLM}): el plan gratuito de \textit{GitHub Models} ofrece acceso a modelos GPT de alta calidad con límites suficientes para los objetivos del proyecto, y añadir proveedores adicionales incrementaría la complejidad del servidor MCP sin aportar valor diferencial en esta primera versión. La persistencia del historial de conversación entre sesiones fue igualmente descartada: el historial se gestiona en memoria del cliente durante la sesión activa, lo cual es suficiente para los ciclos de refinamiento iterativo previstos; una persistencia duradera requeriría una base de datos, lo que excede el alcance del proyecto. Por último, la exportación del diagrama en formatos alternativos (imagen PNG/SVG, PDF) no forma parte de los objetivos del TFM y puede cubrirse mediante las funcionalidades nativas del propio \textit{bpmn.io}.
 
 \vspace{0.5em}
 \noindent\textbf{Resumen por prioridad:}
@@ -652,9 +680,9 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 
 
 
-\textbf{US08 -- Diseño del módulo de análisis PERVAL}
+\textbf{US08 -- Diseño de la herramienta de análisis PERVAL}
 
-\textit{Descripción}: como desarrollador, quiero diseñar un módulo capaz de analizar el valor percibido por el cliente de las tareas o entregables de un modelo BPMN, según la clasificación de Sweeney y Soutar~\cite{sweeney2001perval}, para que el usuario pueda obtener información sobre el valor que aporta cada elemento del proceso.
+\textit{Descripción}: como desarrollador, quiero diseñar una herramienta MCP capaz de analizar el valor percibido por el cliente de las tareas o entregables de un modelo BPMN, según la clasificación de Sweeney y Soutar~\cite{sweeney2001perval}, para que el usuario pueda obtener información sobre el valor que aporta cada elemento del proceso.
 
 \textit{Estimación}: 10h.
 
@@ -665,6 +693,7 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
     \item Diseño del \textit{prompt} de análisis PERVAL, incluyendo el ámbito (tareas/entregables) y el actor (3h).
     \item Pruebas con modelos BPMN de ejemplo (2h).
 \end{itemize}
+
 
 \textbf{US09 -- Implementación de la herramienta \texttt{analyzePerval}}
 
@@ -731,9 +760,10 @@ Para concretar el desarrollo del sistema se ha definido un conjunto de quince hi
 \begin{itemize}
     \item Configuración de \textit{Playwright} sobre el proyecto (2h).
     \item Implementación de pruebas de generación y edición conversacional de modelos BPMN (3h).
-    \item Implementación de pruebas del módulo de análisis PERVAL (2h).
+    \item Implementación de pruebas de la herramienta \texttt{analyzePerval} (2h).
     \item Integración de las pruebas en el flujo de desarrollo (1h).
 \end{itemize}
+
 
 \textbf{US14 -- Despliegue en \textit{Render} y documentación}
 
@@ -770,6 +800,8 @@ La estimación total del conjunto de historias de usuario asciende a \textbf{145
 
 El desarrollo del sistema se ha planificado siguiendo una metodología ágil basada en \textit{Scrum}~\cite{riano2021}, organizando el trabajo en \textbf{ocho \textit{sprints} semanales} (Sprint 0 a Sprint 7), desde el 26/05/2026 hasta el 20/07/2026. Cada \textit{sprint} agrupa una o varias de las historias de usuario definidas en la sección~\ref{subsec:historiasUsuario}, de modo que la suma de las estimaciones de las historias de usuario de cada \textit{sprint} determina su carga de trabajo prevista. De forma paralela al desarrollo de cada \textit{sprint}, se redacta la documentación correspondiente de la memoria del TFM, de modo que, una vez finalizado el Sprint 7, el trabajo restante se centra en completar y revisar las secciones de la memoria que no hayan podido finalizarse durante el desarrollo.
 
+Conviene señalar que la planificación mediante sprints constituye exclusivamente la estrategia adoptada para organizar el desarrollo incremental del artefacto software. La evaluación científica de la propuesta se aborda de forma independiente mediante un estudio empírico de aceptación basado en el TAM, descrito en los capítulos posteriores. De este modo, Scrum se emplea como metodología de desarrollo del software, mientras que la validación de la investigación se fundamenta en un procedimiento empírico específico.
+
 La tabla~\ref{tab:planTrabajo} resume la planificación de los ocho \textit{sprints}, indicando para cada uno su rango de fechas, las historias de usuario asignadas y la carga de trabajo estimada.
 
 \begingroup
@@ -791,7 +823,7 @@ Sprint 2 & 09/06/2026 -- 15/06/2026 & US05 (Generación de modelos BPMN a partir
 \hline
 Sprint 3 & 16/06/2026 -- 22/06/2026 & US06 (Edición conversacional iterativa), US07 (Validación y reparación de XML) & 22 \\
 \hline
-Sprint 4 & 23/06/2026 -- 29/06/2026 & US08 (Diseño del módulo PERVAL), US09 (Implementación de \texttt{analyzePerval}) & 20 \\
+Sprint 4 & 23/06/2026 -- 29/06/2026 & US08 (Diseño de la herramienta PERVAL), US09 (Implementación de \texttt{analyzePerval}) & 20 \\
 \hline
 Sprint 5 & 30/06/2026 -- 06/07/2026 & US10 (Visualización de resultados PERVAL), US11 (Interfaz del panel conversacional) & 20 \\
 \hline
@@ -804,7 +836,7 @@ Sprint 7 & 14/07/2026 -- 20/07/2026 & US14 (Despliegue en \textit{Render} y docu
 \end{longtable}
 \endgroup
 
-Como puede observarse, la carga de trabajo prevista se sitúa en torno a las 18 horas semanales de media (145 horas en total repartidas en 8 \textit{sprints}), con dos \textit{sprints} de menor carga (Sprint 0 y Sprint 2) dedicados, respectivamente, a la planificación inicial del proyecto y a la implementación de la funcionalidad central de generación de modelos BPMN, que por su complejidad se ha mantenido como única historia de usuario del \textit{sprint}. Los \textit{sprints} 1, 3, 4 y 5 concentran la mayor parte del desarrollo de las dos funcionalidades principales del sistema --la generación y edición conversacional de modelos BPMN (\textit{sprints} 1-3) y el módulo de análisis PERVAL (\textit{sprints} 4-5)--, mientras que los \textit{sprints} 6 y 7 se dedican a pulir la interfaz, dar soporte a la internacionalización, completar las pruebas automatizadas, desplegar el sistema en producción y validar la solución con un grupo de usuarios mediante el modelo TAM.
+Como puede observarse, la carga de trabajo prevista se sitúa en torno a las 18 horas semanales de media (145 horas en total repartidas en 8 \textit{sprints}), con dos \textit{sprints} de menor carga (Sprint 0 y Sprint 2) dedicados, respectivamente, a la planificación inicial del proyecto y a la implementación de la funcionalidad central de generación de modelos BPMN, que por su complejidad se ha mantenido como única historia de usuario del \textit{sprint}. Los \textit{sprints} 1, 3, 4 y 5 concentran la mayor parte del desarrollo de las dos funcionalidades principales del sistema --la generación y edición conversacional de modelos BPMN (\textit{sprints} 1-3) y la herramienta de análisis PERVAL (\textit{sprints} 4-5)--, mientras que los \textit{sprints} 6 y 7 se dedican a pulir la interfaz, dar soporte a la internacionalización, completar las pruebas automatizadas, desplegar el sistema en producción y validar la solución con un grupo de usuarios mediante el modelo TAM.
 
 \shorthandon{<>}
 

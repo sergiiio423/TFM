@@ -45,6 +45,9 @@ var pervalAnalisado     = false;
 // auto-confirmando cada sugerencia hasta que el diagrama queda completo.
 var autoGenerateAll     = false;
 var _autoTypingEl       = null; // spinner persistente durante la generación automática
+// Contexto activo para poder retomar el flujo si el usuario pulsa "Generar resto automáticamente"
+var _currentGatewayStep = null;
+var _currentBranchIdx   = 0;
 
 // Función para detener el dictado de voz y limpiar el estado de transcripción.
 // Se asigna en setupVoiceInput(); hasta entonces es un no-op.
@@ -88,6 +91,7 @@ function updateUI() {
   const pervalBtn     = document.getElementById('ai-perval-btn');
   const hint          = document.getElementById('ai-hint');
   const addInfoBtn    = document.getElementById('ai-add-info-btn');
+  const switchAutoBtn = document.getElementById('btn-switch-to-auto');
 
   textarea.disabled = false;
   btn.disabled      = false;
@@ -96,6 +100,15 @@ function updateUI() {
   btn.style.display         = '';
   if (confirmActs) confirmActs.style.display = 'none';
   if (addInfoBtn)  addInfoBtn.style.display  = 'none';
+
+  // El botón "Generar el resto automáticamente" solo aparece si estamos en modo
+  // manual (paso a paso) y el usuario ya empezó a definir pasos del flujo.
+  const flowPhases = ['flow_start','flow_step','flow_branches','flow_branch_step'];
+  if (switchAutoBtn) {
+    const showSwitch = !autoGenerateAll && flowPhases.includes(fase);
+    switchAutoBtn.style.display = showSwitch ? 'block' : 'none';
+    switchAutoBtn.textContent = t('switchToAutoBtn');
+  }
 
   if (fase === 'describe') {
     btn.textContent = t('describeBtn');
@@ -870,7 +883,7 @@ async function startBranchDefinitionPhase(gatewayStep) {
   const lanes = effectiveLanes();
   const ext   = (confirmedStructure.poolExterno || []).map(p => p.nombre);
 
-  fase = 'flow_branches'; updateUI();
+  fase = 'flow_branches'; _currentGatewayStep = gatewayStep; updateUI();
   if (!autoGenerateAll) addMessage(t('identifyingCases', { name: gatewayStep.nombre }), 'ai');
   addTyping();
 
@@ -904,7 +917,7 @@ async function startBranchStepFlow(gatewayStep, branchIdx, consecutiveDups = 0) 
   const branch = gatewayStep.branches[branchIdx];
   const stepNum = branch.steps.length + 1;
 
-  fase = 'flow_branch_step'; updateUI();
+  fase = 'flow_branch_step'; _currentGatewayStep = gatewayStep; _currentBranchIdx = branchIdx; updateUI();
   if (!autoGenerateAll) addMessage(t('caseStepThinking', { branch: branch.nombre, i: branchIdx + 1, total: gatewayStep.branches.length, n: stepNum }), 'ai');
   addTyping();
 
@@ -1438,6 +1451,38 @@ $(function() {
   document.getElementById('ai-scenario').addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) handleSend(); });
   document.getElementById('ai-add-info-btn').addEventListener('click', handleAddInfo);
 
+  document.getElementById('btn-switch-to-auto').addEventListener('click', () => {
+    if (autoGenerateAll) return; // ya está en modo auto
+    autoGenerateAll = true;
+    addMessage(t('switchToAutoChosen'), 'user');
+
+    if (fase === 'flow_start') {
+      // La tarjeta de inicio sigue visible — el usuario la confirma y desde ahí
+      // arranca el modo automático. Solo informamos al usuario.
+      addMessage(t('switchToAutoFromStart'), 'ai');
+      updateUI(); // oculta el botón
+
+    } else if (fase === 'flow_step') {
+      // Desactivar la tarjeta actual y relanzar desde el estado ya confirmado.
+      const card = document.getElementById('next-step-card');
+      if (card) disableCard(card);
+      addMessage(t('autoModeRunningMsg'), 'ai');
+      startNextStepFlow();
+
+    } else if (fase === 'flow_branches') {
+      const card = document.getElementById('branches-card');
+      if (card) disableCard(card);
+      addMessage(t('autoModeRunningMsg'), 'ai');
+      if (_currentGatewayStep) startBranchDefinitionPhase(_currentGatewayStep);
+
+    } else if (fase === 'flow_branch_step') {
+      const card = document.getElementById('next-step-card');
+      if (card) disableCard(card);
+      addMessage(t('autoModeRunningMsg'), 'ai');
+      if (_currentGatewayStep) startBranchStepFlow(_currentGatewayStep, _currentBranchIdx);
+    }
+  });
+
   document.getElementById('btn-confirm-main').addEventListener('click', () => {
     if (fase === 'confirm_structure') handleConfirmStructure();
   });
@@ -1452,7 +1497,8 @@ $(function() {
 
   document.getElementById('ai-reset').addEventListener('click', () => {
     fase = 'describe'; processDescription = ''; processFlowDescription = ''; confirmedStructure = null;
-    diagramState = { steps: [] }; pervalAnalisado = false; autoGenerateAll = false; stopAutoTyping();
+    diagramState = { steps: [] }; pervalAnalisado = false; autoGenerateAll = false;
+    _currentGatewayStep = null; _currentBranchIdx = 0; stopAutoTyping();
     document.getElementById('ai-messages').innerHTML = `
       <div class="msg ai"><div class="msg-av">🤖</div><div class="msg-bubble">${t('welcomeReset')}</div></div>`;
     updateUI();

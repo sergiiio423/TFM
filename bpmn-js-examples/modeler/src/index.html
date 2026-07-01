@@ -253,6 +253,13 @@
     #ai-perval-btn:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); }
     #ai-perval-btn:disabled { opacity:.32; cursor: not-allowed; transform: none; }
 
+    .btn-switch-auto {
+      background: linear-gradient(135deg, #713f12, #92400e);
+      border: 1px solid rgba(251,191,36,0.25) !important;
+      color: #fde68a !important;
+    }
+    .btn-switch-auto:hover:not(:disabled) { opacity:.87; transform: translateY(-1px); border-color: rgba(251,191,36,0.5) !important; }
+
     .hint { font-size: 10px; color: rgba(100,160,210,0.38); text-align: center; letter-spacing: 0.2px; }
 
     .provider-notice {
@@ -473,6 +480,7 @@
         <button id="btn-modify-main"  class="btn-send btn-blue"  style="flex:1">✏️ Modificar</button>
       </div>
       <button id="ai-add-info-btn" class="btn-send btn-outline" style="display:none">➕ Añadir información</button>
+      <button id="btn-switch-to-auto" class="btn-send btn-switch-auto" style="display:none">⚡ Generar todo de una vez</button>
       <button id="ai-perval-btn">🔍 Analizar valor PERVAL</button>
       <div class="hint" id="ai-hint">Ctrl+Enter para enviar</div>
       <div class="provider-notice" id="ai-provider-notice"></div>

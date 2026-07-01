@@ -5,6 +5,394 @@
 
 \chapter{Diseño de la solución}
 
+%% Comando para mostrar un logotipo de tecnología con su nombre debajo.
+%% Uso: \techlogo{nombre-fichero-sin-extension}{Etiqueta}
+%% Coloca el PNG en plantillaTFM-DSICv2/include/nombre-fichero.png
+\newcommand{\techlogo}[2]{%
+  \begin{minipage}[b]{2.1cm}%
+    \centering%
+    \IfFileExists{include/#1.png}%
+      {\includegraphics[width=1.7cm,height=1.7cm,keepaspectratio]{include/#1}}%
+      {\colorbox{gray!12}{\makebox[1.7cm][c]{\rule{0pt}{1.7cm}}}}\\[4pt]%
+    {\scriptsize #2}%
+  \end{minipage}%
+}
+
+En este capítulo se presenta la arquitectura general del sistema desarrollado en este TFM, detallando la organización de sus componentes principales, los mecanismos de comunicación entre ellos y las decisiones de diseño adoptadas. Asimismo, se describe el modelo de datos empleado y se analizan los lenguajes, \textit{frameworks} y herramientas utilizados en el desarrollo, evaluando su adecuación al contexto del proyecto.
+
+%%---------------------------------------------------------
+\section{Arquitectura del sistema}
+\label{sec:arquitectura}
+%%---------------------------------------------------------
+
+La arquitectura del software hace referencia a la organización estructural de un sistema, compuesta por los distintos componentes que lo integran, sus características observables externamente y las interacciones que existen entre ellos. Esta visión estructurada permite entender cómo se construye, se comunica y evoluciona el sistema a lo largo del tiempo.
+
+La arquitectura presentada en este capítulo constituye el resultado directo de las decisiones de diseño analizadas y justificadas en el capítulo anterior (véase \S\ref{sec:solucionesPosibles}), donde se identificaron y compararon las principales alternativas tecnológicas. Cada elección estructural responde, por tanto, a un proceso sistemático de análisis y selección de alternativas, y no a decisiones arbitrarias.
+
+La solución desarrollada en este TFM se articula en torno a dos componentes principales: la \textbf{extensión sobre bpmn.io}, que actúa como cliente MCP y proporciona la interfaz gráfica de modelado y el panel conversacional; y el \textbf{servidor MCP}, que actúa como intermediario entre la extensión y el proveedor de LLM, y que expone entre sus herramientas la capacidad de análisis PERVAL. La figura~\ref{fig:arquitecturaSistema} muestra la interacción entre los distintos componentes del sistema.
+
+\shorthandoff{<>}
+\begin{figure}[ht]
+\centering
+\resizebox{0.96\linewidth}{!}{%
+\begin{tikzpicture}[
+  extbox/.style  = {draw, thick, rounded corners=5pt,
+                    minimum width=4.8cm, minimum height=3.2cm,
+                    align=center, fill=green!7},
+  subcomp/.style = {draw, rounded corners=3pt,
+                    minimum width=4.2cm, minimum height=0.80cm,
+                    align=center, font=\normalsize, fill=green!15},
+  mcpbox/.style  = {draw, thick, rounded corners=5pt,
+                    minimum width=4.8cm, minimum height=1.6cm,
+                    align=center, font=\normalsize, fill=orange!10},
+  llmbox/.style  = {draw, thick, rounded corners=5pt,
+                    minimum width=4.8cm, minimum height=1.6cm,
+                    align=center, font=\normalsize, fill=blue!8},
+  xmlbox/.style  = {draw, dashed, thick, rounded corners=4pt,
+                    minimum width=4.8cm, minimum height=1.4cm,
+                    align=center, font=\normalsize, fill=yellow!10},
+  >=Stealth, thick
+]
+
+
+\draw[thick] (0,  0.55) circle (0.42cm);
+\draw[thick] (0,  0.13) -- (0, -1.05);
+\draw[thick] (-0.65, -0.38) -- (0.65, -0.38);
+\draw[thick] (0, -1.05) -- (-0.52, -1.85);
+\draw[thick] (0, -1.05) -- ( 0.52, -1.85);
+\node[below, font=\normalsize] at (0, -2.0) {Usuario};
+
+\node[extbox] (ext) at (6.6, 0.0) {};
+\node[font=\large\bfseries] at (6.6, 1.20) {Extensión bpmn.io};
+\node[subcomp] at (6.6,  0.38) {Editor BPMN (\textit{bpmn-js})};
+\node[subcomp] at (6.6, -0.68) {Panel conversacional};
+
+\node[mcpbox] (mcp) at (14.0, 0.0)
+  {Servidor MCP\\[6pt]{\normalsize Node.js + Express}};
+
+
+\node[xmlbox] (xml) at (6.6, -5.2)
+  {XML BPMN\\[-2pt]{\normalsize (estado compartido)}};
+
+\node[llmbox] (llm) at (14.0, -5.2)
+  {GitHub Models\\[6pt]{\normalsize gpt-4.1 + \textit{fallbacks}}};
+
+
+\draw[<->]
+  (0.75, 0.0) -- node[above, font=\normalsize, midway]{interactúa}
+  (4.2, 0.0);
+
+\draw[<->, rounded corners=8pt]
+  (ext.north)
+  -- (6.6, 2.6)
+  -- node[above, font=\normalsize, midway]{HTTP POST \texttt{/mcp}}
+     (14.0, 2.6)
+  -- (mcp.north);
+
+\draw[<->]
+  (ext.south) -- node[right, font=\normalsize, midway]{lee / escribe}
+  (xml.north);
+
+
+\draw[<->]
+  (mcp.south) -- node[right, font=\normalsize, midway]{GitHub Models API}
+  (llm.north);
+
+\draw[->, dashed, thick]
+  (0.35, -2.30)
+  -- node[below, sloped, font=\normalsize, midway]{edita directamente}
+  (xml.west);
+
+\end{tikzpicture}%
+}
+\caption{Interacción entre los diferentes componentes del sistema.}
+\label{fig:arquitecturaSistema}
+\end{figure}
+\shorthandon{<>}
+
+
+
+Como se puede observar, el usuario interactúa con la extensión sobre bpmn.io tanto a través del editor gráfico (modificando directamente el diagrama BPMN) como a través del panel conversacional (expresando instrucciones en lenguaje natural). La extensión se comunica con el servidor MCP mediante peticiones HTTP, y este se encarga de invocar las herramientas adecuadas y gestionar las llamadas al LLM. El XML BPMN del modelo actúa como \textbf{estado compartido} entre el usuario y el LLM: ambos pueden leerlo y modificarlo, siendo bpmn.io el punto de renderización y persistencia en sesión. Esta bidireccionalidad es la que define el paradigma de \textit{vibe modeling} guiado e híbrido implementado en este TFM.
+
+La adopción de una arquitectura modular y desacoplada favorece la mantenibilidad y la extensibilidad del sistema, ya que cada componente puede modificarse o sustituirse de forma independiente sin afectar al resto.
+
+%%---------------------------------------------------------
+\subsection{Justificación de la arquitectura adoptada}
+%%---------------------------------------------------------
+
+La arquitectura adoptada para este TFM responde a una serie de consideraciones técnicas, funcionales y de escalabilidad. A continuación, se justifican las principales decisiones arquitectónicas.
+
+La primera y más determinante decisión ha sido adoptar la \textbf{arquitectura MCP} (\textit{Model Context Protocol}) como patrón estructural del sistema. Como se describe en el capítulo de Fundamentos, el protocolo MCP define una separación explícita en tres roles: el \textit{host} o cliente (la extensión sobre bpmn.io), que desea acceder a las capacidades del LLM; el servidor MCP, que expone un conjunto de herramientas con una interfaz estandarizada; y el LLM, que las ejecuta. Esta separación aporta ventajas que justifican su elección frente a una integración directa entre la interfaz de usuario y la API del LLM:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Estandarización e interoperabilidad:} el protocolo MCP define un contrato estable entre cliente y servidor independiente del proveedor de LLM. Cambiar de proveedor (p.~ej., de GitHub Models a otro) o de modelo no requiere modificar el código de la extensión, únicamente la configuración del servidor.
+    \item[$\bullet$] \textbf{Seguridad:} las credenciales de acceso a la API del LLM residen exclusivamente en el servidor MCP, nunca en el código JavaScript que se ejecuta en el navegador del usuario y que podría ser inspeccionado.
+    \item[$\bullet$] \textbf{Centralización de la lógica de herramientas:} el servidor MCP concentra la definición, validación y ejecución de las nueve herramientas del sistema. Añadir o modificar una herramienta no requiere cambios en la extensión del cliente.
+    \item[$\bullet$] \textbf{Capacidad de extensión:} la arquitectura MCP permite incorporar nuevas herramientas o fuentes de datos (p.~ej., acceso a repositorios de modelos BPMN externos) de forma incremental, sin alterar la arquitectura base del sistema.
+\end{itemize}
+
+En segundo lugar, se ha optado por \textbf{bpmn.io} como base de la herramienta de modelado. Las dos alternativas barajadas fueron bpmn.io y Draw.io. Draw.io es un editor de diagramas de propósito general, extensible y de código abierto, que incluye soporte para notación BPMN; sin embargo, no garantiza la conformidad estricta con el estándar BPMN 2.0, no expone una API de extensión orientada específicamente al modelado de procesos y su arquitectura no facilita la integración programática del panel conversacional ni la manipulación del XML BPMN desde código externo. bpmn.io, en cambio, está diseñado específicamente para BPMN 2.0, ejecuta íntegramente en el navegador sin instalación adicional, ofrece una arquitectura modular y extensible mediante \textit{plugins} que permite integrar el panel conversacional y la comunicación con el servidor MCP directamente en la interfaz de edición, y es ampliamente adoptada tanto en entornos académicos como profesionales.
+
+En tercer lugar, el servidor MCP se ha implementado en \textbf{modo sin estado} (\textit{stateless}): cada petición crea una nueva instancia del servidor MCP y su transporte, que se destruyen al finalizar la respuesta. Este enfoque simplifica la gestión del ciclo de vida de las sesiones para un prototipo en el que la persistencia entre peticiones no es un requisito.
+
+Por último, se ha seleccionado \textbf{GitHub Models} como proveedor de LLM por su plan gratuito, que permite un número elevado de peticiones durante el desarrollo y las pruebas, y por la disponibilidad de múltiples modelos a través de una única API compatible con el formato OpenAI. El modelo principal es \texttt{gpt-4.1}, con \textit{fallback} automático hacia \texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano} y \texttt{Phi-4}, garantizando la resiliencia del sistema ante la indisponibilidad puntual de modelos.
+
+%%---------------------------------------------------------
+\subsection{Arquitectura detallada por componente}
+%%---------------------------------------------------------
+
+A continuación se describe la estructura y responsabilidades de cada uno de los dos componentes principales del sistema.
+
+%%---------------------------------------------------------
+\subsubsection{Extensión sobre bpmn.io (cliente MCP)}
+%%---------------------------------------------------------
+
+La extensión sobre bpmn.io constituye el punto de entrada del usuario al sistema. Se ha desarrollado como una capa adicional sobre la librería de código abierto \textit{bpmn-js}, que proporciona las capacidades nativas de edición y renderizado de diagramas BPMN 2.0. A esta capa base se ha añadido un \textbf{panel conversacional} que permite al usuario interactuar con el LLM mediante instrucciones en lenguaje natural, siguiendo la estrategia de prompting iterativo con validación humana en el bucle (\textit{Iterative prompting with human-in-the-loop validation}) descrita en el capítulo de Fundamentos.
+
+Desde el punto de vista del protocolo MCP, la extensión actúa como \textbf{cliente MCP} o \textit{host}: es la aplicación que desea hacer uso de las capacidades del LLM y que envía las solicitudes al servidor MCP. La comunicación se realiza mediante peticiones HTTP POST al \textit{endpoint} \texttt{/mcp} del servidor, siguiendo el transporte \textit{Streamable HTTP} definido por el SDK de MCP.
+
+El elemento central para el paradigma de \textit{vibe modeling} guiado e híbrido es el \textbf{XML BPMN como estado compartido}. La librería bpmn-js mantiene en memoria el XML del diagrama actual. Este XML puede ser leído y modificado tanto por el usuario —a través de la edición directa del diagrama en la interfaz gráfica— como por el LLM —a través de las herramientas del servidor MCP que generan o modifican el XML y lo devuelven a la extensión para su renderización—. Esta característica bidireccional diferencia la propuesta de la mayoría de los trabajos existentes en la literatura, en los que el usuario se limita a proporcionar instrucciones textuales sin posibilidad de edición directa del artefacto.
+
+%%---------------------------------------------------------
+\subsubsection{Servidor MCP}
+%%---------------------------------------------------------
+
+El servidor MCP es el componente intermediario del sistema. Está implementado como un servicio \textbf{Node.js} con el framework \textbf{Express v5} y desplegado en la plataforma en la nube \textit{Render.com}, lo que garantiza su disponibilidad continua con acceso HTTPS.
+
+El servidor expone un único \textit{endpoint} (\texttt{POST /mcp}) y gestiona las peticiones del cliente siguiendo el protocolo MCP en modo \textit{stateless}: por cada petición recibida, se crea una nueva instancia del servidor MCP (\texttt{McpServer}) y su transporte (\texttt{StreamableHTTPServerTransport}), se conectan, se procesa la petición y ambos se destruyen al finalizar la respuesta. Este diseño elimina la necesidad de gestionar ciclos de vida de sesiones entre peticiones.
+
+El servidor registra \textbf{nueve herramientas} MCP, cada una con nombre, descripción y esquema de entrada/salida definido mediante la librería Zod. La tabla~\ref{tab:herramientasMCP} resume las herramientas disponibles y su función en el proceso de modelado.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|l|p{8.8cm}|}
+\hline
+\rowcolor{gray!20} \textbf{Herramienta} & \textbf{Función} \\
+\hline
+\texttt{identify\_structure} & Analiza la descripción en lenguaje natural del proceso e identifica la organización principal, sus departamentos y los actores externos; devuelve el objeto \texttt{structure} y el XML BPMN inicial (\textit{pools/lanes} sin pasos). \\
+\hline
+\texttt{suggest\_flow\_start} & Propone el evento o eventos de inicio del proceso a partir de la descripción y los departamentos identificados. \\
+\hline
+\texttt{suggest\_next\_step} & Propone el siguiente elemento del proceso (tarea, \textit{gateway} o evento) dado el estado actual del diagrama. \\
+\hline
+\texttt{suggest\_gateway\_branches} & Sugiere las ramas de un \textit{gateway} de decisión y sus condiciones de guarda. \\
+\hline
+\texttt{suggest\_branch\_step} & Propone los pasos internos de una rama de un \textit{gateway}. \\
+\hline
+\texttt{modify\_structure} & Modifica la estructura del proceso (actores externos, departamentos) antes de la generación de pasos. \\
+\hline
+\texttt{render\_diagram} & Genera el XML BPMN 2.0 completo y validado a partir del estado acumulado del diagrama (\texttt{structure} + \texttt{diagramState}). \\
+\hline
+\texttt{refine\_diagram} & Aplica una modificación libre expresada en lenguaje natural sobre el XML BPMN existente y devuelve el XML modificado. \\
+\hline
+\texttt{analyze\_perval} & Analiza el diagrama BPMN según el modelo PERVAL (Sweeney y Soutar, 2001), devolviendo las dimensiones de valor percibido por tarea y un resumen global. \\
+\hline
+\end{tabular}
+\caption{Herramientas MCP registradas en el servidor.}
+\label{tab:herramientasMCP}
+\end{table}
+
+Cada herramienta realiza una o varias llamadas a la API de GitHub Models con \textit{prompts} de sistema y usuario diseñados específicamente para la tarea correspondiente. El mecanismo de \textit{fallback} automático garantiza la resiliencia del sistema ante errores de cuota o indisponibilidad de modelos individuales.
+
+\paragraph{Herramienta de análisis PERVAL (\texttt{analyze\_perval}).}
+Entre las nueve herramientas registradas en el servidor destaca \texttt{analyze\_perval}, que implementa el análisis de valor percibido según el modelo PERVAL (Sweeney y Soutar, 2001). No se trata de un componente independiente, sino de una herramienta más dentro del servidor MCP, cuya lógica reside en el mismo servicio Node.js junto al resto de herramientas de generación y refinamiento de diagramas.
+
+La herramienta recibe como entrada el XML BPMN del diagrama, la lista de tareas o entregas a analizar (extraídas previamente del XML por la extensión), el nombre del actor externo cuyo punto de vista se adopta, el alcance del análisis (entregas al cliente o todas las tareas del proceso) y el idioma de los textos generados. A partir de esta información el LLM aplica el marco PERVAL y devuelve, en formato JSON estructurado, las dimensiones de valor para cada elemento analizado (\textit{Quality}, \textit{Price}, \textit{Emotional}, \textit{Social}), junto con un resumen global por dimensión y una valoración general del proceso.
+
+%%---------------------------------------------------------
+\section{Diseño detallado}
+\label{sec:disenioDetallado}
+%%---------------------------------------------------------
+
+En esta sección se aborda el modelo de datos empleado en el sistema y el flujo de comunicación entre componentes durante las principales operaciones de la herramienta.
+
+%%---------------------------------------------------------
+\subsection{Modelo de datos}
+%%---------------------------------------------------------
+
+A diferencia de los sistemas basados en bases de datos relacionales, la herramienta desarrollada en este TFM no emplea persistencia estructurada entre sesiones. El \textbf{artefacto central del sistema es el XML BPMN 2.0}, que actúa como estado compartido y transitorio durante la sesión de modelado en el navegador. Este artefacto es gestionado por la librería bpmn-js en memoria y transmitido entre los componentes según sea necesario.
+
+Junto al XML BPMN, el sistema maneja internamente los siguientes objetos de datos:
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Objeto \texttt{structure}:} representa la estructura organizativa del proceso. Contiene los actores externos del proceso (\texttt{poolExterno}, array de objetos con nombre y rol), la organización principal con sus departamentos (\texttt{poolPrincipal.nombre} y \texttt{poolPrincipal.lanes}) y un resumen descriptivo del proceso (\texttt{resumen}). Es el resultado de la herramienta \texttt{identify\_structure} y el punto de partida para la generación iterativa del diagrama.
+
+    \item[$\bullet$] \textbf{Objeto \texttt{diagramState}:} representa el estado acumulado del diagrama durante la generación paso a paso. Está compuesto por un array de pasos (\texttt{steps}), donde cada paso describe un elemento del proceso (tarea, evento o \textit{gateway}) con su posición en el flujo y su departamento. Este objeto, junto con el objeto \texttt{structure}, es utilizado por la herramienta \texttt{render\_diagram} para generar el XML BPMN 2.0 completo.
+
+    \item[$\bullet$] \textbf{Resultado PERVAL:} estructura JSON devuelta por la herramienta \texttt{analyze\_perval}. Está compuesta por un array de objetos de análisis por tarea (con campos \texttt{nombre}, \texttt{dimensiones}, \texttt{valor} y \texttt{justificacion}), un resumen de las cuatro dimensiones PERVAL (\texttt{Quality}, \texttt{Price}, \texttt{Emotional}, \texttt{Social}) y una valoración general del proceso (\texttt{valorGeneral}).
+\end{itemize}
+
+La ausencia de persistencia en base de datos es una decisión de diseño coherente con la naturaleza del prototipo y con el modelo de interacción adoptado: el XML BPMN que el usuario ve en el editor es siempre el estado actualizado, independientemente de si la última modificación la realizó el usuario directamente o el LLM a través de una herramienta.
+
+%%---------------------------------------------------------
+\subsection{Flujo de comunicación}
+%%---------------------------------------------------------
+
+En esta subsección se describe el flujo de comunicación entre los componentes durante las dos operaciones principales de la herramienta: la generación y refinamiento iterativo de modelos BPMN, y el análisis PERVAL.
+
+%%---------------------------------------------------------
+\subsubsection{Generación y refinamiento iterativo de modelos BPMN}
+%%---------------------------------------------------------
+
+La generación de un nuevo modelo BPMN sigue un flujo de comunicación estructurado en múltiples fases, que implementa la estrategia de prompting iterativo con validación humana en el bucle descrita en el capítulo de Fundamentos. El flujo completo se describe a continuación.
+
+El proceso comienza cuando el usuario introduce en el panel conversacional una descripción en lenguaje natural del proceso de negocio a modelar. La extensión envía esta descripción al servidor MCP, que invoca la herramienta \texttt{identify\_structure}. El LLM analiza la descripción e identifica la organización principal, sus departamentos y los actores externos, devolviendo un objeto \texttt{structure} y un XML BPMN inicial con la estructura de \textit{pools} y \textit{lanes}. Este XML se renderiza en el editor bpmn.io y se presenta al usuario para su validación o corrección.
+
+Una vez confirmada la estructura, la extensión guía al usuario a través de la definición paso a paso del proceso, invocando sucesivamente las herramientas \texttt{suggest\_flow\_start}, \texttt{suggest\_next\_step}, \texttt{suggest\_gateway\_branches} y \texttt{suggest\_branch\_step} según el tipo de elemento propuesto en cada iteración. En cada paso, el usuario puede aceptar la propuesta del LLM, modificarla o rechazarla antes de continuar con el siguiente elemento. Cuando se han definido todos los pasos del proceso, se invoca la herramienta \texttt{render\_diagram}, que genera el XML BPMN 2.0 completo y lo transmite a la extensión para su renderización en el editor.
+
+Si el usuario desea realizar modificaciones sobre el diagrama ya generado, puede hacerlo mediante dos mecanismos complementarios que caracterizan el paradigma de \textit{vibe modeling} guiado e híbrido:
+
+\begin{enumerate}
+    \item Mediante una \textbf{instrucción en lenguaje natural} a través del panel conversacional, que invoca la herramienta \texttt{refine\_diagram}. Esta herramienta recibe el XML actual del diagrama junto con la instrucción de modificación, genera el XML modificado mediante el LLM aplicando el cambio solicitado y lo devuelve a la extensión para su renderización.
+
+    \item Mediante \textbf{edición directa del diagrama} en la interfaz gráfica de bpmn.io, sin necesidad de instrucciones textuales. Las modificaciones realizadas por el usuario quedan reflejadas directamente en el XML del modelo gestionado por bpmn-js, que actúa como estado compartido. En la siguiente interacción conversacional, el servidor MCP recibirá el XML actualizado, garantizando la coherencia entre ambas formas de modificación.
+\end{enumerate}
+
+%%---------------------------------------------------------
+\subsubsection{Análisis PERVAL}
+%%---------------------------------------------------------
+
+El análisis PERVAL puede iniciarse en cualquier momento sobre el diagrama BPMN disponible en el editor. El flujo comienza cuando el usuario solicita el análisis a través del panel conversacional. La extensión lee el XML BPMN actual desde bpmn-js y extrae la lista de tareas o entregas que se desean analizar. A continuación, envía al servidor MCP una solicitud a la herramienta \texttt{analyze\_perval}, incluyendo el XML, la lista de elementos a analizar, el nombre del actor externo cuyo punto de vista se adopta, el alcance del análisis y el idioma de los textos de salida.
+
+El servidor MCP construye el \textit{prompt} de sistema específico para PERVAL y lo envía al LLM junto con la información del proceso. El LLM analiza el proceso según el modelo PERVAL (Sweeney y Soutar, 2001) y devuelve un objeto JSON estructurado con las dimensiones de valor percibido para cada elemento analizado. El servidor transmite este resultado a la extensión, que lo presenta al usuario en el panel conversacional de forma estructurada.
+
+%%---------------------------------------------------------
+\section{Tecnología utilizada}
+\label{sec:tecnologia}
+%%---------------------------------------------------------
+
+En el desarrollo del proyecto se han empleado distintas tecnologías orientadas al diseño, la programación, el control de versiones y el despliegue del sistema. A continuación, se describen las principales decisiones tecnológicas adoptadas en cada uno de estos ámbitos.
+
+%%---------------------------------------------------------
+\subsection{Diseño}
+%%---------------------------------------------------------
+
+Para la elaboración de los diagramas del proyecto se ha utilizado la herramienta \textbf{Draw.io}, una aplicación web de código abierto que permite diseñar y editar diagramas directamente desde el navegador, sin necesidad de instalar software adicional ni adquirir licencias. Draw.io ofrece compatibilidad con múltiples plataformas y soporte para diagramas UML, de arquitectura, de flujo y de red, entre otros. Su uso en este TFM ha permitido elaborar los diagramas de actores, de contexto, de casos de uso y de arquitectura presentes en la memoria.
+
+Para el diseño de los bocetos de la interfaz de usuario se ha empleado \textbf{Figma}, una plataforma de diseño colaborativo orientada al desarrollo de interfaces y prototipos interactivos. Figma ha permitido elaborar de forma ágil los bocetos iniciales del panel conversacional y de la distribución general de la interfaz, facilitando la clarificación de ideas y la planificación del desarrollo antes de iniciar la implementación.
+
+\begin{center}
+\techlogo{logo-drawio}{Draw.io}\hspace{1.0cm}%
+\techlogo{logo-figma}{Figma}%
+\end{center}
+
+%%---------------------------------------------------------
+\subsection{Programación}
+%%---------------------------------------------------------
+
+A continuación se expone la justificación de las tecnologías de programación seleccionadas para cada componente del sistema, atendiendo a criterios de adecuación al contexto, compatibilidad, robustez y madurez de las herramientas.
+
+%%---------------------------------------------------------
+\subsubsection{Lenguajes y tecnologías utilizados en cada componente}
+%%---------------------------------------------------------
+
+Dado que el sistema está compuesto por dos módulos software principales —la extensión sobre bpmn.io y el servidor MCP—, en esta subsección se describe la elección de lenguajes de programación y tecnologías para cada uno de ellos, junto con la justificación de dichas decisiones.
+
+\paragraph{Extensión sobre bpmn.io.}
+
+La extensión sobre bpmn.io ha sido desarrollada en \textbf{JavaScript} con módulos ES (\textit{ECMAScript Modules}), el estándar moderno de organización y reutilización de código en el ecosistema web. JavaScript es el único lenguaje de programación soportado de forma nativa por los navegadores web, lo que lo convierte en la opción obligatoria para el desarrollo de la extensión, dado que bpmn.io es una herramienta de modelado basada en navegador.
+
+La librería \textbf{bpmn-js} (versión 18.12.0) proporciona el núcleo de edición y renderizado de diagramas BPMN 2.0. Se trata de una librería de código abierto mantenida activamente por la organización bpmn.io, con una arquitectura modular y extensible mediante \textit{plugins}. La librería \textbf{diagram-js} (versión 15.1.0), sobre la que se construye bpmn-js, proporciona las capacidades base de manipulación de elementos de diagrama.
+
+La librería \textbf{jQuery} (versión 4.0.0) se ha utilizado para simplificar la manipulación del DOM en el panel conversacional y la gestión de eventos de la interfaz añadida por la extensión. Su uso resulta adecuado para el alcance de esta extensión, en la que no se requiere una arquitectura de componentes reactiva de mayor complejidad.
+
+El empaquetado de la extensión para su ejecución en el navegador se realiza mediante \textbf{Webpack 5}, que transpila y agrupa los módulos JavaScript, los estilos CSS y los recursos estáticos en un \textit{bundle} listo para ser servido por el servidor de desarrollo o desplegado en producción.
+
+\begin{center}
+\techlogo{logo-javascript}{JavaScript}\hspace{0.8cm}%
+\techlogo{logo-bpmnjs}{bpmn-js}\hspace{0.8cm}%
+\techlogo{logo-jquery}{jQuery}\hspace{0.8cm}%
+\techlogo{logo-webpack}{Webpack}%
+\end{center}
+
+\paragraph{Servidor MCP.}
+
+El servidor MCP ha sido implementado en \textbf{JavaScript} (ES modules) ejecutándose sobre \textbf{Node.js}, el entorno de ejecución de JavaScript en el lado del servidor. La elección de JavaScript para el servidor permite compartir código y convenciones con la extensión del cliente, reduciendo la complejidad del proyecto y facilitando el mantenimiento.
+
+El framework \textbf{Express} (versión 5.2.1) se ha utilizado para implementar el servidor HTTP. Express es uno de los frameworks web más consolidados del ecosistema Node.js, con una curva de aprendizaje reducida y un ecosistema de \textit{middleware} amplio. Su flexibilidad lo hace adecuado para implementar el \textit{endpoint} único del servidor MCP (\texttt{POST /mcp}) con un mínimo de configuración.
+
+La librería \textbf{@modelcontextprotocol/sdk} (versión 1.29.0) proporciona la implementación del protocolo MCP para Node.js, incluyendo el servidor (\texttt{McpServer}), el transporte HTTP (\texttt{StreamableHTTPServerTransport}) y las utilidades de registro y gestión de herramientas. Su uso garantiza el cumplimiento del estándar MCP y la interoperabilidad con cualquier cliente MCP compatible.
+
+Para la definición de los esquemas de entrada y salida de las herramientas MCP se ha utilizado la librería \textbf{Zod} (versión 4.4.3), que permite definir esquemas de validación de datos de forma declarativa en JavaScript. Cada herramienta expone su \texttt{inputSchema} definido mediante Zod, garantizando que los datos recibidos del cliente tienen la estructura y los tipos esperados antes de ser procesados.
+
+La gestión de las variables de entorno —incluyendo el token de acceso a la API de GitHub Models— se realiza mediante \textbf{dotenv} (versión 17.4.2), que permite configurar el servidor a través de un fichero \texttt{.env} local sin exponer credenciales en el código fuente.
+
+\begin{center}
+\techlogo{logo-nodejs}{Node.js}\hspace{0.8cm}%
+\techlogo{logo-express}{Express}\hspace{0.8cm}%
+\techlogo{logo-mcp}{MCP SDK}\hspace{0.8cm}%
+\techlogo{logo-zod}{Zod}\hspace{0.8cm}%
+\techlogo{logo-dotenv}{dotenv}%
+\end{center}
+
+%%---------------------------------------------------------
+\subsubsection{\textit{Frameworks} y bibliotecas}
+%%---------------------------------------------------------
+
+La tabla~\ref{tab:frameworks} resume los principales \textit{frameworks} y bibliotecas utilizados en el proyecto, indicando el componente en el que se emplean y la versión utilizada.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|l|l|c|}
+\hline
+\rowcolor{gray!20} \textbf{Tecnología} & \textbf{Componente} & \textbf{Versión} \\
+\hline
+bpmn-js               & Extensión bpmn.io & 18.12.0 \\
+\hline
+diagram-js            & Extensión bpmn.io & 15.1.0 \\
+\hline
+jQuery                & Extensión bpmn.io & 4.0.0 \\
+\hline
+Webpack               & Extensión bpmn.io & 5.x \\
+\hline
+Express               & Servidor MCP      & 5.2.1 \\
+\hline
+@modelcontextprotocol/sdk & Servidor MCP  & 1.29.0 \\
+\hline
+Zod                   & Servidor MCP      & 4.4.3 \\
+\hline
+dotenv                & Servidor MCP      & 17.4.2 \\
+\hline
+cors                  & Servidor MCP      & 2.8.6 \\
+\hline
+\end{tabular}
+\caption{Principales \textit{frameworks} y bibliotecas utilizados en el proyecto.}
+\label{tab:frameworks}
+\end{table}
+
+%%---------------------------------------------------------
+\subsubsection{Entornos de desarrollo}
+%%---------------------------------------------------------
+
+El desarrollo del proyecto se ha llevado a cabo principalmente con \textbf{Visual Studio Code}, un editor de código ligero, extensible y ampliamente adoptado en el ecosistema JavaScript/Node.js. Visual Studio Code ofrece soporte nativo para JavaScript, integración con Git, \textit{debugging} integrado y un ecosistema de extensiones que facilita el desarrollo y la inspección del código.
+
+La gestión de dependencias del proyecto se realiza mediante \textbf{npm} (\textit{Node Package Manager}), el gestor de paquetes estándar del ecosistema Node.js, que permite instalar, actualizar y gestionar las dependencias del proyecto de forma declarativa a través del fichero \texttt{package.json}.
+
+%%---------------------------------------------------------
+\subsection{Control de versiones}
+%%---------------------------------------------------------
+
+El control de versiones del proyecto se ha gestionado mediante \textbf{Git}, el sistema de control de versiones distribuido más utilizado en la actualidad. Git permite registrar el historial de cambios del código y trabajar con ramas de desarrollo independientes. El repositorio remoto se ha alojado en \textbf{GitHub}, plataforma de alojamiento de repositorios Git que proporciona además herramientas de seguimiento de tareas y gestión de proyectos. El repositorio se ha organizado siguiendo la estructura de \textit{sprints} de la metodología ágil adoptada, con \textit{commits} frecuentes que documentan el progreso incremental del desarrollo.
+
+\begin{center}
+\techlogo{logo-git}{Git}\hspace{1.0cm}%
+\techlogo{logo-github}{GitHub}%
+\end{center}
+
+%%---------------------------------------------------------
+\subsection{Despliegue}
+%%---------------------------------------------------------
+
+El servidor MCP se ha desplegado en la plataforma en la nube \textbf{Render.com}, que ofrece servicios de alojamiento de aplicaciones Node.js con despliegue continuo desde repositorios de GitHub, reinicio automático ante fallos y acceso HTTPS mediante certificado SSL gestionado por la propia plataforma. Esta elección permite que el servidor MCP esté disponible de forma continua y accesible desde cualquier instancia del editor bpmn.io, sin necesidad de infraestructura propia.
+
+La extensión sobre bpmn.io se ejecuta íntegramente en el navegador del usuario y no requiere despliegue en un servidor web propio. Durante el desarrollo, se sirve localmente mediante el servidor de desarrollo de Webpack (\texttt{webpack-dev-server}), que permite la recarga automática de los cambios en el navegador sin necesidad de una compilación manual.
+
+\begin{center}
+\techlogo{logo-render}{Render.com}%
+\end{center}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de diseño de la solución
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -153,6 +153,37 @@ Desde el punto de vista del protocolo MCP, la extensión actúa como \textbf{cli
 
 El elemento central para el paradigma de \textit{vibe modeling} guiado e híbrido es el \textbf{XML BPMN como estado compartido}. La librería bpmn-js mantiene en memoria el XML del diagrama actual. Este XML puede ser leído y modificado tanto por el usuario —a través de la edición directa del diagrama en la interfaz gráfica— como por el LLM —a través de las herramientas del servidor MCP que generan o modifican el XML y lo devuelven a la extensión para su renderización—. Esta característica bidireccional diferencia la propuesta de la mayoría de los trabajos existentes en la literatura, en los que el usuario se limita a proporcionar instrucciones textuales sin posibilidad de edición directa del artefacto.
 
+La figura~\ref{fig:capaExtension} ilustra la distribución funcional de la extensión en cuatro capas.
+
+\shorthandoff{<>}
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  lyr/.style={draw, thick, rectangle, minimum width=9cm, align=center, font=\small, inner sep=10pt},
+  arrlbl/.style={font=\footnotesize, align=left, text width=4.2cm},
+  >=Stealth
+]
+  \node[lyr, fill=blue!10, minimum height=1.4cm] (l1) at (0,0)
+    {\textbf{Presentación}\\[4pt]
+     Editor BPMN (\textit{bpmn-js} canvas)\\Panel conversacional (historial + entrada)};
+  \node[lyr, fill=green!8, minimum height=1.3cm, below=1.0cm of l1] (l2)
+    {\textbf{Lógica de aplicación}\\[4pt]
+     Historial · indicadores de carga\\parseo de respuestas LLM};
+  \node[lyr, fill=yellow!12, minimum height=1.2cm, below=1.0cm of l2] (l3)
+    {\textbf{Estado compartido}\\[4pt]
+     XML BPMN en memoria (\textit{bpmn-js})\\leído y escrito por usuario y LLM};
+  \node[lyr, fill=orange!12, minimum height=1.2cm, below=1.0cm of l3] (l4)
+    {\textbf{Comunicación (cliente MCP)}\\[4pt]
+     HTTP \texttt{POST /mcp} · \textit{Streamable HTTP}};
+  \draw[<->] (l1.south) -- node[arrlbl, right, xshift=6pt]{eventos del usuario\\ renderizado del XML} (l2.north);
+  \draw[<->] (l2.south) -- node[arrlbl, right, xshift=6pt]{lectura / escritura\\ del XML BPMN} (l3.north);
+  \draw[<->] (l3.south) -- node[arrlbl, right, xshift=6pt]{datos del diagrama\\ respuesta del servidor} (l4.north);
+\end{tikzpicture}
+\caption{Estructura por capas de la extensión sobre bpmn.io.}
+\label{fig:capaExtension}
+\end{figure}
+\shorthandon{<>}
+
 %%---------------------------------------------------------
 \subsubsection{Servidor MCP}
 %%---------------------------------------------------------
@@ -194,6 +225,38 @@ El servidor registra \textbf{nueve herramientas} MCP, cada una con nombre, descr
 \end{table}
 
 Cada herramienta realiza una o varias llamadas a la API de GitHub Models con \textit{prompts} de sistema y usuario diseñados específicamente para la tarea correspondiente. El mecanismo de \textit{fallback} automático garantiza la resiliencia del sistema ante errores de cuota o indisponibilidad de modelos individuales.
+
+La figura~\ref{fig:capaServidorMCP} muestra la organización interna del servidor MCP en cuatro capas.
+
+\shorthandoff{<>}
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  lyr/.style={draw, thick, rectangle, minimum width=9cm, align=center, font=\small, inner sep=10pt},
+  arrlbl/.style={font=\footnotesize, align=left, text width=4.2cm},
+  >=Stealth
+]
+  \node[lyr, fill=orange!12, minimum height=1.2cm] (l1) at (0,0)
+    {\textbf{Transporte HTTP (Express)}\\[4pt]
+     Endpoint \texttt{POST /mcp} · gestión CORS\\ciclo petición/respuesta};
+  \node[lyr, fill=yellow!12, minimum height=1.2cm, below=1.0cm of l1] (l2)
+    {\textbf{Protocolo MCP}\\[4pt]
+     \texttt{McpServer} + \texttt{StreamableHTTPServerTransport}\\instancia nueva por petición (\textit{stateless})};
+  \node[lyr, fill=green!8, minimum height=1.9cm, below=1.0cm of l2] (l3)
+    {\textbf{Herramientas MCP --- 9 \textit{tools} con esquemas Zod}\\[4pt]
+     \texttt{identify\_structure} · \texttt{suggest\_*} ($\times$4) · \texttt{modify\_structure}\\[3pt]
+     \texttt{render\_diagram} · \texttt{refine\_diagram} · \texttt{analyze\_perval}};
+  \node[lyr, fill=blue!10, minimum height=1.4cm, below=1.0cm of l3] (l4)
+    {\textbf{Integración LLM}\\[4pt]
+     \texttt{callOpenAI()} · \textit{fallback} automático\\(\texttt{gpt-4.1} $\to$ \texttt{gpt-4o} $\to$ \ldots) · GitHub Models API};
+  \draw[<->] (l1.south) -- node[arrlbl, right, xshift=6pt]{petición MCP\\ respuesta MCP} (l2.north);
+  \draw[<->] (l2.south) -- node[arrlbl, right, xshift=6pt]{herramienta + argumentos\\ resultado de la herramienta} (l3.north);
+  \draw[<->] (l3.south) -- node[arrlbl, right, xshift=6pt]{prompt de sistema + usuario\\ texto generado por el LLM} (l4.north);
+\end{tikzpicture}
+\caption{Estructura interna del servidor MCP.}
+\label{fig:capaServidorMCP}
+\end{figure}
+\shorthandon{<>}
 
 \paragraph{Herramienta de análisis PERVAL (\texttt{analyze\_perval}).}
 Entre las nueve herramientas registradas en el servidor destaca \texttt{analyze\_perval}, que implementa el análisis de valor percibido según el modelo PERVAL (Sweeney y Soutar, 2001). No se trata de un componente independiente, sino de una herramienta más dentro del servidor MCP, cuya lógica reside en el mismo servicio Node.js junto al resto de herramientas de generación y refinamiento de diagramas.
@@ -249,6 +312,39 @@ Si el usuario desea realizar modificaciones sobre el diagrama ya generado, puede
     \item Mediante \textbf{edición directa del diagrama} en la interfaz gráfica de bpmn.io, sin necesidad de instrucciones textuales. Las modificaciones realizadas por el usuario quedan reflejadas directamente en el XML del modelo gestionado por bpmn-js, que actúa como estado compartido. En la siguiente interacción conversacional, el servidor MCP recibirá el XML actualizado, garantizando la coherencia entre ambas formas de modificación.
 \end{enumerate}
 
+La figura~\ref{fig:flujoGeneracion} ilustra las fases del proceso de generación y refinamiento iterativo de modelos BPMN.
+
+\shorthandoff{<>}
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  phase/.style={draw, thick, rounded corners=5pt, minimum width=9cm, align=center, font=\small, inner sep=10pt},
+  >=Stealth
+]
+  \node[phase, fill=blue!8] (p1) at (0,0)
+    {\textbf{Fase 1 --- Identificación de estructura}\\[4pt]
+     \texttt{identify\_structure} · Salida: \texttt{structure} + XML inicial (\textit{pools}/\textit{lanes})};
+  \node[phase, fill=green!8, below=0.2cm of p1] (p2)
+    {\textbf{Fase 2 --- Generación iterativa de pasos}\\[4pt]
+     \texttt{suggest\_flow\_start} · \texttt{suggest\_next\_step} · \texttt{suggest\_gateway\_branches}\\[2pt]
+     Acumula pasos en objeto \texttt{diagramState}};
+  \node[phase, fill=orange!8, below=0.2cm of p2] (p3)
+    {\textbf{Fase 3 --- Renderizado final}\\[4pt]
+     \texttt{render\_diagram} · Entrada: \texttt{structure} + \texttt{diagramState}\\[2pt]
+     Salida: XML BPMN 2.0 completo};
+  \node[phase, fill=yellow!10, below=0.2cm of p3] (p4)
+    {\textbf{Fase 4 --- Refinamiento libre (opcional, repetible)}\\[4pt]
+     \texttt{refine\_diagram} · Instrucción NL $\to$ XML BPMN modificado};
+  \draw[->] (p1.south) -- node[right, font=\footnotesize, xshift=3pt]{validación del usuario} (p2.north);
+  \draw[->] (p2.south) -- node[right, font=\footnotesize, xshift=3pt]{todos los pasos definidos} (p3.north);
+  \draw[->] (p3.south) -- node[right, font=\footnotesize, xshift=3pt]{modificación solicitada} (p4.north);
+  \draw[->, dashed] (p4.east) to[out=0, in=0, looseness=2] node[right, font=\footnotesize]{nueva iteración} (p3.east);
+\end{tikzpicture}
+\caption{Fases del flujo de generación y refinamiento iterativo de modelos BPMN. La fase~4 puede ejecutarse tantas veces como el usuario lo requiera.}
+\label{fig:flujoGeneracion}
+\end{figure}
+\shorthandon{<>}
+
 %%---------------------------------------------------------
 \subsubsection{Análisis PERVAL}
 %%---------------------------------------------------------
@@ -256,6 +352,35 @@ Si el usuario desea realizar modificaciones sobre el diagrama ya generado, puede
 El análisis PERVAL puede iniciarse en cualquier momento sobre el diagrama BPMN disponible en el editor. El flujo comienza cuando el usuario solicita el análisis a través del panel conversacional. La extensión lee el XML BPMN actual desde bpmn-js y extrae la lista de tareas o entregas que se desean analizar. A continuación, envía al servidor MCP una solicitud a la herramienta \texttt{analyze\_perval}, incluyendo el XML, la lista de elementos a analizar, el nombre del actor externo cuyo punto de vista se adopta, el alcance del análisis y el idioma de los textos de salida.
 
 El servidor MCP construye el \textit{prompt} de sistema específico para PERVAL y lo envía al LLM junto con la información del proceso. El LLM analiza el proceso según el modelo PERVAL (Sweeney y Soutar, 2001) y devuelve un objeto JSON estructurado con las dimensiones de valor percibido para cada elemento analizado. El servidor transmite este resultado a la extensión, que lo presenta al usuario en el panel conversacional de forma estructurada.
+
+La figura~\ref{fig:flujoPerval} resume el flujo de la operación de análisis PERVAL.
+
+\shorthandoff{<>}
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  flowstep/.style={draw, thick, rounded corners=5pt, minimum width=9cm, align=center, font=\small, inner sep=10pt},
+  >=Stealth
+]
+  \node[flowstep, fill=blue!8] (s1) at (0,0)
+    {\textbf{Paso 1 --- Configuración y envío (extensión bpmn.io)}\\[4pt]
+     Lee XML desde bpmn-js · extrae tareas/entregas · configura actor y alcance\\[2pt]
+     Envía solicitud a la herramienta \texttt{analyze\_perval} del servidor MCP};
+  \node[flowstep, fill=green!8, below=0.2cm of s1] (s2)
+    {\textbf{Paso 2 --- Análisis PERVAL (servidor MCP + LLM)}\\[4pt]
+     Construye \textit{prompt} de sistema PERVAL · llama a GitHub Models API\\[2pt]
+     El LLM clasifica cada elemento según las dimensiones Q\,/\,P\,/\,E\,/\,S};
+  \node[flowstep, fill=orange!8, below=0.2cm of s2] (s3)
+    {\textbf{Paso 3 --- Presentación de resultados (extensión bpmn.io)}\\[4pt]
+     Dimensiones por elemento · resumen global por dimensión · valoración general\\[2pt]
+     Resaltado visual de los elementos analizados en el diagrama};
+  \draw[->] (s1.south) -- node[right, font=\footnotesize, xshift=3pt]{HTTP \texttt{POST /mcp}} (s2.north);
+  \draw[->] (s2.south) -- node[right, font=\footnotesize, xshift=3pt]{JSON estructurado} (s3.north);
+\end{tikzpicture}
+\caption{Flujo de la operación de análisis PERVAL.}
+\label{fig:flujoPerval}
+\end{figure}
+\shorthandon{<>}
 
 %%---------------------------------------------------------
 \section{Tecnología utilizada}

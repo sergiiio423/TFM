@@ -146,8 +146,8 @@ Una vez delimitado el contexto de cada subsistema, se detallan a continuación l
   >=Stealth, line width=0.7pt
 ]
 
-\draw[thick] (0.2,-8.3) rectangle (10.6,0.8);
-\node[font=\bfseries] at (5.4,0.5) {Extensión \textit{bpmn.io}};
+\draw[thick] (-0.5,-8.6) rectangle (16.5,0.8);
+\node[font=\bfseries] at (8.0,0.5) {Extensión \textit{bpmn.io}};
 
 \node[uc] (uc1) at (2.4,0)    {Describir proceso en\\lenguaje natural};
 \node[uc] (uc2) at (2.4,-1.5) {Solicitar modificación\\del modelo};
@@ -156,8 +156,8 @@ Una vez delimitado el contexto de cada subsistema, se detallan a continuación l
 \node[uc] (uc5) at (2.4,-6)   {Configurar y visualizar\\análisis PERVAL};
 \node[uc] (uc6) at (2.4,-7.5) {Cambiar idioma de\\la interfaz};
 
-\node[uc] (uc7) at (8.4,-0.75) {Renderizar diagrama y\\actualizar historial};
-\node[uc] (uc8) at (8.4,-3.75) {Mostrar estado de\\carga o error};
+\node[uc] (uc7) at (13.5,-0.75) {Renderizar diagrama y\\actualizar historial};
+\node[uc] (uc8) at (13.5,-3.75) {Mostrar estado de\\carga o error};
 
 \begin{scope}[shift={(-1.6,-3.75)}]
   \stickman
@@ -188,34 +188,34 @@ La figura~\ref{fig:casosUsoMCP} muestra los casos de uso del \textbf{servidor MC
   >=Stealth, line width=0.7pt
 ]
 
-\draw[thick] (-0.3,-5.2) rectangle (12.8,3.4);
-\node[font=\bfseries] at (6.25,3.1) {Servidor MCP};
+\draw[thick] (-0.5,-5.5) rectangle (16.5,3.6);
+\node[font=\bfseries] at (8.0,3.3) {Servidor MCP};
 
 \node[uc] (uc5) at (1.9,2.7)  {Limpiar y reparar\\XML};
 \node[uc] (uc1) at (1.9,0.5)  {Generar o editar\\modelo BPMN};
 \node[uc] (uc6) at (1.9,-3.7) {Analizar valor\\PERVAL};
 
-\node[uc] (uc2) at (6.25,1.7)  {Construir prompt de\\generación};
-\node[uc] (uc7) at (6.25,-2.5) {Construir prompt\\PERVAL};
+\node[uc] (uc2) at (7.0,1.7)  {Construir prompt de\\generación};
+\node[uc] (uc7) at (7.0,-2.5) {Construir prompt\\PERVAL};
 
-\node[uc] (uc3) at (10.6,0.5)  {Invocar LLM\\(generación)};
-\node[uc] (uc4) at (10.6,-1.7) {Seleccionar modelo\\de respaldo};
-\node[uc] (uc8) at (10.6,-3.7) {Invocar LLM\\(análisis PERVAL)};
+\node[uc] (uc3) at (13.0,0.5)  {Invocar LLM\\(generación)};
+\node[uc] (uc4) at (13.0,-1.7) {Seleccionar modelo\\de respaldo};
+\node[uc] (uc8) at (13.0,-3.7) {Invocar LLM\\(análisis PERVAL)};
 
 \begin{scope}[shift={(-2.2,-1.5)}]
   \stickman
   \node[below=0.2cm, align=center, font=\small] at (0,-0.9) {Extensión\\\textit{bpmn.io}};
 \end{scope}
 
-\begin{scope}[shift={(14.8,-1.5)}]
+\begin{scope}[shift={(18.0,-1.5)}]
   \stickman
   \node[below=0.2cm] at (0,-0.8) {LLM};
 \end{scope}
 
 \draw (-1.5,-1.5) -- (uc1.west);
 \draw (-1.5,-1.5) -- (uc6.west);
-\draw (uc3.east) -- (14.1,-1.5);
-\draw (uc8.east) -- (14.1,-1.5);
+\draw (uc3.east) -- (15.8,-1.5);
+\draw (uc8.east) -- (15.8,-1.5);
 
 \draw[dashed,->] (uc1.east) -- node[pos=0.35, above, sloped, font=\scriptsize, fill=white, inner sep=1pt] {\textless\textless include\textgreater\textgreater} (uc2.west);
 \draw[dashed,->] (uc1.east) -- node[pos=0.65, below, sloped, font=\scriptsize, fill=white, inner sep=1pt] {\textless\textless include\textgreater\textgreater} (uc3.west);

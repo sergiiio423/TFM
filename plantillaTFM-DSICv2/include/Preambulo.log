@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  30 JUN 2026 12:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  1 JUL 2026 19:18
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -604,25 +604,34 @@ Package: appendix 2020/02/08 v1.2c extra appendix facilities
 \c@@ppsaveapp=\count349
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/tools\dcolumn.sty
 Package: dcolumn 2025/10/21 v1.06 decimal alignment package (DPC)
+) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
+Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
+\TX@col@width=\dimen294
+\TX@old@table=\dimen295
+\TX@old@col=\dimen296
+\TX@target=\dimen297
+\TX@delta=\dimen298
+\TX@cols=\count350
+\TX@ftn=\toks49
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.sty
-\lst@mode=\count350
+\lst@mode=\count351
 \lst@gtempboxa=\box77
-\lst@token=\toks49
-\lst@length=\count351
-\lst@currlwidth=\dimen294
-\lst@column=\count352
-\lst@pos=\count353
-\lst@lostspace=\dimen295
-\lst@width=\dimen296
-\lst@newlines=\count354
-\lst@lineno=\count355
-\lst@maxwidth=\dimen297
+\lst@token=\toks50
+\lst@length=\count352
+\lst@currlwidth=\dimen299
+\lst@column=\count353
+\lst@pos=\count354
+\lst@lostspace=\dimen300
+\lst@width=\dimen301
+\lst@newlines=\count355
+\lst@lineno=\count356
+\lst@maxwidth=\dimen302
  (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstpatch.sty
 File: lstpatch.sty 2025/11/14 1.11b (Carsten Heinz)
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty
 File: lstmisc.sty 2025/11/14 1.11b (Carsten Heinz)
-\c@lstnumber=\count356
-\lst@skipnumbers=\count357
+\c@lstnumber=\count357
+\lst@skipnumbers=\count358
 \lst@framebox=\box78
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cfg
 File: listings.cfg 2025/11/14 1.11b listings configuration
@@ -643,10 +652,10 @@ Package: listings 2025/11/14 1.11b (Carsten Heinz)
 
  
 Here is how much of TeX's memory you used:
- 25275 strings out of 467871
- 466572 string characters out of 5417408
- 875722 words of memory out of 5000000
- 53776 multiletter control sequences out of 15000+600000
+ 25334 strings out of 467871
+ 467514 string characters out of 5417408
+ 876867 words of memory out of 5000000
+ 53832 multiletter control sequences out of 15000+600000
  628790 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,0n,104p,596b,365s stack positions out of 10000i,1000n,20000p,200000b,200000s

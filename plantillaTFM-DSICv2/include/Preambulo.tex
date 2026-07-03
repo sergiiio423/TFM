@@ -144,6 +144,35 @@
    }
 
 \lstdefinestyle{Python}
-   {language=Python,    
+   {language=Python,
    }
-\makeatother   
+
+%% Estilo para mostrar fragmentos de prompts en el capítulo de desarrollo
+\lstdefinestyle{promptbox}{%
+  basicstyle=\footnotesize\ttfamily,
+  numbers=none,
+  frame=single,
+  backgroundcolor=\color{gray97},
+  rulesepcolor=\color{gray75},
+  breaklines=true,
+  keepspaces=true,
+  showstringspaces=false,
+  columns=flexible,
+  literate=%
+    {á}{{\'{a}}}1%
+    {é}{{\'{e}}}1%
+    {í}{{\'{i}}}1%
+    {ó}{{\'{o}}}1%
+    {ú}{{\'{u}}}1%
+    {Á}{{\'{A}}}1%
+    {É}{{\'{E}}}1%
+    {Í}{{\'{I}}}1%
+    {Ó}{{\'{O}}}1%
+    {Ú}{{\'{U}}}1%
+    {ñ}{{\~{n}}}1%
+    {Ñ}{{\~{N}}}1%
+    {ü}{{\"u}}1%
+    {¿}{{\textquestiondown}}1%
+    {¡}{{\textexclamdown}}1%
+}
+\makeatother

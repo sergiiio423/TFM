@@ -4,6 +4,1011 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Desarrollo e implementación}
+\label{cap:desarrollo}
+
+Dado que el desarrollo del proyecto se ha llevado a cabo siguiendo una metodología ágil con un enfoque iterativo e incremental, organizando el trabajo en \textit{sprints} semanales de acuerdo con la planificación definida en el capítulo de análisis (véase \S\ref{sec:planTrabajo}), el sistema ha experimentado una evolución progresiva a lo largo del tiempo. En cada iteración se ha partido del resultado de la anterior, incorporando nuevas funcionalidades y refinando las ya implementadas, con la participación activa del autor como desarrollador y usuario del sistema.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Evolución del proyecto por \textit{sprints}}
+\label{sec:evolucionSprints}
+
+En los siguientes apartados se describen, para cada iteración, las tareas realizadas, las historias de usuario completadas y los principales hitos técnicos alcanzados.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 0 (26/05/2026 -- 01/06/2026)}
+\label{subsec:sprint0}
+
+El Sprint~0 estuvo dedicado a la selección tecnológica, la planificación del proyecto y la configuración del entorno de desarrollo, abarcando las historias de usuario US01 y US02.
+
+En el marco de la US01, se llevó a cabo un análisis exhaustivo de las alternativas disponibles para abordar los objetivos del TFM. Respecto al editor BPMN, se estudiaron las opciones de \textit{draw.io} y \textit{bpmn.io}: mientras que \textit{draw.io} ofrece soporte general para diagramas BPMN, no proporciona una API que permita la manipulación programática del modelo ni la integración de un panel conversacional propio, por lo que se descartó en favor de \textit{bpmn.io} (\textit{bpmn-js}), que sí ofrece estas capacidades a través de su arquitectura modular de \textit{plugins}. En cuanto al proveedor de LLM, se compararon el acceso directo a las API de OpenAI y de Google con el servicio GitHub Models, optándose finalmente por este último por su plan gratuito y por la posibilidad de acceder a múltiples modelos (\texttt{gpt-4.1}, \texttt{gpt-4o}, \texttt{Phi-4}, entre otros) a través de una única API compatible con el formato OpenAI. Asimismo, se definió la arquitectura de integración basada en el protocolo MCP, que permite desacoplar la extensión del cliente de la lógica de llamada al LLM y almacenar las credenciales de forma segura en el servidor. Finalmente, se estableció el \textit{backlog} inicial de historias de usuario y se planificó la distribución del trabajo en los ocho \textit{sprints} del proyecto.
+
+La US02 se centró en la configuración del entorno de desarrollo. Se clonó el repositorio \texttt{bpmn-js-examples} y se tomó como punto de partida el ejemplo \texttt{modeler}, que proporciona un editor BPMN 2.0 funcional en el navegador con soporte de importación y exportación de XML. Se configuró el sistema de empaquetado mediante \textbf{Webpack 5}, se verificó que todas las dependencias de \textit{bpmn-js} se resolvieran correctamente y se comprobó el funcionamiento básico del editor. Al finalizar el sprint, se disponía de un entorno de desarrollo operativo sobre el que construir la extensión.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 1 (02/06/2026 -- 08/06/2026)}
+\label{subsec:sprint1}
+
+El Sprint~1 abordó el diseño e implementación del servidor MCP y su integración con la API de GitHub Models, correspondiendo a las historias US03 y US04.
+
+La US03 comenzó con el estudio de la especificación del \textit{Model Context Protocol} y del SDK oficial \texttt{@modelcontextprotocol/sdk} para Node.js. A continuación, se implementó el servidor utilizando el framework \textbf{Express} (versión 5.2.1), que expone un único \textit{endpoint} \texttt{POST /mcp}. El servidor crea, por cada petición recibida, una instancia del \texttt{McpServer} y del transporte \texttt{StreamableHTTPServerTransport}, los conecta, procesa la petición y los destruye al finalizar la respuesta, siguiendo el modelo \textit{stateless} descrito en el diseño. Se definió la estructura base de registro de herramientas MCP, especificando para cada una su nombre, descripción y esquemas de entrada y salida mediante la librería \textbf{Zod}. Al finalizar esta historia se realizaron pruebas de conexión entre una extensión de prueba en el navegador y el servidor, verificando que el protocolo MCP funcionaba correctamente en el entorno local.
+
+La US04 añadió la integración con la API de GitHub Models. Se implementó la función \texttt{callOpenAI}, encargada de construir la solicitud HTTP a la API de GitHub Models con el \textit{prompt} de sistema y de usuario correspondiente, gestionar la respuesta y devolver el texto generado. Se configuró el acceso mediante la variable de entorno \texttt{GITHUB\_TOKEN}, gestionada con la librería \textbf{dotenv} para evitar su exposición en el código fuente. Se implementó también el mecanismo de \textit{fallback} automático: si el modelo principal (\texttt{gpt-4.1}) devuelve un error de cuota o de disponibilidad, la función intenta sucesivamente con \texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano} y \texttt{Phi-4}, lanzando un error únicamente si todos fallan. Este mecanismo resultó especialmente útil durante el desarrollo, cuando los límites de peticiones del plan gratuito se alcanzaban con frecuencia.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 2 (09/06/2026 -- 15/06/2026)}
+\label{subsec:sprint2}
+
+El Sprint~2 se dedicó íntegramente a la implementación de la generación de modelos BPMN a partir de descripciones en lenguaje natural (US05), que constituye la funcionalidad central del sistema.
+
+El principal reto de esta historia fue el diseño de los \textit{prompts} de las herramientas de generación iterativa. Para cada una de las seis herramientas del flujo de generación (\texttt{identify\_structure}, \texttt{suggest\_flow\_start}, \texttt{suggest\_next\_step}, \texttt{suggest\_gateway\_branches}, \texttt{suggest\_branch\_step} y \texttt{render\_diagram}), se elaboró un \textit{prompt} de sistema que especifica con precisión el formato de la respuesta esperada (objeto JSON o XML BPMN 2.0 válido), los elementos BPMN soportados y las convenciones de nomenclatura y estructura del diagrama. Se implementó la función \texttt{parseLLMJson}, que extrae y deserializa el objeto JSON de la respuesta del LLM incluso cuando esta incluye texto adicional o bloques de código Markdown, lo que resultó necesario dado que los modelos de lenguaje no siempre devuelven JSON puro.
+
+En el lado de la extensión, se implementó la lógica de carga del XML BPMN generado en el editor \textit{bpmn-js}: al recibir el XML del servidor MCP, la extensión lo importa mediante la API de la librería (\texttt{bpmnViewer.importXML}), actualiza la vista del editor y centra automáticamente el lienzo en el contenido del diagrama. Se realizaron pruebas con descripciones de proceso de diferente complejidad (procesos lineales, procesos con \textit{gateways} y múltiples participantes) para verificar la calidad de los modelos generados y ajustar los \textit{prompts} en consecuencia. Al finalizar el sprint se disponía de un sistema capaz de generar un modelo BPMN 2.0 completo a partir de una descripción en lenguaje natural.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 3 (16/06/2026 -- 22/06/2026)}
+\label{subsec:sprint3}
+
+En el Sprint~3 se implementaron la edición conversacional iterativa del modelo (US06) y la validación y reparación automática del XML BPMN (US07).
+
+La US06 incorporó al sistema la posibilidad de realizar modificaciones sobre el diagrama generado mediante instrucciones en lenguaje natural. Se implementó la herramienta MCP \texttt{refine\_diagram}, que recibe el XML BPMN actual del diagrama junto con la instrucción de modificación expresada por el usuario y devuelve el XML modificado. El \textit{prompt} de esta herramienta fue especialmente cuidado para garantizar que el LLM preservara los elementos no afectados por la modificación y que el XML devuelto fuera válido. En el lado de la extensión, se diseñó e implementó el panel conversacional: un área lateral que muestra el historial de mensajes intercambiados entre el usuario y el sistema, con un campo de entrada de texto y un botón de envío. Se implementó la gestión del historial de la conversación en el cliente, que se transmite al servidor en cada petición para mantener el contexto de la interacción.
+
+La US07 abordó un problema detectado durante el Sprint~2: los LLM generan con frecuencia XML BPMN malformado o truncado, especialmente cuando el diagrama es complejo y la respuesta supera los límites de tokens del modelo. Se analizaron los errores más habituales (etiquetas sin cerrar, comentarios XML incrustados, texto adicional antes o después del bloque XML, comillas sin escapar) y se implementó la función \texttt{cleanXML}, que aplica una secuencia de transformaciones para sanear la respuesta antes de intentar cargarla en \textit{bpmn-js}. Esta función resultó crítica para la fiabilidad del sistema: sin ella, una proporción significativa de las respuestas del LLM no podía cargarse en el editor.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 4 (23/06/2026 -- 29/06/2026)}
+\label{subsec:sprint4}
+
+El Sprint~4 se centró en el diseño e implementación de la herramienta de análisis PERVAL, abarcando las historias US08 y US09.
+
+La US08 se dedicó al diseño de la herramienta. Se realizó un estudio detallado del modelo PERVAL de Sweeney y Soutar~\cite{sweeney2001perval}, prestando especial atención a la operacionalización de las cuatro dimensiones de valor percibido (\textit{Quality}, \textit{Price}, \textit{Emotional} y \textit{Social}) en el contexto de tareas y entregas de procesos de negocio. A partir de este estudio se diseñó el esquema de entrada de la herramienta: el XML BPMN del diagrama, la lista de tareas o entregas a analizar, el nombre del actor externo cuyo punto de vista se adopta, el alcance del análisis (entregas al cliente externo o todas las tareas del proceso) y el idioma de los textos generados. Se diseñó asimismo el \textit{prompt} de análisis PERVAL, que instruye al LLM a clasificar cada elemento del proceso según las cuatro dimensiones de valor y a devolver un objeto JSON estructurado con las clasificaciones individuales, un resumen por dimensión y una valoración general del proceso.
+
+La US09 completó la implementación de la herramienta. Se registró \texttt{analyze\_perval} en el servidor MCP con su esquema Zod correspondiente, se implementó la lógica de extracción de las tareas y entregas directamente a partir del XML BPMN recibido y se verificó el cálculo del resumen agregado por dimensión a partir de las clasificaciones individuales devueltas por el LLM. Se realizaron pruebas con modelos BPMN de diferente complejidad y con distintos actores externos para validar la calidad y consistencia de los resultados del análisis.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 5 (30/06/2026 -- 06/07/2026)}
+\label{subsec:sprint5}
+
+El Sprint~5 abordó la visualización de los resultados del análisis PERVAL (US10) y el diseño e implementación de la interfaz del panel conversacional (US11).
+
+En el marco de la US10, se implementó en la extensión la interfaz de configuración del análisis PERVAL: un formulario que permite al usuario seleccionar el alcance del análisis (tareas o entregas al cliente externo), introducir el nombre del actor externo cuyo punto de vista se desea adoptar y lanzar el análisis. Una vez recibida la respuesta del servidor, la extensión presenta los resultados de forma estructurada en el panel conversacional: para cada elemento analizado se muestran las cuatro dimensiones PERVAL con su clasificación y la justificación textual generada por el LLM, y se añade un resumen global por dimensión junto con la valoración general del proceso. Se implementó también el resaltado visual sobre el diagrama BPMN de los elementos analizados, de modo que el usuario pueda identificar fácilmente qué tareas o entregas han sido evaluadas.
+
+La US11 se centró en el diseño visual del panel conversacional. Se definió una paleta de colores basada en tonos azul y verde para diferenciar los mensajes del usuario y las respuestas del sistema, y se seleccionó la fuente \textit{Inter} por su legibilidad en pantallas de alta densidad. Se implementaron los estilos del panel adaptados a diferentes tamaños de pantalla, se añadieron indicadores de estado de carga (animación de puntos durante el procesamiento de peticiones) y mensajes de error con el formato adecuado para cada tipo de fallo (error de conexión con el servidor, error de cuota del LLM, XML inválido). Se realizaron pruebas de la interfaz en distintas resoluciones de pantalla y se ajustaron los estilos para garantizar una experiencia de usuario coherente.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 6 (07/07/2026 -- 13/07/2026)}
+\label{subsec:sprint6}
+
+El Sprint~6 se destinó a la internacionalización de la interfaz y los \textit{prompts} (US12) y a la implementación de las pruebas \textit{end-to-end} con \textit{Playwright} (US13).
+
+La US12 implementó el soporte multilingüe del sistema. Se extrajeron todos los textos de la interfaz a ficheros de idioma (\texttt{i18n/es.js} y \texttt{i18n/en.js}), cubriendo los mensajes del panel conversacional, los textos de los formularios, los indicadores de estado y los mensajes de error. El idioma activo se selecciona mediante un selector en la interfaz y se almacena en el estado de la extensión. Los \textit{prompts} de todas las herramientas MCP se parametrizaron según el idioma activo, de modo que las respuestas del LLM —incluidas las justificaciones del análisis PERVAL— se generan directamente en el idioma seleccionado, sin necesidad de traducción posterior. Se verificó el funcionamiento completo del sistema en ambos idiomas mediante pruebas manuales de los flujos principales.
+
+La US13 configuró \textit{Playwright} sobre el proyecto e implementó un conjunto de pruebas \textit{end-to-end} que verifican el funcionamiento de los flujos principales del sistema en un navegador real (Chromium). Las pruebas cubren la generación de un modelo BPMN a partir de una descripción en lenguaje natural, la modificación conversacional del modelo generado y la ejecución del análisis PERVAL sobre el diagrama resultante. Dado que las pruebas realizan llamadas reales a la API de GitHub Models, los tiempos de ejecución son variables y pueden superar el minuto en modelos de mayor latencia; por ello, se configuraron \textit{timeouts} generosos y se añadieron verificaciones intermedias del estado de la interfaz que permiten distinguir entre un sistema lento y uno que ha fallado.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sprint} 7 (14/07/2026 -- 20/07/2026)}
+\label{subsec:sprint7}
+
+El Sprint~7 cerró el desarrollo del proyecto con el despliegue en producción (US14) y la validación de la solución con usuarios mediante el modelo TAM (US15).
+
+La US14 configuró el despliegue continuo en la plataforma \textit{Render.com}. Se elaboró el fichero \texttt{render.yaml}, que define dos servicios: un sitio estático (\texttt{tfm-bpmn-frontend}) para servir la extensión empaquetada por Webpack, y un servicio web Node.js (\texttt{tfm-bpmn-mcp-server}) para el servidor MCP. Ambos servicios se despliegan automáticamente al hacer \textit{push} al repositorio de GitHub, con reinicio automático ante fallos y acceso HTTPS mediante certificados gestionados por la propia plataforma. Se realizaron pruebas de integración entre la extensión desplegada en \textit{Render} y el servidor MCP, verificando el correcto funcionamiento del sistema en el entorno de producción y documentando las variables de entorno necesarias para futuras configuraciones.
+
+La US15 completó la validación de la solución con un grupo de aproximadamente quince participantes, siguiendo el modelo de aceptación de la tecnología (\textit{Technology Acceptance Model}, TAM)~\cite{davis1989tam}. Se diseñó un cuestionario que mide tres constructos: la utilidad percibida (PU), la facilidad de uso percibida (PEOU) y la intención de uso (IU), adaptando los ítems estándar del TAM al contexto específico de la herramienta. Los participantes utilizaron la versión desplegada del sistema para generar y editar modelos BPMN a partir de descripciones de proceso propuestas, y completaron el cuestionario al finalizar la sesión. Los resultados obtenidos se presentan y analizan en el capítulo de Resultados.
+
+Los aspectos técnicos más relevantes de la implementación —la lógica de llamada al LLM, los \textit{prompts} de generación y análisis PERVAL, el renderizador programático del XML BPMN y las funciones de robustez— se describen en detalle en la sección~\ref{sec:componentesClave}.
+
+\shorthandoff{<>}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementación de los componentes técnicos clave}
+\label{sec:componentesClave}
+
+Los apartados anteriores han narrado la evolución del sistema iteración a iteración. Esta sección profundiza en los componentes de implementación de mayor relevancia técnica. Para cada \textit{prompt}, se muestra el texto exacto en lenguaje natural que recibe el LLM, con \texttt{[corchetes]} para las partes dinámicas que se inyectan en tiempo de ejecución a partir del estado de la conversación. Para los componentes algorítmicos (función de llamada al LLM, renderizador de XML y funciones de robustez) se muestra el código fuente completo.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{La función \texttt{callOpenAI} y el mecanismo de \textit{fallback}}
+\label{subsec:callOpenAI}
+
+Toda la comunicación con el LLM se canaliza a través de \texttt{callOpenAI}, implementada en \texttt{mcp-server/src/llm.js}. La función construye una petición \texttt{POST} al \textit{endpoint} de inferencia de GitHub Models, transmitiendo un \textit{prompt} de sistema, un historial de mensajes y los parámetros de generación: temperatura 0,3 y límite de 8.000 \textit{tokens} de salida. El mecanismo de \textit{fallback} opera en dos niveles: rotación automática entre los seis modelos de la lista \texttt{LLM\_MODELS} ante errores de cuota o disponibilidad, y reintento global con espera adaptativa cuando todos los modelos devuelven error 429 simultáneamente. Cada llamada individual dispone de un \textit{timeout} de 30 segundos implementado con \texttt{AbortController}.
+
+\begin{lstlisting}[style=promptbox]
+// mcp-server/src/llm.js
+export const LLM_MODELS = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'Phi-4'];
+let _llmModelIdx = 0; // recuerda el último modelo que funcionó en esta sesión
+
+export async function callOpenAI(apiKey, systemPrompt, messages) {
+  let lastErr = null;
+
+  for (let globalRetry = 0; globalRetry < 3; globalRetry++) {
+    let minWaitMs = 0;
+    let allRateLimited = true;
+
+    for (let k = 0; k < LLM_MODELS.length; k++) {
+      const idx   = (_llmModelIdx + k) % LLM_MODELS.length;
+      const model = LLM_MODELS[idx];
+      let response;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000); // 30s por modelo
+      try {
+        response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'system', content: systemPrompt }, ...messages],
+            temperature: 0.3,
+            max_tokens: 8000
+          }),
+          signal: controller.signal
+        });
+      } catch(e) { clearTimeout(timer); lastErr = e; allRateLimited = false; continue; }
+      clearTimeout(timer);
+
+      if (response.ok) {
+        _llmModelIdx = idx;
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+      }
+
+      const err = await response.json().catch(() => ({}));
+      const msg = err.error?.message || `Error ${response.status} en la API`;
+      console.warn(`Modelo "${model}" no disponible (${msg}), probando con el siguiente...`);
+      lastErr = new Error(msg);
+
+      if (response.status === 429) {
+        const waitMatch = msg.match(/wait (\d+) second/i);
+        if (waitMatch) minWaitMs = Math.max(minWaitMs, parseInt(waitMatch[1]) * 1000);
+      } else {
+        allRateLimited = false;
+      }
+    }
+
+    if (allRateLimited && globalRetry < 2) {
+      const wait = minWaitMs > 0 ? Math.min(minWaitMs, 60000) : 15000;
+      console.warn(`Todos los modelos en rate-limit. Reintentando en ${wait / 1000}s...`);
+      await new Promise(r => setTimeout(r, wait));
+    } else if (!allRateLimited) {
+      break;
+    }
+  }
+
+  throw new Error(`Ningún modelo disponible (cuota agotada o modelos retirados). Espera unas horas o usa otro token. Último error: ${lastErr?.message || '?'}`);
+}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Prompts del flujo de generación iterativa}
+\label{subsec:promptsGeneracion}
+
+El flujo de generación descompone la tarea en seis llamadas al LLM más un \textit{prompt} auxiliar. En los bloques siguientes se reproduce el texto exacto en lenguaje natural que recibe el modelo en cada llamada. Las partes entre \texttt{[corchetes]} son valores dinámicos inyectados en tiempo de ejecución desde el estado de la conversación; el resto es texto estático del \textit{prompt}.
+
+Nota: todos los \textit{prompts} incluyen, cuando la interfaz está en modo inglés, una directiva de idioma final (\textit{«IMPORTANT — LANGUAGE: Generate all human-readable content in English...»}) que garantiza que las respuestas del LLM se generen en el idioma activo. En modo español dicha directiva es una cadena vacía y no aparece en el \textit{prompt}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{buildStructureSystemPrompt} — herramienta \texttt{identify\_structure}}
+
+Primer paso del flujo: identifica los participantes del proceso y los devuelve en JSON puro. Exige JSON sin texto adicional, distingue entre actores con rol \texttt{cliente} (receptor del valor) y \texttt{colaborador} (participante sin recibir el resultado final), y prohíbe inventar departamentos no mencionados.
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto en modelado de procesos BPMN 2.0 para e-commerce.
+Analiza la descripción de un proceso de negocio e identifica los participantes
+y departamentos.
+
+RESPONDE ÚNICAMENTE con JSON válido (sin texto adicional, sin bloques de código):
+{
+  "poolExterno": [{"nombre": "nombre del canal o cliente externo", "rol": "cliente"}],
+  "poolPrincipal": {
+    "nombre": "nombre de la empresa u organización principal",
+    "lanes": ["Departamento1", "Departamento2"]
+  },
+  "resumen": "Una frase resumiendo los participantes"
+}
+
+REGLAS:
+- poolExterno: canales o actores EXTERNOS (clientes, marketplace, pasarela de pago,
+  transportista, proveedor...). Puede ser [].
+- "rol" de cada poolExterno: "cliente" si ese actor es quien RECIBE EL VALOR/resultado
+  del proceso (normalmente quien inicia el proceso o a quien se dirige el resultado
+  final, p.ej. el comprador/cliente final); "colaborador" para el resto de actores
+  externos que participan pero NO son destinatarios del valor (pasarela de pago,
+  transportista, proveedor, marketplace...).
+- Si poolExterno no está vacío, debe haber AL MENOS un actor con "rol":"cliente".
+- poolPrincipal.lanes: SOLO los departamentos/áreas internas mencionados EXPLÍCITAMENTE
+  en la descripción (Ventas, Logística, Atención al Cliente, Finanzas...). Máximo 5.
+  Si la descripción NO menciona departamentos ni áreas internas, devuelve [] (lista
+  vacía) -- NO inventes departamentos: la organización se dibujará como una única
+  piscina sin calles.
+- Nombres concisos: 1-3 palabras
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{buildModifyStructurePrompt} — herramienta \texttt{modify\_structure}}
+
+Permite al usuario ajustar la estructura identificada (añadir o renombrar departamentos, cambiar actores) antes de continuar con la definición del flujo. Recibe el JSON de la estructura actual y la instrucción de modificación.
+
+\begin{lstlisting}[style=promptbox]
+Estructura actual:
+[JSON de la estructura actual, por ejemplo:]
+{
+  "poolExterno": [{"nombre": "Cliente", "rol": "cliente"},
+                  {"nombre": "Transportista", "rol": "colaborador"}],
+  "poolPrincipal": {"nombre": "TiendaOnline",
+                    "lanes": ["Ventas", "Logística"]},
+  "resumen": "Proceso de venta online entre el cliente y la tienda"
+}
+
+Modificación: "[instrucción del usuario, p.ej.: «añade el departamento Finanzas»]"
+
+Devuelve ÚNICAMENTE el JSON modificado (mismo formato, conservando el campo "rol" de
+cada poolExterno --"cliente" o "colaborador"-- y ajustándolo solo si la modificación
+lo requiere).
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{buildFlowStartPrompt} — herramienta \texttt{suggest\_flow\_start}}
+
+Identifica el punto o puntos de inicio del proceso. Permite varios inicios en paralelo (poco frecuente) e indica si cada inicio está disparado por un mensaje de un actor externo (\texttt{trigger:"message"}) o es autónomo (\texttt{trigger:"none"}).
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto en modelado BPMN 2.0 para e-commerce.
+Departamentos internos: [Ventas, Logística, Atención al Cliente]
+Actores externos: [Cliente, Pasarela de pago, Transportista]
+
+Descripción del proceso:
+[descripción del proceso introducida por el usuario]
+
+Identifica el/los punto(s) de INICIO del proceso (puede haber varios inicios en
+paralelo si el proceso arranca por más de un motivo).
+Para cada inicio indica:
+- "lane": el departamento donde ocurre (uno de los departamentos listados)
+- "nombre": nombre breve del evento de inicio
+- "trigger": "message" si lo dispara la recepción de un mensaje de un actor externo,
+  o "none" en caso contrario
+- "from": si trigger es "message", el nombre de uno de los actores externos; si no,
+  null
+
+REGLAS:
+- Si no hay actores externos, usa siempre "trigger":"none" y "from":null.
+- Normalmente hay un único inicio; usa varios solo si la descripción lo indica
+  explícitamente.
+
+RESPONDE SOLO con JSON (sin texto adicional):
+{"inicios":[{"lane":"[primer departamento]","nombre":"Inicio","trigger":"none","from":null}]}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{buildNextStepPrompt} — herramienta \texttt{suggest\_next\_step}}
+
+El \textit{prompt} más extenso del sistema. En cada llamada recibe el inventario cronológico de pasos ya confirmados y propone el siguiente elemento del flujo principal. Incluye reglas detalladas de clasificación de tipo BPMN para evitar el uso del tipo genérico \texttt{task}, que era el comportamiento por defecto de los modelos sin esta guía. Los marcadores «OBLIGATORIO» y «NUNCA» responden a observaciones empíricas: formulaciones más suaves eran ignoradas con frecuencia.
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto en modelado BPMN 2.0 para e-commerce.
+Departamentos internos: [Ventas, Logística, Atención al Cliente]
+Actores externos: [Cliente, Transportista]
+
+Descripción completa del proceso:
+[descripción del proceso]
+
+Pasos confirmados hasta ahora (en orden cronológico):
+[historial acumulado de pasos, p.ej.:]
+1. [Ventas] Tarea de usuario: Registrar pedido
+2. [Logística] Gateway exclusivo: Verificar disponibilidad de stock
+   - Caso "Hay stock": Preparar envío -> Generar etiqueta [converge]
+   - Caso "Sin stock": Notificar al cliente [termina el proceso]
+
+¿Cuál es el SIGUIENTE paso del proceso, según la descripción? Indica:
+- "tipo": uno de userTask | serviceTask | sendTask | exclusiveGateway | parallelGateway |
+  inclusiveGateway | timerEvent | intermediateCatchEvent | intermediateThrowEvent |
+  compensationEvent | endMessageEvent | errorEndEvent | task
+- "nombre": nombre breve del paso
+- "lane": departamento que lo realiza (uno de los departamentos listados)
+- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent"
+  y va dirigido a un actor externo, su nombre; si no, null
+- "esFinal": true si DESPUÉS de este paso el proceso TERMINA
+
+=== TIPO DE ELEMENTO -- REGLAS OBLIGATORIAS (aplica en orden) ===
+
+> GATEWAYS -- modela SIEMPRE la estructura real del proceso:
+  - "exclusiveGateway" (XOR): cuando el proceso llega a una CONDICIÓN O DECISIÓN que lo
+    bifurca en caminos MUTUAMENTE EXCLUYENTES (solo se sigue UNO). Señales: "si...",
+    "en caso de...", "dependiendo de...", "cuando...", "según si...".
+    NUNCA ignores una bifurcación real.
+  - "parallelGateway" (AND): cuando varias actividades ocurren EN PARALELO o
+    SIMULTÁNEAMENTE y TODAS deben completarse. Señales: "al mismo tiempo", "en paralelo",
+    "simultáneamente", "mientras tanto", "a la vez".
+    OBLIGATORIO cuando el proceso divide en ramas concurrentes.
+  - "inclusiveGateway" (OR): cuando se pueden seguir UNO O VARIOS caminos según
+    condiciones no excluyentes. Señales: "según lo que corresponda", "los que apliquen",
+    "uno o más de...".
+  Si hay una bifurcación o paralelismo en este punto -> pon el gateway AHORA.
+
+> TAREAS -- clasifica según quién ejecuta la acción:
+  - "userTask": OBLIGATORIO cuando la acción la realiza una PERSONA (empleado, agente,
+    operario...). Incluye: revisar, aprobar, gestionar, tramitar, atender, validar
+    manualmente, seleccionar, contactar, introducir datos, tomar una decisión, rellenar
+    formulario, inspeccionar físicamente.
+    -> Si una persona interviene, SIEMPRE "userTask". NUNCA uses "task" para acciones
+    humanas.
+  - "serviceTask": OBLIGATORIO cuando la acción la realiza el SISTEMA de forma automática,
+    sin intervención humana. Incluye: consultar API, actualizar base de datos, generar
+    documento, procesar pago automáticamente, enviar petición a sistema externo, calcular,
+    transformar datos, integrar sistemas, lanzar webhook, sincronizar inventario.
+    -> Si es un sistema automático, SIEMPRE "serviceTask". NUNCA uses "task" para tareas
+    del sistema.
+  - "sendTask": OBLIGATORIO para ENVIAR un mensaje, notificación, email, SMS,
+    confirmación, factura o aviso a un actor EXTERNO cuando el proceso continúa después.
+    Rellena "actorExterno".
+  - "task": SOLO como último recurso si la acción es genuinamente ambigua (ni claramente
+    humana ni claramente automática). En la mayoría de procesos de e-commerce no debería
+    aparecer.
+
+> EVENTOS INTERMEDIOS -- insértalos cuando el proceso necesita esperar o revertir:
+  - "timerEvent": OBLIGATORIO cuando el proceso debe ESPERAR un plazo de tiempo antes de
+    continuar. Señales: "esperar X días/horas", "al cabo de...", "tras N días laborables",
+    "en un plazo de...", "después de...", "pasado el periodo de...",
+    "antes del vencimiento". -> Siempre que haya una espera temporal explícita o
+    implícita, modélala con timerEvent.
+  - "compensationEvent": cuando hay que DESHACER o REVERTIR una acción anterior.
+  - "intermediateCatchEvent": espera de un mensaje entrante de un actor externo.
+  - "intermediateThrowEvent": lanza un mensaje a un actor externo sin terminar el proceso.
+
+> EVENTOS DE FIN especiales:
+  - "endMessageEvent": el proceso TERMINA ENVIANDO un mensaje/notificación final a un
+    actor externo (confirmación de pedido, factura, ticket...). "esFinal" debe ser true.
+  - "errorEndEvent": el proceso TERMINA con error irrecuperable (pago rechazado
+    definitivamente, fraude detectado, cancelación sin solución...). "esFinal": true.
+
+REGLAS ADICIONALES:
+- Si no hay actores externos, "actorExterno" debe ser siempre null.
+- PROHIBIDO repetir un paso ya confirmado. Si no quedan pasos nuevos, devuelve el último
+  paso real con "esFinal": true.
+- "nombre" DEBE ser descriptivo y específico. PROHIBIDO: "Siguiente paso", "Tarea".
+
+RESPONDE SOLO con JSON (sin texto adicional):
+{"siguiente":{"tipo":"userTask","nombre":"...","lane":"[primer departamento]","actorExterno":null},
+ "esFinal":false}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{buildGatewayBranchesPrompt} — herramienta \texttt{suggest\_gateway\_branches}}
+
+Cuando el paso propuesto es una puerta lógica, se lanza esta llamada adicional para que el LLM nombre los casos que salen de dicha puerta. Distingue los tres tipos de \textit{gateway} y fija entre 2 y 5 ramas con nombres breves.
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto en modelado BPMN 2.0 para e-commerce.
+Departamentos internos: [Ventas, Logística, ...]
+Actores externos: [Cliente, ...]
+
+Descripción completa del proceso:
+[descripción del proceso]
+
+El proceso ha llegado a una puerta [según el tipo de gateway:]
+  - EXCLUSIVA (XOR): solo se sigue UNO de los casos según la condición
+  - INCLUSIVA (OR): se siguen UNO O VARIOS de los casos según las condiciones
+  - PARALELA (AND): se siguen TODOS los caminos a la vez
+llamada "[nombre del gateway]".
+
+Según la descripción, ¿qué casos/ramas salen de esta puerta?
+- Mínimo 2 y máximo 5 casos.
+- Nombres breves de 1-4 palabras (p.ej. "Hay stock" / "Sin stock", o
+  "Pago aceptado" / "Pago rechazado").
+
+RESPONDE SOLO con JSON (sin texto adicional):
+{"casos":["Caso 1","Caso 2"]}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{buildBranchStepPrompt} — herramienta \texttt{suggest\_branch\_step}}
+
+Análogo a \texttt{buildNextStepPrompt} pero opera dentro del contexto de un caso específico de una puerta. Prohíbe \textit{gateways} anidados dentro de una rama y exige indicar si el paso es el último de la rama (\texttt{esFinalRama}) y si ese final implica la terminación del proceso completo (\texttt{terminaProceso}).
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto en modelado BPMN 2.0 para e-commerce.
+Departamentos internos: [Ventas, Logística, ...]
+Actores externos: [Cliente, ...]
+
+Descripción completa del proceso:
+[descripción del proceso]
+
+El proceso llegó a la puerta "[nombre del gateway]" (exclusiva/XOR).
+Estamos definiendo los pasos del caso/rama: "[nombre del caso]".
+
+Pasos confirmados de ESTA rama hasta ahora:
+[historial de pasos de la rama, p.ej.:]
+1. [Logística] Tarea de usuario: Preparar envío
+(o bien: "(ninguno todavía)" si la rama acaba de comenzar)
+
+¿Cuál es el SIGUIENTE paso de esta rama, según la descripción? Indica:
+- "tipo": uno de userTask | serviceTask | sendTask | timerEvent |
+  intermediateCatchEvent | intermediateThrowEvent | compensationEvent |
+  endMessageEvent | errorEndEvent | task
+  (NO se permiten gateways dentro de una rama)
+- "nombre": nombre breve del paso
+- "lane": departamento que lo realiza (uno de los departamentos listados)
+- "actorExterno": SOLO si tipo es "sendTask", "intermediateThrowEvent" o "endMessageEvent"
+  y va dirigido a un actor externo, su nombre; si no, null
+- "esFinalRama": true si este es el ÚLTIMO paso de esta rama
+- "terminaProceso": SOLO si esFinalRama es true. true si el proceso COMPLETO termina aquí;
+  false si converge.
+
+=== TIPO DE ELEMENTO -- REGLAS OBLIGATORIAS (aplica en orden) ===
+
+> TAREAS -- clasifica según quién ejecuta:
+  - "userTask": OBLIGATORIO cuando la acción la realiza una PERSONA (revisar, aprobar,
+    gestionar, tramitar, atender, validar manualmente, contactar, rellenar, inspeccionar,
+    tomar una decisión). -> NUNCA uses "task" para acciones que realiza una persona.
+  - "serviceTask": OBLIGATORIO cuando la acción la realiza el SISTEMA automáticamente
+    (consultar API, actualizar BBDD, generar documento, procesar automáticamente,
+    sincronizar, calcular, integrar sistemas, lanzar webhook).
+    -> NUNCA uses "task" para acciones automáticas del sistema.
+  - "sendTask": OBLIGATORIO para ENVIAR mensaje/notificación/email a un actor EXTERNO
+    cuando la rama continúa. Rellena siempre "actorExterno".
+  - "task": SOLO si la acción es genuinamente ambigua (ni claramente humana ni automática).
+
+> EVENTOS INTERMEDIOS:
+  - "timerEvent": OBLIGATORIO cuando la rama debe ESPERAR un plazo de tiempo (esperar X
+    días, al cabo de N horas, tras el periodo de..., antes del vencimiento...).
+  - "compensationEvent": deshacer/revertir una acción anterior de esta rama.
+  - "intermediateCatchEvent": esperar un mensaje de un actor externo.
+  - "intermediateThrowEvent": lanzar un mensaje a un actor externo sin terminar la rama.
+
+> EVENTOS DE FIN de rama (implican esFinalRama=true y terminaProceso=true):
+  - "endMessageEvent": esta rama TERMINA enviando un mensaje/notificación final a un actor
+    externo.
+  - "errorEndEvent": esta rama TERMINA con error irrecuperable (pago rechazado, fraude,
+    cancelación sin solución...).
+
+MUY IMPORTANTE -- ENVÍOS a actores externos:
+- NUNCA uses "task" para enviar algo a un actor externo. Usa "sendTask" si la rama
+  continúa, o "endMessageEvent" si termina con ese envío. Rellena siempre "actorExterno".
+
+REGLAS:
+- Si no hay actores externos, "actorExterno" debe ser siempre null.
+- PROHIBIDO repetir un paso ya confirmado de esta rama. Si la descripción no contiene
+  ningún paso NUEVO para esta rama, devuelve el último paso real con "esFinalRama": true.
+- El "nombre" del paso DEBE ser descriptivo y específico. PROHIBIDO usar nombres genéricos
+  como "Siguiente paso", "Next step", "Tarea", "Actividad", "Paso" o similares.
+
+RESPONDE SOLO con JSON (sin texto adicional):
+{"siguiente":{"tipo":"userTask","nombre":"...","lane":"[primer departamento]","actorExterno":null},
+ "esFinalRama":false,"terminaProceso":false}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\texttt{bpmnJsonExpertPrompt} — \textit{prompt} de sistema auxiliar}
+
+\textit{Prompt} de sistema breve reutilizado en las llamadas auxiliares rápidas (identificación de casos del \textit{gateway}, inicio del proceso) donde no se necesita el contexto completo de clasificación de tipos BPMN.
+
+\begin{lstlisting}[style=promptbox]
+Eres experto en modelado BPMN. Responde SOLO con JSON.
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Renderizado programático del XML BPMN}
+\label{subsec:renderDiagram}
+
+La herramienta \texttt{render\_diagram} no llama al LLM para producir el XML final. Delega en \texttt{renderDiagramFromState()}, implementada en \texttt{mcp-server/src/diagramRenderer.js}, que construye el XML BPMN 2.0 de forma completamente programática a partir del estado del diagrama acumulado. Esta decisión elimina las alucinaciones de XML que aparecían cuando se pedía al LLM el artefacto completo (identificadores duplicados, \texttt{sequenceFlow} rotos, coordenadas incoherentes). Los pasos principales se distribuyen con un espaciado horizontal fijo de 160 píxeles (\texttt{DX}); las ramas de una puerta lógica se desplazan verticalmente con un separador de 110 píxeles (\texttt{BRANCH\_GAP}); la altura de cada calle se ajusta dinámicamente al número máximo de ramas del proceso.
+
+\begin{lstlisting}[style=promptbox]
+// mcp-server/src/diagramRenderer.js
+export function renderDiagramFromState(structure, state) {
+  const ext   = structure.poolExterno || [];
+  const lanes = structure.poolPrincipal.lanes || [];
+  const N     = lanes.length;
+  const EH    = 160, EG = 20;
+  const X0    = 150, DX = 160;
+  const BRANCH_GAP = 110; // > altura de tarea (80) para que las ramas no se solapen
+
+  const steps  = state.steps || [];
+  const starts = steps.filter(s => s.tipo === 'startEvent');
+  const ends   = steps.filter(s => s.tipo === 'endEvent' || s.tipo === 'errorEndEvent');
+  const mains  = steps.filter(s => s.tipo !== 'startEvent' && s.tipo !== 'endEvent'
+                                && s.tipo !== 'errorEndEvent');
+
+  // Altura de lane: si hay gateways con ramas, dejar sitio para el abanico vertical
+  const maxBranches = Math.max(1, ...mains.filter(m => m.branches?.length)
+                                         .map(m => m.branches.length));
+  const LH = Math.max(180, maxBranches * BRANCH_GAP + 110);
+
+  // Posiciones X: recorrido secuencial. Las ramas de un gateway se dibujan en
+  // paralelo (mismo rango X, desplazamiento vertical _yOffset por rama) y
+  // convergen, si procede, en el gateway de unión (join).
+  starts.forEach(s => { s._x = X0; s._yOffset = 0; });
+  let cursorX = X0 + DX;
+  const branchExtras = [];
+  mains.forEach(step => {
+    step._yOffset = 0;
+    if ((step.tipo === 'exclusiveGateway' || step.tipo === 'parallelGateway'
+         || step.tipo === 'inclusiveGateway') && step.branches?.length) {
+      step._x = cursorX; cursorX += DX;
+      let maxLen = 0;
+      step.branches.forEach((branch, bi) => {
+        const yOff = (bi - (step.branches.length - 1) / 2) * BRANCH_GAP;
+        (branch.steps || []).forEach((bstep, j) => {
+          bstep._x = cursorX + j * DX; bstep._yOffset = yOff;
+          branchExtras.push(bstep);
+        });
+        maxLen = Math.max(maxLen, (branch.steps || []).length);
+      });
+      cursorX += Math.max(maxLen, 1) * DX;
+      if (step.join) {
+        step.join._x = cursorX; step.join._yOffset = 0;
+        branchExtras.push(step.join);
+        cursorX += DX;
+      }
+    } else {
+      step._x = cursorX; cursorX += DX;
+    }
+  });
+  const endX = cursorX;
+  ends.forEach(s => { s._x = endX; s._yOffset = 0; });
+
+  const ordered = [...starts, ...mains, ...branchExtras, ...ends];
+
+  const PW = Math.max(1200, endX + 300);
+
+  const extY   = i => 30 + i * (EH + EG);
+  const extCY  = i => extY(i) + EH / 2;
+  const mainY  = ext.length > 0 ? 30 + ext.length * (EH + EG) : 30;
+  const mainH  = Math.max(1, N) * LH;
+  const laneCY = j => N > 0 ? mainY + j * LH + LH / 2 : mainY + mainH / 2;
+
+  // -- Collaboration
+  let col = '';
+  ext.forEach((p, i) => {
+    col += `    <participant id="Part_Ext${i+1}" name="${p.nombre}" processRef="Proc_Ext${i+1}"/>\n`;
+  });
+  col += `    <participant id="Part_Main" name="${structure.poolPrincipal.nombre}" processRef="Proc_Main"/>\n`;
+  ordered.forEach(s => {
+    if (s.participantIdx !== undefined) {
+      col += `    <messageFlow id="MF_${s.id}" name="${s.nombre}" sourceRef="${s.id}" targetRef="Part_Ext${s.participantIdx+1}"/>\n`;
+    }
+    if (s.tipo === 'startEvent' && s.messageTrigger && s.fromParticipantIdx !== undefined) {
+      col += `    <messageFlow id="MF_${s.id}_in" sourceRef="Part_Ext${s.fromParticipantIdx+1}" targetRef="${s.id}"/>\n`;
+    }
+  });
+
+  // -- External processes
+  let proc = '';
+  ext.forEach((p, i) => { proc += `  <process id="Proc_Ext${i+1}" isExecutable="false"/>\n`; });
+
+  // -- Lane sets
+  let laneSetXml = '';
+  lanes.forEach((lane, j) => {
+    const refs = ordered.filter(t => t.laneIdx === j)
+      .map(t => `        <flowNodeRef>${t.id}</flowNodeRef>`).join('\n');
+    laneSetXml += `      <lane id="Lane${j+1}" name="${lane}">\n${refs ? refs+'\n' : ''}      </lane>\n`;
+  });
+
+  // -- Task / gateway / event elements
+  const taskXml = ordered.map(t => {
+    const n = (t.nombre || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                              .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (t.tipo === 'startEvent')
+      return `    <startEvent id="${t.id}" name="${n}">${t.messageTrigger
+        ? `<messageEventDefinition id="MED_${t.id}"/>` : ''}</startEvent>`;
+    if (t.tipo === 'endEvent')
+      return t.messageTrigger
+        ? `    <endEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></endEvent>`
+        : `    <endEvent id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'exclusiveGateway') return `    <exclusiveGateway id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'parallelGateway')  return `    <parallelGateway  id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'inclusiveGateway') return `    <inclusiveGateway id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'intermediateCatchEvent')
+      return `    <intermediateCatchEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></intermediateCatchEvent>`;
+    if (t.tipo === 'intermediateThrowEvent')
+      return `    <intermediateThrowEvent id="${t.id}" name="${n}"><messageEventDefinition id="MED_${t.id}"/></intermediateThrowEvent>`;
+    if (t.tipo === 'compensationEvent')
+      return `    <intermediateThrowEvent id="${t.id}" name="${n}"><compensateEventDefinition id="CED_${t.id}"/></intermediateThrowEvent>`;
+    if (t.tipo === 'timerEvent')
+      return `    <intermediateCatchEvent id="${t.id}" name="${n}"><timerEventDefinition id="TED_${t.id}"/></intermediateCatchEvent>`;
+    if (t.tipo === 'sendTask')    return `    <sendTask    id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'userTask')    return `    <userTask    id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'serviceTask') return `    <serviceTask id="${t.id}" name="${n}"/>`;
+    if (t.tipo === 'errorEndEvent')
+      return `    <endEvent id="${t.id}" name="${n}"><errorEventDefinition id="EED_${t.id}"/></endEvent>`;
+    return `    <task id="${t.id}" name="${n}"/>`;
+  }).join('\n');
+
+  // -- Sequence flows
+  const escName = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const chain = [];
+  if (mains.length > 0) {
+    starts.forEach(s => chain.push([s.id, mains[0].id]));
+    mains.forEach((m, i) => {
+      const next = mains[i+1];
+      if ((m.tipo === 'exclusiveGateway' || m.tipo === 'parallelGateway'
+           || m.tipo === 'inclusiveGateway') && m.branches?.length) {
+        m.branches.forEach(branch => {
+          const bsteps = branch.steps || [];
+          const flowName = m.tipo !== 'parallelGateway' ? branch.nombre : '';
+          if (bsteps.length > 0) {
+            chain.push([m.id, bsteps[0].id, flowName]);
+            for (let j = 0; j < bsteps.length - 1; j++) chain.push([bsteps[j].id, bsteps[j+1].id]);
+            if (!branch.endsHere && m.join) chain.push([bsteps[bsteps.length-1].id, m.join.id]);
+          } else if (m.join) {
+            chain.push([m.id, m.join.id, flowName]);
+          }
+        });
+        if (m.join) {
+          if (next) chain.push([m.join.id, next.id]);
+          else ends.forEach(e => chain.push([m.join.id, e.id]));
+        }
+      } else {
+        if (next) chain.push([m.id, next.id]);
+        else ends.forEach(e => chain.push([m.id, e.id]));
+      }
+    });
+  } else {
+    starts.forEach(s => ends.forEach(e => chain.push([s.id, e.id])));
+  }
+  const seqXml = chain.map(([src, tgt, name], i) =>
+    `    <sequenceFlow id="SF_${i}" sourceRef="${src}" targetRef="${tgt}"${name ? ` name="${escName(name)}"` : ''}/>`
+  ).join('\n');
+
+  const laneSetBlock = N > 0 ? `    <laneSet id="LaneSet_1">\n${laneSetXml}    </laneSet>\n` : '';
+  proc += `\n  <process id="Proc_Main" isExecutable="false">
+${laneSetBlock}${taskXml ? taskXml+'\n' : ''}${seqXml ? seqXml+'\n' : ''}  </process>`;
+
+  // -- DI shapes
+  let shapes = '', edges = '';
+
+  ext.forEach((p, i) => {
+    shapes += `      <bpmndi:BPMNShape id="Shape_Part_Ext${i+1}" bpmnElement="Part_Ext${i+1}" isHorizontal="true">
+        <dc:Bounds x="30" y="${extY(i)}" width="${PW}" height="${EH}"/>
+      </bpmndi:BPMNShape>\n`;
+  });
+  shapes += `      <bpmndi:BPMNShape id="Shape_Part_Main" bpmnElement="Part_Main" isHorizontal="true">
+        <dc:Bounds x="30" y="${mainY}" width="${PW}" height="${mainH}"/>
+      </bpmndi:BPMNShape>\n`;
+  lanes.forEach((_, j) => {
+    shapes += `      <bpmndi:BPMNShape id="Shape_Lane${j+1}" bpmnElement="Lane${j+1}" isHorizontal="true">
+        <dc:Bounds x="60" y="${mainY+j*LH}" width="${PW-30}" height="${LH}"/>
+      </bpmndi:BPMNShape>\n`;
+  });
+
+  const isGwTipo = t => t === 'exclusiveGateway' || t === 'parallelGateway' || t === 'inclusiveGateway';
+  const isEvTipo = t => t === 'intermediateCatchEvent' || t === 'intermediateThrowEvent'
+                     || t === 'compensationEvent' || t === 'timerEvent'
+                     || t === 'startEvent' || t === 'endEvent' || t === 'errorEndEvent';
+  const shapeW = t => isGwTipo(t.tipo) ? 50 : isEvTipo(t.tipo) ? 36 : 100;
+  const shapeH = t => isGwTipo(t.tipo) ? 50 : isEvTipo(t.tipo) ? 36 : 80;
+  const elemCY = t => laneCY(t.laneIdx) + (t._yOffset || 0);
+
+  ordered.forEach(t => {
+    const w = shapeW(t), h = shapeH(t);
+    shapes += `      <bpmndi:BPMNShape id="Shape_${t.id}" bpmnElement="${t.id}"${isGwTipo(t.tipo) ? ' isMarkerVisible="true"' : ''}>
+        <dc:Bounds x="${t._x-w/2}" y="${elemCY(t)-h/2}" width="${w}" height="${h}"/>
+      </bpmndi:BPMNShape>\n`;
+  });
+
+  // -- DI edges (sequence flows)
+  const elemOf = id => ordered.find(o => o.id === id);
+  chain.forEach(([src, tgt], i) => {
+    const s = elemOf(src), t = elemOf(tgt);
+    if (!s || !t) return;
+    const sy = elemCY(s), ty = elemCY(t);
+    let wps;
+    if (Math.abs(sy - ty) < 1) {
+      wps = [[s._x + shapeW(s) / 2, sy], [t._x - shapeW(t) / 2, ty]];
+    } else if (isGwTipo(s.tipo)) {
+      const gy = sy + (ty > sy ? shapeH(s) / 2 : -shapeH(s) / 2);
+      wps = [[s._x, gy], [s._x, ty], [t._x - shapeW(t) / 2, ty]];
+    } else if (isGwTipo(t.tipo)) {
+      const gy = ty + (sy > ty ? shapeH(t) / 2 : -shapeH(t) / 2);
+      wps = [[s._x + shapeW(s) / 2, sy], [t._x, sy], [t._x, gy]];
+    } else {
+      const sx = s._x + shapeW(s) / 2, tx = t._x - shapeW(t) / 2;
+      wps = [[sx, sy], [(sx + tx) / 2, sy], [(sx + tx) / 2, ty], [tx, ty]];
+    }
+    edges += `      <bpmndi:BPMNEdge id="Edge_SF_${i}" bpmnElement="SF_${i}">
+${wps.map(([x, y]) => `        <di:waypoint x="${x}" y="${y}"/>`).join('\n')}
+      </bpmndi:BPMNEdge>\n`;
+  });
+
+  // -- DI edges (message flows): salientes
+  ordered.filter(t => t.participantIdx !== undefined).forEach(t => {
+    const srcY = elemCY(t) - shapeH(t) / 2;
+    edges += `      <bpmndi:BPMNEdge id="Edge_MF_${t.id}" bpmnElement="MF_${t.id}">
+        <di:waypoint x="${t._x}" y="${srcY}"/>
+        <di:waypoint x="${t._x}" y="${extCY(t.participantIdx)}"/>
+      </bpmndi:BPMNEdge>\n`;
+  });
+
+  // -- DI edges (message flows): entrantes
+  starts.filter(s => s.messageTrigger && s.fromParticipantIdx !== undefined).forEach(s => {
+    const tgtY = elemCY(s) - shapeH(s) / 2;
+    edges += `      <bpmndi:BPMNEdge id="Edge_MF_${s.id}_in" bpmnElement="MF_${s.id}_in">
+        <di:waypoint x="${s._x}" y="${extCY(s.fromParticipantIdx)}"/>
+        <di:waypoint x="${s._x}" y="${tgtY}"/>
+      </bpmndi:BPMNEdge>\n`;
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <collaboration id="Collab_1">
+${col}  </collaboration>
+${proc}
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collab_1">
+${shapes}${edges}    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>`;
+}
+
+export function buildStructureBPMN(structure) {
+  return renderDiagramFromState(structure, { steps: [] });
+}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Prompts de refinamiento conversacional}
+\label{subsec:promptRefinamiento}
+
+La herramienta \texttt{refine\_diagram} permite modificar el diagrama mediante instrucciones en lenguaje natural. Opera en dos partes: el \textit{prompt} de sistema (\texttt{buildRefinementSystemPrompt()}) fija las reglas de modificación del XML, y el mensaje de usuario (\texttt{buildRefinementMessage()}) inyecta en cada petición el inventario de elementos actuales, el XML BPMN completo y la instrucción del usuario. Este contexto enriquecido es necesario porque el LLM necesita conocer los identificadores exactos de los \texttt{sequenceFlow} para reconectar el flujo tras una modificación.
+
+\subsubsection{\texttt{buildRefinementSystemPrompt}}
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto BPMN 2.0. Tu tarea es modificar un diagrama BPMN existente
+según las instrucciones del usuario.
+
+REGLAS GENERALES:
+- Devuelve SOLO XML válido completo (<?xml ... </definitions>), sin texto ni markdown.
+- Mantén TODOS los pools, lanes y la estructura de piscinas existente.
+- Mantén los messageFlows hacia actores externos que sigan siendo válidos.
+- Modifica, añade o elimina SOLO lo que el usuario pida; no alteres el resto del
+  diagrama.
+- Si el usuario pide eliminar un elemento, elimínalo del proceso, de los sequenceFlows
+  (reconecta los flujos para que el diagrama siga siendo válido) y de la sección
+  BPMNDiagram.
+- Si el usuario pide añadir un elemento, insértalo en el punto correcto del flujo, con
+  los sequenceFlows adecuados, y añádele su BPMNShape en la sección de diagrama con
+  coordenadas razonables (entre el elemento anterior y el siguiente).
+
+TIPOS DE ELEMENTO -- usa el correcto según la acción:
+- userTask: acción realizada por una PERSONA (revisar, aprobar, gestionar, atender...).
+- serviceTask: acción automática del SISTEMA (consultar API, procesar, generar, calcular).
+- sendTask: ENVIAR mensaje/notificación a un actor EXTERNO. Requiere messageFlow.
+- exclusiveGateway: decisión con caminos mutuamente excluyentes (XOR).
+- parallelGateway: actividades que ocurren en paralelo (AND).
+- inclusiveGateway: uno o varios caminos según condiciones (OR).
+- timerEvent (intermediateCatchEvent+timerEventDefinition): espera temporal.
+- endEvent con errorEventDefinition: fin con error irrecuperable.
+- task: SOLO si la acción es genuinamente ambigua.
+
+COHERENCIA:
+- Cada elemento debe tener al menos un sequenceFlow entrante y uno saliente (excepto
+  startEvent y endEvent).
+- Los nombres de los elementos deben ser descriptivos y coherentes con el proceso.
+- Si el usuario pide algo que no tiene sentido en el contexto del proceso, adáptalo
+  razonablemente al contexto o interpreta la intención más lógica.
+- Asegúrate de que las coordenadas (Bounds) de elementos nuevos no se solapen con los
+  existentes.
+\end{lstlisting}
+
+\subsubsection{\texttt{buildRefinementMessage}}
+
+\begin{lstlisting}[style=promptbox]
+=== ESTRUCTURA DEL DIAGRAMA ===
+Organización: [nombre de la empresa, p.ej. TiendaOnline]
+Departamentos (lanes): [Ventas, Logística, Atención al Cliente]
+Actores externos: [Cliente, Transportista]
+
+=== ELEMENTOS ACTUALES DEL DIAGRAMA ===
+[inventario numerado de elementos del diagrama, p.ej.:]
+  1. [Ventas] Tarea de usuario: "Registrar pedido"
+  2. [Logística] Gateway exclusivo: "Verificar stock"
+     - Caso "Hay stock": Tarea de usuario: "Preparar envío" [Logística] -> Tarea de
+       servicio: "Generar etiqueta" [Logística] [converge]
+     - Caso "Sin stock": Tarea de usuario: "Notificar al cliente" [Ventas] [termina]
+  3. [Logística] Tarea de servicio: "Actualizar inventario"
+  4. [Logística] Envío de mensaje: "Confirmar envío" -> Cliente
+
+=== XML BPMN ACTUAL ===
+[XML BPMN completo del diagrama en su estado actual]
+
+=== INSTRUCCIÓN DEL USUARIO ===
+"[instrucción de modificación del usuario, p.ej.: «añade un evento de espera
+de 24 horas antes de la preparación del envío»]"
+
+Aplica la modificación y devuelve el XML COMPLETO (desde <?xml hasta </definitions>)
+con la sección bpmndi:BPMNDiagram.
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Prompt de análisis PERVAL}
+\label{subsec:promptPerval}
+
+La herramienta \texttt{analyze\_perval} guía al LLM en la clasificación de los elementos del proceso según las cuatro dimensiones de valor percibido del modelo de Sweeney y Soutar~\cite{sweeney2001perval}. El \textit{prompt} de sistema parametriza el actor de referencia y el alcance del análisis (\texttt{entregas} solo evalúa los mensajes hacia el cliente externo; sin alcance definido, evalúa todas las tareas). El mensaje de usuario transmite la lista numerada de elementos y el XML BPMN completo.
+
+\subsubsection{\texttt{buildPervalSystemPrompt}}
+
+\begin{lstlisting}[style=promptbox]
+Eres un experto en análisis de valor percibido PERVAL (Sweeney y Soutar, 2001)
+aplicado a e-commerce.
+
+[SI el proceso tiene entregas/mensajes explícitos hacia el cliente externo:]
+El valor percibido se calcula sobre LO QUE LA EMPRESA DEVUELVE/ENVÍA AL CLIENTE
+(mensajes, confirmaciones, notificaciones, entregables...), identificado a partir
+de los flujos de mensaje hacia el participante externo del cliente. NO evalúes
+tareas puramente internas que no generan ninguna comunicación o entrega hacia el
+cliente.
+
+[SI NO hay entregas explícitas identificadas:]
+No se han identificado comunicaciones o entregas explícitas hacia un participante
+externo cliente, así que se analizan todas las tareas del proceso.
+
+[SI se especifica un actor de referencia "[nombre del actor]":]
+FOCO: analiza SOLO los elementos que tienen impacto directo o indirecto en la
+experiencia de "[nombre del actor]". Ignora los elementos puramente internos sin
+relación con este actor.
+
+[SI no se especifica actor concreto:]
+Analiza todos los elementos indicados.
+
+DIMENSIONES PERVAL:
+- Quality (Calidad): fiabilidad, seguridad, rendimiento, satisfacción del servicio
+- Price (Precio): ahorro económico, transparencia de costes, relación calidad-precio
+- Emotional (Emocional): conveniencia, facilidad, personalización, bienestar,
+  tranquilidad
+- Social (Social): reconocimiento, accesibilidad, flexibilidad de entrega/pago
+
+Elementos sin impacto en el actor -> clasificarlos como "Interno".
+
+NIVEL DE RENDIMIENTO -- para cada tarea, evalúa cómo de bien el proceso entrega
+valor percibido al actor y asigna un nivel:
+- "muy_bueno": la tarea entrega un valor percibido excelente al actor
+- "bueno": la tarea entrega un buen valor percibido
+- "regular": el valor percibido es neutro o mejorable
+- "malo": el valor percibido es bajo o deficiente
+- "muy_malo": la tarea genera una percepción muy negativa
+
+RESPONDE ÚNICAMENTE con JSON:
+{
+  "tareas": [{"nombre":"...","dimensiones":["Quality"],"nivel":"bueno",
+              "valor":"...","justificacion":"..."}],
+  "resumen": {"Quality":"...","Price":"...","Emotional":"...","Social":"..."},
+  "valorGeneral": "..."
+}
+\end{lstlisting}
+
+\subsubsection{\texttt{buildPervalUserMessage}}
+
+\begin{lstlisting}[style=promptbox]
+[SI scope = 'entregas':]
+ENTREGAS/COMUNICACIONES DE LA EMPRESA AL CLIENTE:
+[SI se especifica actor:] Actor a analizar: [nombre del actor]
+1. Envío de mensaje: Confirmación de pedido al cliente
+2. Envío de mensaje: Notificación de envío al cliente
+3. Envío de mensaje: Entrega completada -- mensaje de seguimiento
+
+[SI scope != 'entregas' (todas las tareas):]
+TAREAS DEL PROCESO:
+1. Registrar pedido
+2. Verificar disponibilidad de stock
+3. Preparar envío
+4. Generar etiqueta de envío
+
+XML BPMN:
+[XML BPMN completo del diagrama]
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Robustez ante respuestas imprecisas del LLM}
+\label{subsec:robustez}
+
+Incluso con \textit{prompts} que exigen respuestas en formato estricto, los LLMs producen con cierta frecuencia salidas que envuelven el contenido en bloques de código Markdown, añaden texto explicativo o truncan la respuesta al alcanzar el límite de \textit{tokens}. Las dos funciones siguientes, implementadas en \texttt{mcp-server/src/llm.js}, gestionan estos casos.
+
+\subsubsection{\texttt{parseLLMJson}}
+
+Extrae y deserializa el primer objeto JSON completo de la respuesta del LLM. Su autómata de estados cuenta llaves de apertura y cierre distinguiendo correctamente el contenido de las cadenas (incluidas secuencias de escape) del delimitador estructural, lo que lo hace más robusto que una expresión regular codiciosa que busca el primer \texttt{\{} y el último \texttt{\}}.
+
+\begin{lstlisting}[style=promptbox]
+export function parseLLMJson(raw) {
+  const text = (raw || '').replace(/```(?:json)?/gi, '').trim();
+  try { return JSON.parse(text); } catch (e) { /* hay texto extra: se busca el objeto */ }
+  const start = text.indexOf('{');
+  if (start === -1) throw new Error('La respuesta no contiene JSON');
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (esc) { esc = false; continue; }
+    if (ch === '\\') { esc = inStr; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) return JSON.parse(text.slice(start, i + 1));
+    }
+  }
+  return JSON.parse(text.slice(start)); // JSON truncado: que el error sea descriptivo
+}
+\end{lstlisting}
+
+\subsubsection{\texttt{cleanXML}}
+
+Sanea el XML BPMN generado por el LLM antes de intentar cargarlo en \textit{bpmn-js}. Aplica un \textit{pipeline} de cuatro transformaciones: (1) eliminación de bloques Markdown, (2) extracción del bloque XML, (3) reparación de comillas de cierre omitidas y (4) reparación de truncaciones añadiendo los cierres de etiqueta necesarios.
+
+\begin{lstlisting}[style=promptbox]
+export function cleanXML(raw) {
+  let xml = raw.replace(/```xml/gi, '').replace(/```bpmn/gi, '').replace(/```/g, '').trim();
+  const idx = xml.indexOf('<?xml');
+  if (idx > -1) xml = xml.substring(idx);
+  if (!xml.startsWith('<?xml')) {
+    const d = xml.indexOf('<definitions');
+    if (d > -1) xml = xml.substring(d);
+  }
+
+  // -- Reparación 1: comilla de cierre olvidada antes de />
+  // El LLM a veces genera: height="36/>  en lugar de  height="36"/>
+  xml = xml.replace(/="([^"<>\n\r]*)\s*\/>/g, '="$1"/>');
+
+  // -- Reparación 2: truncaciones (XML cortado antes de </definitions>)
+  if (!xml.includes('</definitions>')) {
+    const lastGt = xml.lastIndexOf('>');
+    if (lastGt > 0) xml = xml.substring(0, lastGt + 1);
+
+    const needsPlane = xml.includes('<bpmndi:BPMNPlane') && !xml.includes('</bpmndi:BPMNPlane>');
+    const needsDiag  = xml.includes('<bpmndi:BPMNDiagram') && !xml.includes('</bpmndi:BPMNDiagram>');
+    if (needsPlane) xml += '\n    </bpmndi:BPMNPlane>';
+    if (needsDiag)  xml += '\n  </bpmndi:BPMNDiagram>';
+    xml += '\n</definitions>';
+  }
+
+  if (!xml.includes('bpmndi:BPMNDiagram') && !xml.includes('BPMNDiagram'))
+    throw new Error(t('errNoDiagramSection'));
+  return xml;
+}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Funciones auxiliares}
+\label{subsec:helpers}
+
+Las dos funciones siguientes, implementadas en \texttt{mcp-server/src/helpers.js}, son utilizadas internamente por los \textit{prompts} de generación para construir el resumen cronológico de pasos y para normalizar la denominación de los departamentos cuando la organización no tiene calles definidas.
+
+\subsubsection{\texttt{effectiveLanes}}
+
+Devuelve la lista de departamentos efectivos para construir el contexto de los \textit{prompts}. Si la organización no tiene \textit{lanes} (piscina única), usa el nombre de la organización como única «calle» lógica con índice 0, de modo que las funciones de \textit{prompt} nunca reciben una lista vacía.
+
+\begin{lstlisting}[style=promptbox]
+export function effectiveLanes(structure) {
+  const l = structure?.poolPrincipal?.lanes || [];
+  return l.length > 0 ? l : [structure?.poolPrincipal?.nombre || t('defaultOrgName')];
+}
+\end{lstlisting}
+
+\subsubsection{\texttt{elementLabel}}
+
+Traduce el identificador de tipo BPMN (\texttt{userTask}, \texttt{exclusiveGateway}, etc.) a la etiqueta legible en el idioma activo de la interfaz, usando el sistema de internacionalización \texttt{i18n}. Es utilizado por \texttt{buildNextStepPrompt} y \texttt{buildBranchStepPrompt} para construir el resumen de pasos confirmados que se inyecta como contexto en cada llamada al LLM.
+
+\begin{lstlisting}[style=promptbox]
+export function elementLabel(tipo) {
+  const keys = {
+    task:                   'elTask',
+    userTask:               'elUserTask',
+    serviceTask:            'elServiceTask',
+    sendTask:               'elSendTask',
+    intermediateCatchEvent: 'elIntermediateCatch',
+    intermediateThrowEvent: 'elIntermediateThrow',
+    compensationEvent:      'elCompensation',
+    timerEvent:             'elTimer',
+    endMessageEvent:        'elEndMessage',
+    errorEndEvent:          'elErrorEnd',
+    exclusiveGateway:       'elExclusiveGw',
+    parallelGateway:        'elParallelGw',
+    inclusiveGateway:       'elInclusiveGw',
+    startEvent:             'elStart',
+    endEvent:               'elEnd',
+  };
+  return t(keys[tipo] || 'elTask');
+}
+\end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de desarrollo e implementación

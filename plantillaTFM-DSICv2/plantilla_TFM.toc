@@ -92,6 +92,22 @@
 \contentsline {subsection}{\numberline {6.2.7}Funciones auxiliares}{77}{subsection.6.2.7}%
 \contentsline {subsubsection}{\numberline {6.2.7.1}\texttt {effectiveLanes}}{77}{subsubsection.6.2.7.1}%
 \contentsline {subsubsection}{\numberline {6.2.7.2}\texttt {elementLabel}}{77}{subsubsection.6.2.7.2}%
-\contentsline {chapter}{Bibliografía}{80}{chapter*.9}%
-\contentsline {chapter}{Anexo I}{81}{appendix*.10}%
-\contentsline {chapter}{Anexo II}{83}{appendix*.11}%
+\contentsline {chapter}{\numberline {7}Ejecución y funcionamiento del sistema}{79}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Interfaz general del sistema}{79}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Generación iterativa de modelos BPMN}{79}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Paso 1 --- Descripción del proceso}{80}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{80}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{81}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{81}{subsection.7.2.4}%
+\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{82}{subsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{82}{subsection.7.2.6}%
+\contentsline {section}{\numberline {7.3}Edición conversacional del diagrama}{84}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{84}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{84}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{84}{subsection.7.4.2}%
+\contentsline {section}{\numberline {7.5}Entrada por voz}{86}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Soporte multilingüe}{86}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Despliegue en producción}{88}{section.7.7}%
+\contentsline {chapter}{Bibliografía}{92}{chapter*.9}%
+\contentsline {chapter}{Anexo I}{93}{appendix*.10}%
+\contentsline {chapter}{Anexo II}{95}{appendix*.11}%

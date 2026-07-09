@@ -4,6 +4,213 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Ejecución y funcionamiento del sistema}
+\label{cap:ejecucion}
+
+%% Macro para insertar figura.
+%% Cuando la imagen no existe muestra un recuadro de reserva.
+%% Uso: \screenfig[alto]{fichero}{caption}{label}
+%%   fichero: nombre sin ruta ni extensión (imagenes/cap8/<fichero>.png)
+%%   alto:    altura del recuadro gris de reserva (defecto 6cm)
+\newcommand{\screenfig}[4][6cm]{%
+  \begin{figure}[htbp]%
+    \centering%
+    \IfFileExists{include/#2.png}{%
+      \includegraphics[width=0.95\textwidth]{include/#2.png}%
+    }{%
+      \setlength{\fboxsep}{2mm}%
+      \fbox{%
+        \begin{minipage}[c][#1][c]{0.88\textwidth}%
+          \centering\small\itshape [Captura pendiente de insertar]%
+        \end{minipage}%
+      }%
+    }%
+    \caption{#3}%
+    \label{fig:#4}%
+  \end{figure}%
+}
+
+Este capítulo presenta el sistema en funcionamiento mediante una demostración guiada de sus principales flujos de uso. Se parte de la interfaz general del sistema para, a continuación, recorrer el ciclo completo de trabajo: descripción del proceso en lenguaje natural (por texto o por voz), generación iterativa del diagrama BPMN con validación humana en cada paso, edición conversacional del modelo resultante y análisis de valor percibido según el modelo PERVAL. Se ilustra también el soporte multilingüe español--inglés y el despliegue en producción en la plataforma \textit{Render.com}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interfaz general del sistema}
+\label{sec:interfazGeneral}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La interfaz del sistema integra en una única ventana de navegador el editor de diagramas BPMN y el panel conversacional que centraliza toda la interacción con el LLM. La figura~\ref{fig:interfazGeneral} muestra el estado inicial de la aplicación con sus principales zonas identificadas.
+
+\screenfig[8cm]{interfaz_general}%
+  {Vista general de la interfaz del sistema}%
+  {interfazGeneral}
+
+El lienzo BPMN~(2) es el editor \textit{bpmn-js} estándar, con soporte de arrastrar y soltar, acercar/alejar y edición manual de propiedades. El panel conversacional~(3) actúa como canal único de comunicación con el servidor MCP: todas las instrucciones de generación, refinamiento y análisis se introducen aquí, ya sea mediante texto o mediante el botón de voz~(4). El selector de idioma~(5) cambia simultáneamente los textos de la interfaz y la lengua en que el LLM genera las respuestas.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Generación iterativa de modelos BPMN}
+\label{sec:demoGeneracion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La generación de un diagrama BPMN parte de una descripción en lenguaje natural introducida por el usuario. El sistema ofrece dos modos de generación: el \textbf{modo guiado} (paso a paso), en el que el LLM propone cada elemento del flujo individualmente y el usuario confirma o corrige antes de continuar; y el \textbf{modo completo}, en el que, tras confirmar la estructura de participantes, el usuario únicamente especifica el evento de inicio y el sistema genera el diagrama íntegro de forma autónoma. Los pasos~1, 2 y~3 son comunes a ambos modos.
+
+%%---------------------------------------------------------
+\subsection{Paso 1 --- Descripción del proceso}
+\label{subsec:demoDescripcion}
+%%---------------------------------------------------------
+
+El usuario introduce en el panel conversacional una descripción libre del proceso de negocio que desea modelar. La descripción puede ser breve (dos o tres frases) o extensa; el sistema utiliza su contenido íntegro como contexto para todas las llamadas posteriores al LLM. En la figura~\ref{fig:genDescripcion} se muestra un ejemplo con un proceso de compra en línea.
+
+\screenfig[5cm]{generacion_01_descripcion}%
+  {Introducción de la descripción del proceso en el panel conversacional. El usuario ha descrito un proceso de compra en línea con varios departamentos internos y actores externos.}%
+  {genDescripcion}
+
+%%---------------------------------------------------------
+\subsection{Paso 2 --- Identificación de participantes y estructura}
+\label{subsec:demoEstructura}
+%%---------------------------------------------------------
+
+Tras recibir la descripción, el sistema lanza la herramienta \texttt{identify\_structure} y presenta al usuario los participantes identificados: el \textit{pool} principal con sus departamentos (\textit{lanes}) y los actores externos con su rol (\texttt{cliente} o \texttt{colaborador}). La respuesta se muestra en el chat como una tarjeta estructurada con botones de confirmación y modificación (figura~\ref{fig:genEstructura}).
+
+\screenfig[6cm]{generacion_02_estructura}%
+  {Resultado de la identificación de participantes.}%
+  {genEstructura}
+
+Si el usuario no está satisfecho con la estructura propuesta puede introducir una corrección directamente en el chat y el sistema la integra antes de continuar.
+
+%%---------------------------------------------------------
+\subsection{Paso 3 --- Identificación del inicio del proceso}
+\label{subsec:demoInicio}
+%%---------------------------------------------------------
+
+Una vez confirmada la estructura de participantes, el sistema propone al usuario el punto de entrada del proceso: en qué departamento (lane) comienza y cuál es el primer evento o tarea de inicio. Esta información es necesaria tanto en el modo guiado como en el modo completo, ya que ancla el primer nodo del diagrama antes de inferir el resto del flujo. En la figura~\ref{fig:genInicio} se muestra un ejemplo de respuesta.
+
+\screenfig[5cm]{generacion_03_inicio}%
+  {Identificación del inicio del proceso.}%
+  {genInicio}
+
+%%---------------------------------------------------------
+\subsection{Paso 4 --- Definición del flujo paso a paso}
+\label{subsec:demoFlujo}
+%%---------------------------------------------------------
+
+Una vez confirmada la estructura y el punto de inicio, el sistema propone cada elemento del flujo de forma secuencial: tareas de usuario, tareas de servicio, puertas lógicas y eventos. Cuando propone una puerta (\textit{gateway}), solicita también los nombres de los casos que la bifurcan. En cada propuesta el usuario puede aceptar con un botón, rechazar o reformular el elemento. La figura~\ref{fig:genFlujo} ilustra el momento en que el sistema propone una puerta exclusiva con sus ramas.
+
+\screenfig[7cm]{generacion_03_flujo}%
+  {Generación paso a paso del flujo del proceso. El sistema propone una puerta exclusiva (XOR).}%
+  {genFlujo}
+
+En cualquier momento durante la generación paso a paso, el usuario dispone de dos acciones adicionales. Por un lado, puede solicitar que el sistema genere automáticamente el resto del diagrama sin más preguntas, lo que equivale a pasar al modo completo a partir del punto en que se encuentra: el LLM toma los pasos ya confirmados como contexto e infiere los elementos restantes hasta completar el proceso. Por otro lado, el usuario puede ampliar o corregir la descripción original introduciendo información adicional en el chat ---por ejemplo, añadir una condición de error no mencionada inicialmente o precisar el rol de un actor externo---, con lo que el sistema actualiza su contexto y continúa la generación teniendo en cuenta los nuevos datos.
+
+%%---------------------------------------------------------
+\subsection{Paso 5 --- Diagrama BPMN generado}
+\label{subsec:demoDiagrama}
+%%---------------------------------------------------------
+
+Cuando el sistema detecta que el proceso ha llegado a su fin, llama automáticamente a la herramienta \texttt{render\_diagram}, que construye el XML BPMN 2.0 de forma completamente programática y lo carga en el editor \textit{bpmn-js}. El diagrama aparece centrado en el lienzo y muestra piscinas, calles, tareas, puertas y flujos de secuencia con sus etiquetas (figura~\ref{fig:genDiagrama}).
+
+\screenfig[8cm]{generacion_04_diagrama}%
+  {Diagrama BPMN 2.0 generado y cargado en el editor bpmn.io. Se aprecian las tres calles del \textit{pool} principal (Ventas, Logística, Atención al Cliente), el \textit{pool} externo del Cliente, los \textit{gateways} con sus ramas y los flujos de mensaje entre participantes.}%
+  {genDiagrama}
+
+Desde este punto el usuario puede editar el diagrama directamente en el lienzo de bpmn.io o continuar la interacción mediante el panel conversacional para introducir refinamientos.
+
+%%---------------------------------------------------------
+\subsection{Alternativa: generación completa del diagrama}
+\label{subsec:demoGeneracionCompleta}
+%%---------------------------------------------------------
+
+Como alternativa al modo guiado, el sistema permite generar el diagrama completo en una sola llamada al LLM. Tras identificar el inicio del proceso (paso~3), el usuario activa la generación completa; el LLM infiere entonces el flujo íntegro a partir de la descripción original y del nodo de inicio ya confirmado, y llama directamente a \texttt{render\_diagram} sin requerir confirmaciones intermedias para cada elemento.
+
+\screenfig[5cm]{generacion_completa}%
+  {Modo de generación completa. Tras confirmar la estructura, el usuario activa la generación automática: el sistema solicita únicamente el evento de inicio y, a continuación, genera y renderiza el diagrama BPMN íntegro en una sola operación.}%
+  {genCompleta}
+
+Este modo resulta especialmente útil cuando el usuario tiene una descripción detallada del proceso y desea obtener un borrador completo rápidamente, que posteriormente podrá refinar mediante instrucciones conversacionales (véase \S\ref{sec:demoEdicion}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Edición conversacional del diagrama}
+\label{sec:demoEdicion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La herramienta \texttt{refine\_diagram} permite modificar el diagrama existente mediante instrucciones en lenguaje natural, sin necesidad de conocer la sintaxis XML de BPMN~2.0. El usuario describe el cambio deseado en el panel conversacional y el sistema devuelve el XML actualizado, que se recarga automáticamente en el editor.
+
+\screenfig[5cm]{edicion_01_instruccion}%
+  {Instrucción de refinamiento introducida en el panel conversacional: el usuario solicita añadir un evento de espera entre la preparación del envío y la generación de la etiqueta. El historial de mensajes anterior sigue visible en el panel.}%
+  {edicionInstruccion}
+
+La figura~\ref{fig:edicionResultado} muestra el diagrama tras aplicar la modificación: el nuevo evento de temporizador aparece correctamente conectado en el flujo de la calle de Logística, entre las dos tareas indicadas.
+
+\screenfig[8cm]{edicion_02_resultado}%
+  {Diagrama BPMN actualizado tras la instrucción de refinamiento. Se ha insertado un evento de temporizador en la calle de Logística, con sus flujos de secuencia de entrada y salida correctamente reconectados.}%
+  {edicionResultado}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Análisis de valor percibido PERVAL}
+\label{sec:demoPerval}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Una vez generado el diagrama, el usuario puede lanzar el análisis de valor percibido integrado. La herramienta \texttt{analyze\_perval} clasifica los elementos del proceso según las cuatro dimensiones del modelo PERVAL~\cite{sweeney2001perval} (\textit{Quality}, \textit{Price}, \textit{Emotional} y \textit{Social}), con un nivel de rendimiento y una justificación textual para cada elemento.
+
+%%---------------------------------------------------------
+\subsection{Configuración del análisis}
+\label{subsec:demoPervalConfig}
+%%---------------------------------------------------------
+
+Antes de lanzar el análisis, el usuario selecciona el alcance (analizar solo las entregas al cliente externo, o todas las tareas del proceso) y puede especificar el nombre del actor externo cuyo punto de vista se adopta para la clasificación. El formulario de configuración se muestra en la figura~\ref{fig:pervalConfig}.
+
+\screenfig[5cm]{perval_01_config}%
+  {Formulario de configuración del análisis PERVAL en el panel conversacional. El usuario ha seleccionado el alcance «Entregas al cliente externo» y ha especificado «Cliente» como actor de referencia.}%
+  {pervalConfig}
+
+%%---------------------------------------------------------
+\subsection{Resultados del análisis}
+\label{subsec:demoPervalResultados}
+%%---------------------------------------------------------
+
+Los resultados se presentan en el panel conversacional en forma de tarjetas individuales por cada elemento analizado, con las dimensiones PERVAL aplicables, el nivel de rendimiento codificado por color y la justificación textual generada por el LLM, seguidas de un resumen global por dimensión y una valoración general del proceso (figura~\ref{fig:pervalResultados}).
+
+\screenfig[9cm]{perval_02_resultados}%
+  {Resultados del análisis PERVAL en el panel conversacional. Cada elemento analizado muestra sus dimensiones PERVAL activas con el nivel de rendimiento codificado por color (muy bueno / bueno / regular / malo) y la justificación generada por el LLM. Al pie se presenta el resumen agregado por dimensión.}%
+  {pervalResultados}
+
+\screenfig[8cm]{perval_03_diagrama}%
+  {Diagrama BPMN con los elementos analizados resaltados visualmente. Los elementos con impacto positivo en el valor percibido aparecen con fondo verde; los que presentan margen de mejora, con fondo ámbar.}%
+  {pervalDiagrama}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Entrada por voz}
+\label{sec:demoVoz}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+El sistema admite tanto texto como voz como modalidad de entrada. El botón de micrófono, situado junto al campo de texto del panel conversacional, activa la API de reconocimiento de voz del navegador (\textit{Web Speech API}). Mientras el micrófono está activo, el botón muestra una animación de escucha y transcribe el audio en tiempo real al campo de texto. Al finalizar la locución, la transcripción se envía automáticamente como si el usuario hubiese escrito el mensaje.
+
+\screenfig[5cm]{voz_escuchando}%
+  {Entrada por voz activa. El botón de micrófono muestra la animación de escucha y la transcripción en tiempo real aparece en el campo de texto del panel conversacional.}%
+  {vozEscuchando}
+
+Esta modalidad resulta especialmente útil para introducir descripciones largas de procesos o para dictar instrucciones de refinamiento sin necesidad de teclear.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Soporte multilingüe}
+\label{sec:demoMultiidioma}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+El sistema soporta español e inglés de forma completa: al cambiar de idioma mediante el selector de la interfaz, se actualizan simultáneamente todos los textos de la interfaz, los mensajes del sistema en el panel conversacional y la directiva de idioma añadida a cada \textit{prompt}, de modo que las respuestas del LLM ---incluidas las justificaciones del análisis PERVAL--- se generan directamente en la lengua seleccionada. La figura~\ref{fig:multiidioma} muestra la interfaz en modo inglés.
+
+\screenfig[7cm]{interfaz_ingles}%
+  {Interfaz del sistema en modo inglés. Los mensajes del panel conversacional, los botones de acción y los resultados del análisis PERVAL se muestran en inglés, al igual que los \textit{prompts} enviados al LLM.}%
+  {multiidioma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Despliegue en producción}
+\label{sec:demoDespliegue}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+El sistema está desplegado en la plataforma \textit{Render.com} en dos servicios independientes definidos en el fichero \texttt{render.yaml} del repositorio. El primero (\texttt{tfm-bpmn-frontend}) es un sitio estático que sirve el \textit{bundle} Webpack de la extensión. El segundo (\texttt{tfm-bpmn-mcp-server}) es un servicio web Node.js que ejecuta el servidor MCP. Ambos se actualizan automáticamente en cada \textit{push} al repositorio de GitHub y están accesibles mediante HTTPS con certificados gestionados por la propia plataforma.
+
+\screenfig[6cm]{despliegue_render}%
+  {Panel de administración de Render.com mostrando los dos servicios desplegados: el sitio estático de la extensión y el servidor MCP Node.js, ambos en estado \textit{Live} y con HTTPS activo.}%
+  {despliegueRender}
+
+El sistema completo es accesible desde cualquier navegador moderno (Chrome, Firefox, Edge) sin necesidad de instalar ningún software adicional, en la dirección \url{https://tfm-bpmn-frontend.onrender.com/}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de ejecución y funcionamiento

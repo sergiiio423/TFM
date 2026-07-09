@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  3 JUL 2026 12:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  9 JUL 2026 11:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1003,7 +1003,7 @@ Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 ))
 \c@lstlisting=\count366
  (include/Portada.tex
-<include/logo-upv.png, id=390, 136.8312pt x 158.2713pt>
+<include/logo-upv.png, id=454, 136.8312pt x 158.2713pt>
 File: include/logo-upv.png Graphic file (type png)
 <use include/logo-upv.png>
 Package pdftex.def Info: include/logo-upv.png  used on input line 12.
@@ -1035,7 +1035,7 @@ LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/l/n' tried instead on input line 18.
 LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <14.4> not available
 (Font)              Font shape `T1/pbk/db/n' tried instead on input line 18.
-<include/DSIC.png, id=392, 92.7465pt x 64.3203pt>
+<include/DSIC.png, id=456, 92.7465pt x 64.3203pt>
 File: include/DSIC.png Graphic file (type png)
 <use include/DSIC.png>
 Package pdftex.def Info: include/DSIC.png  used on input line 22.
@@ -1739,10 +1739,57 @@ LaTeX Info: Redefining \% on input line 913.
  [75]
 LaTeX Info: Redefining \. on input line 965.
 LaTeX Info: Redefining \% on input line 965.
- [76])
+ [76]) (secciones/08_EjecucionFuncionamiento.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [77] [78
+
+]
+Cap\'{\i }tulo 7.
+[79]
+LaTeX Info: Redefining \. on input line 71.
+LaTeX Info: Redefining \% on input line 71.
+ [80]
+LaTeX Info: Redefining \. on input line 95.
+LaTeX Info: Redefining \% on input line 95.
+ [81]
+LaTeX Info: Redefining \. on input line 127.
+LaTeX Info: Redefining \% on input line 127.
+ [82]
+LaTeX Info: Redefining \. on input line 127.
+LaTeX Info: Redefining \% on input line 127.
+ [83]
+LaTeX Info: Redefining \. on input line 169.
+LaTeX Info: Redefining \% on input line 169.
+ [84]
+LaTeX Info: Redefining \. on input line 169.
+LaTeX Info: Redefining \% on input line 169.
+ [85]
+LaTeX Info: Redefining \. on input line 200.
+LaTeX Info: Redefining \% on input line 200.
+ [86]
+LaTeX Info: Redefining \. on input line 200.
+LaTeX Info: Redefining \% on input line 200.
+ [87]
+Overfull \hbox (15.94644pt too wide) in paragraph at lines 207--208
+\T1/pbk/l/n/10.95 tes de-fi-ni-dos en el fi-che-ro \T1/pcr/m/n/10.95 render.yam
+l \T1/pbk/l/n/10.95 del re-po-si-to-rio. El pri-me-ro (\T1/pcr/m/n/10.95 tfm-bp
+mn-frontend\T1/pbk/l/n/10.95 )
+ []
+
+
+Overfull \hbox (76.60347pt too wide) in paragraph at lines 207--208
+\T1/pbk/l/n/10.95 es un si-tio es-tá-ti-co que sir-ve el \T1/pbk/l/it/10.95 bun
+d-le \T1/pbk/l/n/10.95 Web-pack de la ex-ten-sión. El se-gun-do (\T1/pcr/m/n/10
+.95 tfm-bpmn-mcp-server\T1/pbk/l/n/10.95 )
+ []
+
+LaTeX Info: Redefining \. on input line 214.
+LaTeX Info: Redefining \% on input line 214.
+[88])
 LaTeX Info: Redefining \. on input line 63.
 LaTeX Info: Redefining \% on input line 63.
- [77] [78
+ [89] [90
 
 ] (secciones/06_Bibliografia.tex
 Underfull \hbox (badness 1107) in paragraph at lines 16--17
@@ -1792,7 +1839,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 31--32
 le en:
  []
 
-[79
+[91
 
 ]
 Underfull \hbox (badness 1661) in paragraph at lines 40--41
@@ -1833,12 +1880,12 @@ P. (2024). Ge-
 )
 LaTeX Info: Redefining \. on input line 70.
 LaTeX Info: Redefining \% on input line 70.
- [80] (secciones/AnexoI.tex) (secciones/AnexoII.tex [81
+ [92] (secciones/AnexoI.tex) (secciones/AnexoII.tex [93
 
 
-] [82
+] [94
 
-]) [83]
+]) [95]
 (plantilla_TFM.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
@@ -1855,17 +1902,17 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `plantilla_TFM.out' has not changed.
-(rerunfilecheck)             Checksum: 0D6100028732AD807399C7FEDA6AFEDF;21406.
+(rerunfilecheck)             Checksum: C0988326EBD1FC4668833DFE70943797;25220.
  )
 (\end occurred inside a group at level 1)
 
 ### simple group (level 1) entered at line 27 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 28758 strings out of 467871
- 524308 string characters out of 5417408
- 1703433 words of memory out of 5000000
- 56086 multiletter control sequences out of 15000+600000
+ 28889 strings out of 467871
+ 527189 string characters out of 5417408
+ 1706527 words of memory out of 5000000
+ 56171 multiletter control sequences out of 15000+600000
  677417 words of font info for 137 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  89i,13n,107p,1493b,2383s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1877,9 +1924,9 @@ KTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Program
 s/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb><C:/Users/USUARIO/AppData/Local/Pr
 ograms/MiKTeX/fonts/type1/urw/courier/ucrb8a.pfb><C:/Users/USUARIO/AppData/Loca
 l/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on plantilla_TFM.pdf (95 pages, 630166 bytes).
+Output written on plantilla_TFM.pdf (107 pages, 667439 bytes).
 PDF statistics:
- 2038 PDF objects out of 2073 (max. 8388607)
- 1015 named destinations out of 1200 (max. 500000)
- 791 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2204 PDF objects out of 2487 (max. 8388607)
+ 1058 named destinations out of 1200 (max. 500000)
+ 919 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -271,6 +271,71 @@
 \newlabel{subsec:helpers}{{6.2.7}{77}{Funciones auxiliares}{subsection.6.2.7}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.7.1}\texttt  {effectiveLanes}}{77}{subsubsection.6.2.7.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.7.2}\texttt  {elementLabel}}{77}{subsubsection.6.2.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Ejecución y funcionamiento del sistema}{79}{chapter.7}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{cap:ejecucion}{{7}{79}{Ejecución y funcionamiento del sistema}{chapter.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Interfaz general del sistema}{79}{section.7.1}\protected@file@percent }
+\newlabel{sec:interfazGeneral}{{7.1}{79}{Interfaz general del sistema}{section.7.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Generación iterativa de modelos BPMN}{79}{section.7.2}\protected@file@percent }
+\newlabel{sec:demoGeneracion}{{7.2}{79}{Generación iterativa de modelos BPMN}{section.7.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.1}{\ignorespaces Vista general de la interfaz del sistema}}{80}{figure.7.1}\protected@file@percent }
+\newlabel{fig:interfazGeneral}{{7.1}{80}{Vista general de la interfaz del sistema}{figure.7.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.1}Paso 1 --- Descripción del proceso}{80}{subsection.7.2.1}\protected@file@percent }
+\newlabel{subsec:demoDescripcion}{{7.2.1}{80}{Paso 1 --- Descripción del proceso}{subsection.7.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.2}{\ignorespaces Introducción de la descripción del proceso en el panel conversacional. El usuario ha descrito un proceso de compra en línea con varios departamentos internos y actores externos.}}{80}{figure.7.2}\protected@file@percent }
+\newlabel{fig:genDescripcion}{{7.2}{80}{Introducción de la descripción del proceso en el panel conversacional. El usuario ha descrito un proceso de compra en línea con varios departamentos internos y actores externos}{figure.7.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{80}{subsection.7.2.2}\protected@file@percent }
+\newlabel{subsec:demoEstructura}{{7.2.2}{80}{Paso 2 --- Identificación de participantes y estructura}{subsection.7.2.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.3}{\ignorespaces Resultado de la identificación de participantes.}}{81}{figure.7.3}\protected@file@percent }
+\newlabel{fig:genEstructura}{{7.3}{81}{Resultado de la identificación de participantes}{figure.7.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{81}{subsection.7.2.3}\protected@file@percent }
+\newlabel{subsec:demoInicio}{{7.2.3}{81}{Paso 3 --- Identificación del inicio del proceso}{subsection.7.2.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.4}{\ignorespaces Identificación del inicio del proceso.}}{81}{figure.7.4}\protected@file@percent }
+\newlabel{fig:genInicio}{{7.4}{81}{Identificación del inicio del proceso}{figure.7.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{81}{subsection.7.2.4}\protected@file@percent }
+\newlabel{subsec:demoFlujo}{{7.2.4}{81}{Paso 4 --- Definición del flujo paso a paso}{subsection.7.2.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.5}{\ignorespaces Generación paso a paso del flujo del proceso. El sistema propone una puerta exclusiva (XOR).}}{82}{figure.7.5}\protected@file@percent }
+\newlabel{fig:genFlujo}{{7.5}{82}{Generación paso a paso del flujo del proceso. El sistema propone una puerta exclusiva (XOR)}{figure.7.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{82}{subsection.7.2.5}\protected@file@percent }
+\newlabel{subsec:demoDiagrama}{{7.2.5}{82}{Paso 5 --- Diagrama BPMN generado}{subsection.7.2.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{82}{subsection.7.2.6}\protected@file@percent }
+\newlabel{subsec:demoGeneracionCompleta}{{7.2.6}{82}{Alternativa: generación completa del diagrama}{subsection.7.2.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.6}{\ignorespaces Diagrama BPMN 2.0 generado y cargado en el editor bpmn.io. Se aprecian las tres calles del \textit  {pool} principal (Ventas, Logística, Atención al Cliente), el \textit  {pool} externo del Cliente, los \textit  {gateways} con sus ramas y los flujos de mensaje entre participantes.}}{83}{figure.7.6}\protected@file@percent }
+\newlabel{fig:genDiagrama}{{7.6}{83}{Diagrama BPMN 2.0 generado y cargado en el editor bpmn.io. Se aprecian las tres calles del \textit {pool} principal (Ventas, Logística, Atención al Cliente), el \textit {pool} externo del Cliente, los \textit {gateways} con sus ramas y los flujos de mensaje entre participantes}{figure.7.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.7}{\ignorespaces Modo de generación completa. Tras confirmar la estructura, el usuario activa la generación automática: el sistema solicita únicamente el evento de inicio y, a continuación, genera y renderiza el diagrama BPMN íntegro en una sola operación.}}{83}{figure.7.7}\protected@file@percent }
+\newlabel{fig:genCompleta}{{7.7}{83}{Modo de generación completa. Tras confirmar la estructura, el usuario activa la generación automática: el sistema solicita únicamente el evento de inicio y, a continuación, genera y renderiza el diagrama BPMN íntegro en una sola operación}{figure.7.7}{}}
+\citation{sweeney2001perval}
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}Edición conversacional del diagrama}{84}{section.7.3}\protected@file@percent }
+\newlabel{sec:demoEdicion}{{7.3}{84}{Edición conversacional del diagrama}{section.7.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.8}{\ignorespaces Instrucción de refinamiento introducida en el panel conversacional: el usuario solicita añadir un evento de espera entre la preparación del envío y la generación de la etiqueta. El historial de mensajes anterior sigue visible en el panel.}}{84}{figure.7.8}\protected@file@percent }
+\newlabel{fig:edicionInstruccion}{{7.8}{84}{Instrucción de refinamiento introducida en el panel conversacional: el usuario solicita añadir un evento de espera entre la preparación del envío y la generación de la etiqueta. El historial de mensajes anterior sigue visible en el panel}{figure.7.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{84}{section.7.4}\protected@file@percent }
+\newlabel{sec:demoPerval}{{7.4}{84}{Análisis de valor percibido PERVAL}{section.7.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{84}{subsection.7.4.1}\protected@file@percent }
+\newlabel{subsec:demoPervalConfig}{{7.4.1}{84}{Configuración del análisis}{subsection.7.4.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{84}{subsection.7.4.2}\protected@file@percent }
+\newlabel{subsec:demoPervalResultados}{{7.4.2}{84}{Resultados del análisis}{subsection.7.4.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.9}{\ignorespaces Diagrama BPMN actualizado tras la instrucción de refinamiento. Se ha insertado un evento de temporizador en la calle de Logística, con sus flujos de secuencia de entrada y salida correctamente reconectados.}}{85}{figure.7.9}\protected@file@percent }
+\newlabel{fig:edicionResultado}{{7.9}{85}{Diagrama BPMN actualizado tras la instrucción de refinamiento. Se ha insertado un evento de temporizador en la calle de Logística, con sus flujos de secuencia de entrada y salida correctamente reconectados}{figure.7.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.10}{\ignorespaces Formulario de configuración del análisis PERVAL en el panel conversacional. El usuario ha seleccionado el alcance «Entregas al cliente externo» y ha especificado «Cliente» como actor de referencia.}}{85}{figure.7.10}\protected@file@percent }
+\newlabel{fig:pervalConfig}{{7.10}{85}{Formulario de configuración del análisis PERVAL en el panel conversacional. El usuario ha seleccionado el alcance «Entregas al cliente externo» y ha especificado «Cliente» como actor de referencia}{figure.7.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.11}{\ignorespaces Resultados del análisis PERVAL en el panel conversacional. Cada elemento analizado muestra sus dimensiones PERVAL activas con el nivel de rendimiento codificado por color (muy bueno / bueno / regular / malo) y la justificación generada por el LLM. Al pie se presenta el resumen agregado por dimensión.}}{86}{figure.7.11}\protected@file@percent }
+\newlabel{fig:pervalResultados}{{7.11}{86}{Resultados del análisis PERVAL en el panel conversacional. Cada elemento analizado muestra sus dimensiones PERVAL activas con el nivel de rendimiento codificado por color (muy bueno / bueno / regular / malo) y la justificación generada por el LLM. Al pie se presenta el resumen agregado por dimensión}{figure.7.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.5}Entrada por voz}{86}{section.7.5}\protected@file@percent }
+\newlabel{sec:demoVoz}{{7.5}{86}{Entrada por voz}{section.7.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.6}Soporte multilingüe}{86}{section.7.6}\protected@file@percent }
+\newlabel{sec:demoMultiidioma}{{7.6}{86}{Soporte multilingüe}{section.7.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.12}{\ignorespaces Diagrama BPMN con los elementos analizados resaltados visualmente. Los elementos con impacto positivo en el valor percibido aparecen con fondo verde; los que presentan margen de mejora, con fondo ámbar.}}{87}{figure.7.12}\protected@file@percent }
+\newlabel{fig:pervalDiagrama}{{7.12}{87}{Diagrama BPMN con los elementos analizados resaltados visualmente. Los elementos con impacto positivo en el valor percibido aparecen con fondo verde; los que presentan margen de mejora, con fondo ámbar}{figure.7.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.13}{\ignorespaces Entrada por voz activa. El botón de micrófono muestra la animación de escucha y la transcripción en tiempo real aparece en el campo de texto del panel conversacional.}}{87}{figure.7.13}\protected@file@percent }
+\newlabel{fig:vozEscuchando}{{7.13}{87}{Entrada por voz activa. El botón de micrófono muestra la animación de escucha y la transcripción en tiempo real aparece en el campo de texto del panel conversacional}{figure.7.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.14}{\ignorespaces Interfaz del sistema en modo inglés. Los mensajes del panel conversacional, los botones de acción y los resultados del análisis PERVAL se muestran en inglés, al igual que los \textit  {prompts} enviados al LLM.}}{88}{figure.7.14}\protected@file@percent }
+\newlabel{fig:multiidioma}{{7.14}{88}{Interfaz del sistema en modo inglés. Los mensajes del panel conversacional, los botones de acción y los resultados del análisis PERVAL se muestran en inglés, al igual que los \textit {prompts} enviados al LLM}{figure.7.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.7}Despliegue en producción}{88}{section.7.7}\protected@file@percent }
+\newlabel{sec:demoDespliegue}{{7.7}{88}{Despliegue en producción}{section.7.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.15}{\ignorespaces Panel de administración de Render.com mostrando los dos servicios desplegados: el sitio estático de la extensión y el servidor MCP Node.js, ambos en estado \textit  {Live} y con HTTPS activo.}}{88}{figure.7.15}\protected@file@percent }
+\newlabel{fig:despliegueRender}{{7.15}{88}{Panel de administración de Render.com mostrando los dos servicios desplegados: el sitio estático de la extensión y el servidor MCP Node.js, ambos en estado \textit {Live} y con HTTPS activo}{figure.7.15}{}}
 \bibcite{kourani2025evaluating}{1}
 \bibcite{kourani2024process}{2}
 \bibcite{riano2021}{3}
@@ -293,11 +358,11 @@
 \bibcite{weske2019}{20}
 \bibcite{mendling2010}{21}
 \bibcite{zeithaml1988}{22}
-\@writefile{toc}{\contentsline {chapter}{Bibliografía}{80}{chapter*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{Anexo I}{81}{appendix*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{Bibliografía}{92}{chapter*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{Anexo I}{93}{appendix*.10}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {chapter}{Anexo II}{83}{appendix*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{Anexo II}{95}{appendix*.11}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\gdef \@abspage@last{95}
+\gdef \@abspage@last{107}

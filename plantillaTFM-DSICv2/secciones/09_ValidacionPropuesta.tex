@@ -3,7 +3,283 @@
 %% Inicio del capítulo de validación de la propuesta
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 \chapter{Validación de la propuesta}
+\label{cap:validacion}
+
+La validación de la herramienta desarrollada en este TFM se lleva a cabo mediante un cuestionario de validación basado en el Modelo de Aceptación Tecnológica (\textit{Technology Acceptance Model}, TAM). El objetivo es determinar en qué medida los usuarios perciben el sistema como útil y fácil de usar, y en qué medida estarían dispuestos a adoptarlo en su actividad habitual. La validación recoge la percepción de un grupo de usuarios que interactúan directamente con el sistema y cumplimentan un cuestionario diseñado ad hoc, que cubre tanto las dimensiones clásicas del TAM como aspectos específicos de la herramienta que el modelo original no contempla. Los resultados se presentan en el capítulo siguiente.
+
+%%---------------------------------------------------------
+\section{El Modelo de Aceptación Tecnológica (TAM)}
+\label{sec:tam}
+%%---------------------------------------------------------
+
+El Modelo de Aceptación Tecnológica fue propuesto por Davis~\cite{davis1989tam} como marco teórico para predecir y explicar la aceptación y el uso de sistemas de información. Basado en la Teoría de la Acción Razonada (\textit{Theory of Reasoned Action}, TRA) de Fishbein y Ajzen, el TAM postula que la aceptación de una tecnología está determinada fundamentalmente por dos creencias cognitivas del usuario:
+
+\begin{itemize}
+  \item \textbf{Utilidad percibida} (\textit{Perceived Usefulness}, PU): grado en que el usuario cree que el uso del sistema mejorará su rendimiento en la tarea que realiza. Se centra en la \textit{efectividad} de la herramienta, es decir, si ayuda a hacer mejor o más rápido algo que de otro modo costaría más.
+
+  \item \textbf{Facilidad de uso percibida} (\textit{Perceived Ease of Use}, PEOU): grado en que el usuario cree que la interacción con el sistema estará libre de esfuerzo. Recoge tanto la facilidad de aprendizaje inicial como la fluidez en el uso continuado.
+\end{itemize}
+
+Ambas variables determinan de forma independiente la \textbf{intención de uso} (ITU), predictor directo del uso real del sistema. La figura~\ref{fig:tamModelo} ilustra el modelo y sus relaciones causales principales.
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.72\linewidth}{!}{%
+\begin{tikzpicture}[
+  tambox/.style={draw, thick, rounded corners=5pt,
+                 minimum width=3.8cm, minimum height=1.3cm,
+                 align=center, fill=blue!7, font=\normalsize},
+  >=Stealth, thick
+]
+\node[tambox] (peou) at (0,   2.8) {Facilidad de uso\\percibida (PEOU)};
+\node[tambox] (pu)   at (0,   0)   {Utilidad\\percibida (PU)};
+\node[tambox] (itu)  at (8,   1.4) {Intención\\de uso (ITU)};
+
+\draw[->] (peou.east) .. controls +(3, 0) and +(-3, 1) .. (itu.west);
+\draw[->] (pu.east)   .. controls +(3, 0) and +(-3,-1) .. (itu.west);
+\end{tikzpicture}%
+}
+\caption{Modelo de Aceptación Tecnológica (TAM) aplicado en esta validación. Adaptado de Davis~\cite{davis1989tam}. PEOU y PU son predictores independientes de la intención de uso (ITU).}
+\label{fig:tamModelo}
+\end{figure}
+
+El cuestionario de validación toma como referencia las dos relaciones causales principales del TAM: la utilidad percibida (PU) influye positivamente sobre la intención de uso (ITU), y la facilidad de uso percibida (PEOU) influye también positivamente sobre la intención de uso (ITU). Las medidas obtenidas permiten comprobar si estas relaciones se observan en el contexto específico de la herramienta validada.
+
+La elección del TAM como marco de validación está justificada por varias razones. En primer lugar, es el modelo más extendido para evaluar la aceptación de herramientas de software en contextos académicos y profesionales, lo que facilita la comparación con trabajos previos. En segundo lugar, la herramienta introduce una forma de interacción novedosa, cuya aceptación por parte de los usuarios técnicos no puede darse por sentada y requiere una evaluación directa. En tercer lugar, el TAM puede complementarse con ítems ad hoc que capturen dimensiones específicas de la herramienta no contempladas en el modelo original.
+
+%%---------------------------------------------------------
+\section{Diseño del estudio}
+\label{sec:disenioEstudio}
+%%---------------------------------------------------------
+
+\subsection{Participantes}
+\label{subsec:participantes}
+
+El estudio se lleva a cabo con un grupo de aproximadamente quince participantes. El perfil buscado comprende estudiantes de máster y grado en áreas de Informática, así como profesionales con experiencia en análisis o gestión de procesos de negocio. Se busca deliberadamente que el grupo sea homogéneo en cuanto al nivel de conocimiento previo de la notación BPMN y de la experiencia con herramientas de inteligencia artificial generativa, de modo que sea posible analizar si la herramienta resulta  accesible para perfiles técnicos.
+
+Se establece un requisito previo de conocimiento básico de BPMN y de experiencia previa con LLMs. Cualquier persona con estos conocimientos y que disponga de un navegador modernos puede participar sin instalar ningún software adicional.
+
+
+
+\subsection{Procedimiento}
+\label{subsec:procedimiento}
+
+La evaluación se realiza de forma autónoma por cada participante, siguiendo los pasos que se describen a continuación:
+
+\begin{enumerate}
+  \item \textbf{Acceso a la herramienta.} El participante accede a la aplicación desplegada en \url{https://tfm-bpmn-frontend.onrender.com/} desde su propio dispositivo.
+
+  \item \textbf{Exploración guiada de la interfaz.} Antes de comenzar la tarea, se informa al participante de todas las funcionalidades disponibles: generación guiada (paso a paso) y completa, edición conversacional, análisis PERVAL, entrada por voz y selector de idioma. A continuación se conceden aproximadamente cinco minutos para que explore libremente la interfaz, identificando las zonas principales (editor BPMN, panel conversacional, botón de voz y selector de idioma). Se le indica también que, durante la generación, el sistema solicitará especificar el evento de inicio del proceso (el departamento o actor donde comienza el flujo).
+
+  \item \textbf{Tarea de modelado guiado.} El participante modela el proceso de negocio descrito en la sección~\ref{subsec:casoUso} utilizando el modo de generación guiado (paso a paso), confirmando o corrigiendo cada propuesta del sistema.
+
+  \item \textbf{Exploración de funcionalidades adicionales.} Una vez generado el diagrama, el participante prueba, al menos, una instrucción de refinamiento conversacional y ejecuta el análisis de valor percibido PERVAL. Se le anima también a explorar el modo de generación completa y la entrada por voz si lo desea.
+
+  \item \textbf{Cumplimentación del cuestionario.} El participante completa el cuestionario descrito en la sección~\ref{sec:cuestionario} a través de un formulario en línea.
+\end{enumerate}
+
+No se establece un tiempo máximo; la duración estimada total es de entre 15 y 25 minutos.
+
+\subsection{Caso de uso para la evaluación}
+\label{subsec:casoUso}
+
+Para homogeneizar la experiencia de todos los participantes, se proporciona a cada uno la misma descripción de proceso de negocio. El proceso ha sido diseñado con una complejidad moderada: suficiente para que el sistema genere un diagrama con varias calles, puertas lógicas y actores externos, pero sin exceder el contexto del modelo de lenguaje. La descripción facilitada al participante es la siguiente:
+
+\bigskip
+\noindent
+\begin{center}
+\setlength{\fboxsep}{12pt}
+\fbox{%
+  \begin{minipage}{0.88\linewidth}
+    \small
+    Una empresa de comercio electrónico llamada \textbf{TiendaRápida} gestiona pedidos de clientes a través de su plataforma web. Cuando un cliente finaliza una compra, el departamento de \textbf{Ventas} registra el pedido y verifica la disponibilidad del producto en el almacén. Si el producto está disponible, el departamento de \textbf{Almacén} prepara el paquete y genera la documentación de envío; a continuación, un \textbf{transportista} externo recoge el paquete y lo entrega al cliente. Si el producto no está disponible, el departamento de \textbf{Atención al Cliente} contacta con el cliente para ofrecerle dos opciones: esperar a la reposición del stock o cancelar el pedido. Si el cliente decide esperar, se genera una reserva y se notifica al almacén para gestionar la reposición; si decide cancelar, se inicia el trámite de cancelación. En todos los casos, la \textbf{pasarela de pago} (actor externo) procesa el cargo o el reembolso correspondiente según el resultado final del pedido.
+  \end{minipage}%
+}
+\end{center}
+\bigskip
+
+Este proceso presenta las siguientes características relevantes para la evaluación: (i)~tres departamentos internos (Ventas, Almacén, Atención al Cliente); (ii)~tres actores externos (Cliente, Transportista y Pasarela de pago); (iii)~una puerta lógica exclusiva principal (disponibilidad de producto) con dos ramas, una de las cuales contiene a su vez una bifurcación adicional (esperar o cancelar); y (iv)~flujos de mensaje hacia el cliente externo en distintos momentos del proceso.
+
+%%---------------------------------------------------------
+\section{Instrumento de medida: el cuestionario}
+\label{sec:cuestionario}
+%%---------------------------------------------------------
+
+El cuestionario se organiza en cinco bloques. Los bloques B, C y D recogen los ítems del TAM clásico (utilidad percibida (PU), facilidad de uso percibida (PEOU) e intención de uso (ITU)) medidos con una escala Likert de siete puntos (1~=~\textit{Totalmente en desacuerdo}; 7~=~\textit{Totalmente de acuerdo}). El bloque A recoge variables demográficas y de perfil. El bloque E contiene ítems específicos de la herramienta, también en escala Likert de siete puntos. El cuestionario cierra con dos preguntas abiertas de carácter cualitativo.
+
+\subsection{Bloque A: Datos demográficos y perfil del participante}
+\label{subsec:bloqueA}
+
+Las preguntas de este bloque permitirán caracterizar a los participantes y analizar si existen diferencias en la percepción de la herramienta en función del perfil (tabla~\ref{tab:demograficos}).
+
+\begin{table}[htbp]
+\centering
+\caption{Bloque A --- Variables demográficas y de perfil del participante.}
+\label{tab:demograficos}
+\begin{tabular}{@{} p{0.65cm} p{5.4cm} p{6.5cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Cód.} & \textbf{Variable} & \textbf{Opciones / escala} \\
+\hline
+\rule{0pt}{10pt}D1 & Edad &
+  $<$20 / 20--24 / 25--29 / 30--39 / $\geq$40 años \\[4pt]
+D2 & Género &
+  Hombre / Mujer / No binario / Prefiero no indicarlo \\[4pt]
+D3 & Nivel de estudios completado &
+  Grado / Máster / Doctorado / FP Superior / Otro \\[4pt]
+D4 & Conocimiento previo de la notación BPMN &
+  Escala 1--5 (1~=~Ninguno; 5~=~Experto) \\[4pt]
+D5 & Experiencia con herramientas de modelado de procesos (Bizagi, Camunda, Lucidchart\ldots) &
+  Escala 1--5 (1~=~Ninguna; 5~=~Uso avanzado) \\[4pt]
+D6 & Frecuencia de uso de herramientas de IA generativa (ChatGPT, Copilot, Gemini\ldots) &
+  Nunca / Ocasional / Habitual / Diaria \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Bloque B: Utilidad percibida (PU)}
+\label{subsec:bloqueB}
+
+Los ocho ítems de este bloque miden el grado en que los participantes perciben que la herramienta mejora su capacidad para modelar procesos de negocio, evaluando tanto la utilidad general como aspectos concretos del modelado (tabla~\ref{tab:pu}).
+
+\begin{table}[H]
+\centering
+\caption{Bloque B --- Ítems de Utilidad Percibida (PU). Escala Likert 1 (TD) -- 7 (TA).}
+\label{tab:pu}
+\begin{tabular}{@{} p{0.8cm} p{12cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Cód.} & \textbf{Ítem} \\
+\hline
+\rule{0pt}{10pt}PU1 & El sistema me permite crear diagramas BPMN de forma más rápida que con herramientas de modelado tradicionales. \\[4pt]
+PU2 & El uso del sistema mejora mi productividad en el modelado de procesos de negocio. \\[4pt]
+PU3 & El sistema me resulta útil para representar procesos que implican varios departamentos y actores externos. \\[4pt]
+PU4 & El sistema identifica correctamente los participantes del proceso (departamentos internos y actores externos). \\[4pt]
+PU5 & Las decisiones y condiciones de bifurcación propuestas por el sistema reflejan adecuadamente la lógica del proceso descrito. \\[4pt]
+PU6 & Las preguntas que formula el sistema durante la generación guiada son pertinentes para construir el diagrama. \\[4pt]
+PU7 & La colaboración paso a paso entre usuario y sistema produce un diagrama más fiel al proceso real que una generación completamente autónoma. \\[4pt]
+PU8 & En general, considero que el sistema es una herramienta valiosa para el modelado de procesos. \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Bloque C: Facilidad de uso percibida (PEOU)}
+\label{subsec:bloqueC}
+
+Los ocho ítems de este bloque miden la facilidad con que los participantes han podido interactuar con el sistema y obtener el resultado deseado, incluyendo la facilidad de la interacción cooperativa y el uso de las modalidades de entrada alternativas (tabla~\ref{tab:peou}).
+
+\begin{table}[htbp]
+\centering
+\caption{Bloque C --- Ítems de Facilidad de Uso Percibida (PEOU). Escala Likert 1 (TD) -- 7 (TA).}
+\label{tab:peou}
+\begin{tabular}{@{} p{1.0cm} p{11.8cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Cód.} & \textbf{Ítem} \\
+\hline
+\rule{0pt}{10pt}PEOU1 & Aprender a utilizar el sistema ha sido sencillo. \\[4pt]
+PEOU2 & Describir el proceso de negocio en lenguaje natural es una forma intuitiva de interactuar con el sistema. \\[4pt]
+PEOU3 & La interfaz del sistema (editor BPMN y panel conversacional) es clara y comprensible. \\[4pt]
+PEOU4 & El número de preguntas que formula el sistema durante la generación guiada es adecuado (ni excesivo ni insuficiente). \\[4pt]
+PEOU5 & Confirmar o corregir cada propuesta del sistema durante la generación resulta fácil e intuitivo. \\[4pt]
+PEOU6 & El cambio de idioma entre español e inglés es sencillo de realizar desde la interfaz. \\[4pt]
+PEOU7 & Introducir la descripción del proceso mediante voz resulta tan intuitivo como escribirla por teclado. \\[4pt]
+PEOU8 & En general, considero que el sistema es fácil de usar. \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Bloque D: Intención de uso (ITU)}
+\label{subsec:bloqueD}
+
+Los cinco ítems de este bloque recogen la disposición del participante a utilizar el sistema en el futuro (tabla~\ref{tab:itu}).
+
+\begin{table}[htbp]
+\centering
+\caption{Bloque D --- Ítems de Intención de Uso (ITU). Escala Likert 1 (TD) -- 7 (TA).}
+\label{tab:itu}
+\begin{tabular}{@{} p{0.8cm} p{12cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Cód.} & \textbf{Ítem} \\
+\hline
+\rule{0pt}{10pt}ITU1 & Tengo intención de utilizar este sistema en el futuro para modelar procesos de negocio. \\[4pt]
+ITU2 & Recomendaría el uso de este sistema a compañeros o colegas que necesiten crear diagramas BPMN. \\[4pt]
+ITU3 & Si tuviera acceso a esta herramienta en mi entorno de trabajo o estudio, la utilizaría con regularidad. \\[4pt]
+ITU4 & Preferiría utilizar este sistema antes que herramientas de modelado tradicionales para crear nuevos diagramas BPMN. \\[4pt]
+ITU5 & Utilizaría este sistema para introducir a otras personas en el modelado de procesos de negocio con BPMN. \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Bloque E: Ítems específicos de la herramienta}
+\label{subsec:bloqueE}
+
+Este bloque contiene siete ítems diseñados específicamente para este proyecto con el fin de medir dimensiones que el TAM clásico no contempla y que son especialmente relevantes para una herramienta de generación conversacional de modelos BPMN mediante LLM (tabla~\ref{tab:especificos}). Estos ítems no forman parte de escalas validadas preexistentes y constituyen una aportación exploratoria del estudio.
+
+\begin{table}[H]
+\centering
+\caption{Bloque E --- Ítems específicos de la herramienta. Escala Likert 1 (TD) -- 7 (TA).}
+\label{tab:especificos}
+\begin{tabular}{@{} p{0.7cm} p{6.8cm} p{5.0cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Cód.} & \textbf{Ítem} & \textbf{Dimensión medida} \\
+\hline
+\rule{0pt}{10pt}SP1 &
+  El modo de generación guiado me ha dado suficiente control sobre el resultado del diagrama. &
+  Control en la interacción humano--LLM (\textit{human-in-the-loop}) \\[8pt]
+SP2 &
+  El sistema reduce la necesidad de tener conocimientos previos de notación BPMN para crear diagramas. &
+  Democratización del modelado de procesos \\[8pt]
+SP3 &
+  La opción de generar el diagrama completo de una sola vez (sin confirmaciones intermedias) es una alternativa útil al modo guiado. &
+  Valor del modo de generación autónoma \\[8pt]
+SP4 &
+  El análisis automático de valor percibido (PERVAL) me aporta información útil sobre la calidad del proceso modelado. &
+  Valor del análisis IA sobre el modelo generado \\[8pt]
+SP5 &
+  Confío en que el diagrama BPMN generado representa fielmente el proceso de negocio que describí. &
+  Calibración de la confianza en el output del LLM \\[8pt]
+SP6 &
+  La posibilidad de introducir la descripción del proceso mediante voz facilita la interacción respecto a la escritura por teclado. &
+  Utilidad de la entrada multimodal por voz \\[8pt]
+SP7 &
+  La edición conversacional del diagrama (instrucciones en lenguaje natural para modificar el modelo generado) me ha resultado una forma cómoda de refinar el proceso. &
+  Utilidad de la edición conversacional del modelo \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+Las dimensiones cubiertas por el bloque E no han sido recogidas hasta la fecha en estudios TAM sobre herramientas de modelado de procesos, por lo que los resultados de estos ítems tienen un carácter exploratorio y constituyen una aportación exploratoria propia del presente trabajo.
+
+\subsection{Preguntas abiertas}
+\label{subsec:preguntasAbiertas}
+
+El cuestionario cierra con dos preguntas de respuesta libre, destinadas a recoger percepciones cualitativas que las escalas Likert no pueden capturar:
+
+\begin{enumerate}
+  \item \textit{¿Qué funcionalidad de la herramienta te ha parecido más útil o innovadora? ¿Por qué?}
+  \item \textit{¿Qué aspecto mejorarías o echarías en falta en la herramienta?}
+\end{enumerate}
+
+%%---------------------------------------------------------
+\section{Análisis de los datos}
+\label{sec:analisisPrevisto}
+%%---------------------------------------------------------
+
+Los datos recogidos se analizarán siguiendo las fases habituales en estudios de validación basados en TAM:
+
+\begin{enumerate}
+  \item \textbf{Estadística descriptiva.} Para cada ítem de los bloques B, C, D y E se calcularán la media ($\bar{x}$), la desviación típica ($\sigma$), la mediana y los valores mínimo y máximo, con el fin de obtener una imagen global de la percepción de los participantes.
+
+  \item \textbf{Fiabilidad interna de las escalas.} Se calculará el coeficiente alfa de Cronbach ($\alpha$) para cada constructo del TAM (PU, PEOU, ITU) con el fin de verificar la consistencia interna de cada escala. Se considera aceptable $\alpha \geq 0{,}7$ y bueno $\alpha \geq 0{,}8$~\cite{davis1989tam}.
+
+  \item \textbf{Análisis de correlaciones.} Se calculará la correlación de Pearson (o de Spearman en función de la distribución de los datos) entre las puntuaciones medias de los constructos PU, PEOU e ITU, con el objetivo de verificar si las relaciones que el TAM establece entre sus constructos se observan también en el contexto de esta herramienta.
+
+  \item \textbf{Análisis de los ítems específicos.} Los siete ítems del bloque E se analizarán de forma descriptiva e individual. Se prestará especial atención a SP5 (confianza en el modelo generado) y SP2 (democratización del modelado) como indicadores de la propuesta de valor diferencial del sistema respecto a herramientas de modelado convencionales.
+
+  \item \textbf{Análisis cualitativo.} Las respuestas a las preguntas abiertas se categorizarán de forma manual para identificar patrones comunes en los aspectos valorados positivamente y en las áreas de mejora señaladas por los participantes.
+\end{enumerate}
+
+Los resultados del estudio se presentan en el capítulo siguiente.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de validación de la propuesta

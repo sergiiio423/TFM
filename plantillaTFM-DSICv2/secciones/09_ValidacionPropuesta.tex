@@ -154,11 +154,14 @@ Los ocho ítems de este bloque miden el grado en que los participantes perciben 
 \rule{0pt}{10pt}PU1 & El sistema me permite crear diagramas BPMN de forma más rápida que con herramientas de modelado tradicionales. \\[4pt]
 PU2 & El uso del sistema mejora mi productividad en el modelado de procesos de negocio. \\[4pt]
 PU3 & El sistema me resulta útil para representar procesos que implican varios departamentos y actores externos. \\[4pt]
-PU4 & El sistema identifica correctamente los participantes del proceso (departamentos internos y actores externos). \\[4pt]
+PU4 & El sistema identifica correctamente los participantes del proceso. \\[4pt]
 PU5 & Las decisiones y condiciones de bifurcación propuestas por el sistema reflejan adecuadamente la lógica del proceso descrito. \\[4pt]
 PU6 & Las preguntas que formula el sistema durante la generación guiada son pertinentes para construir el diagrama. \\[4pt]
 PU7 & La colaboración paso a paso entre usuario y sistema produce un diagrama más fiel al proceso real que una generación completamente autónoma. \\[4pt]
-PU8 & En general, considero que el sistema es una herramienta valiosa para el modelado de procesos. \\[4pt]
+PU8 & La edición conversacional del diagrama me permite ajustarlo sin necesidad de conocer la sintaxis del BPMN. \\[4pt]
+PU9 & El análisis PERVAL integrado me ayuda a identificar qué elementos del proceso aportan más valor al cliente de una manera tanto visual como textual. \\[4pt]
+PU10 & El modo de generación completa es útil para obtener rápidamente un primer borrador del proceso. \\[4pt] 
+PU11 & En general, considero que el sistema es una herramienta valiosa para el modelado de procesos. \\[4pt]
 \hline
 \end{tabular}
 \end{table}
@@ -168,22 +171,25 @@ PU8 & En general, considero que el sistema es una herramienta valiosa para el mo
 
 Los ocho ítems de este bloque miden la facilidad con que los participantes han podido interactuar con el sistema y obtener el resultado deseado, incluyendo la facilidad de la interacción cooperativa y el uso de las modalidades de entrada alternativas (tabla~\ref{tab:peou}).
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Bloque C --- Ítems de Facilidad de Uso Percibida (PEOU). Escala Likert 1 (TD) -- 7 (TA).}
 \label{tab:peou}
-\begin{tabular}{@{} p{1.0cm} p{11.8cm} @{}}
-\hline
+\begin{tabular}{@{} p{1.0cm} @{\hspace{0.8cm}} p{11.8cm} @{}}\hline
 \rule{0pt}{10pt}\textbf{Cód.} & \textbf{Ítem} \\
 \hline
 \rule{0pt}{10pt}PEOU1 & Aprender a utilizar el sistema ha sido sencillo. \\[4pt]
 PEOU2 & Describir el proceso de negocio en lenguaje natural es una forma intuitiva de interactuar con el sistema. \\[4pt]
 PEOU3 & La interfaz del sistema (editor BPMN y panel conversacional) es clara y comprensible. \\[4pt]
-PEOU4 & El número de preguntas que formula el sistema durante la generación guiada es adecuado (ni excesivo ni insuficiente). \\[4pt]
+PEOU4 & El número de preguntas que formula el sistema durante el proceso es adecuado. \\[4pt]
 PEOU5 & Confirmar o corregir cada propuesta del sistema durante la generación resulta fácil e intuitivo. \\[4pt]
 PEOU6 & El cambio de idioma entre español e inglés es sencillo de realizar desde la interfaz. \\[4pt]
 PEOU7 & Introducir la descripción del proceso mediante voz resulta tan intuitivo como escribirla por teclado. \\[4pt]
-PEOU8 & En general, considero que el sistema es fácil de usar. \\[4pt]
+PEOU8 & Iniciar y utilizar el análisis PERVAL desde el panel conversacional resulta sencillo. \\[4pt]
+PEOU9 & Modificar el diagrama directamente sobre el lienzo de bpmn.io es intuitivo. \\[4pt]
+PEOU10 & El modo de generación completa es fácil de activar y utilizar. \\[4pt]
+PEOU11 & Identificar y especificar el punto de inicio del proceso cuando el sistema lo solicita resulta sencillo e intuitivo.\\[4pt] 
+PEOU12 & En general, considero que el sistema es fácil de usar. \\[4pt]
 \hline
 \end{tabular}
 \end{table}
@@ -213,13 +219,13 @@ ITU5 & Utilizaría este sistema para introducir a otras personas en el modelado 
 \subsection{Bloque E: Ítems específicos de la herramienta}
 \label{subsec:bloqueE}
 
-Este bloque contiene siete ítems diseñados específicamente para este proyecto con el fin de medir dimensiones que el TAM clásico no contempla y que son especialmente relevantes para una herramienta de generación conversacional de modelos BPMN mediante LLM (tabla~\ref{tab:especificos}). Estos ítems no forman parte de escalas validadas preexistentes y constituyen una aportación exploratoria del estudio.
+Este bloque contiene once ítems diseñados específicamente para este proyecto con el fin de medir dimensiones que el TAM clásico no contempla y que son especialmente relevantes para una herramienta de generación conversacional de modelos BPMN mediante LLM (tabla~\ref{tab:especificos}). Estos ítems no forman parte de escalas validadas preexistentes y constituyen una aportación exploratoria del estudio.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Bloque E --- Ítems específicos de la herramienta. Escala Likert 1 (TD) -- 7 (TA).}
 \label{tab:especificos}
-\begin{tabular}{@{} p{0.7cm} p{6.8cm} p{5.0cm} @{}}
+\begin{tabular}{@{} p{0.7cm} @{\hspace{0.8cm}} p{6.8cm} p{5.0cm} @{}}
 \hline
 \rule{0pt}{10pt}\textbf{Cód.} & \textbf{Ítem} & \textbf{Dimensión medida} \\
 \hline
@@ -244,6 +250,21 @@ SP6 &
 SP7 &
   La edición conversacional del diagrama (instrucciones en lenguaje natural para modificar el modelo generado) me ha resultado una forma cómoda de refinar el proceso. &
   Utilidad de la edición conversacional del modelo \\[4pt]
+SP8 & 
+El soporte multilingüe resulta útil para trabajar con equipos o clientes en ambos idiomas. & 
+Valor del soporte multilingüe \\[4pt]
+
+SP9 &
+La posibilidad de modificar el diagrama directamente en el lienzo de bmpn.io complementa bien la interacción conversacional.& 
+Valor de la edición directa sobre el canvas \\[4pt]
+
+SP10 &
+La integración del análisis PERVAL dentro de la propia herramienta es una ventaja significativa. & 
+Valor de la integración del modelado + análisis de valor \\[4pt]
+
+SP11 & El sistema en su conjunto me parece una solución completa para el modelado de procesos orientado al valor. & 
+Percepción de completitud de la solución \\[4pt]
+
 \hline
 \end{tabular}
 \end{table}

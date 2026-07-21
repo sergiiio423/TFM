@@ -1,0 +1,134 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {chapter}{\numberline {1}Introducción}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Motivación}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Objetivos}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Impacto Esperado}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Metodología}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Estructura}{4}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Convenciones}{5}{section.1.6}%
+\contentsline {chapter}{\numberline {2}Fundamentos}{7}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Modelos de lenguaje de gran escala (LLMs)}{7}{section.2.1}%
+\contentsline {section}{\numberline {2.2}BPMN: notación y modelado de procesos de negocio}{9}{section.2.2}%
+\contentsline {section}{\numberline {2.3}La clasificación PERVAL}{11}{section.2.3}%
+\contentsline {section}{\numberline {2.4}El protocolo \textit {Model Context Protocol} (MCP)}{12}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Estado del arte}{15}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Análisis de trabajos relacionados}{15}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}LLMs en la gestión de procesos de negocio}{15}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Generación automática de modelos BPMN 2.0 desde descripciones textuales}{16}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}IA generativa y modelado conversacional de procesos}{17}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.4}BPMN-Chatbot: modelado de procesos mediante interfaz conversacional}{17}{subsection.3.1.4}%
+\contentsline {section}{\numberline {3.2}Síntesis del estado del arte y oportunidades de investigación}{18}{section.3.2}%
+\contentsline {chapter}{\numberline {4}Análisis del problema}{21}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Modelado funcional del sistema}{21}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Diagrama de actores}{22}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Diagramas de casos de uso}{23}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}Análisis del marco legal y ético}{24}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Protección de datos}{25}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Propiedad intelectual y licencias}{25}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Consideraciones éticas}{25}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.3}Identificación y análisis de soluciones posibles}{26}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Selección del editor BPMN base}{26}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Selección del proveedor de LLM}{27}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Arquitectura de integración: extensión directa frente a servidor MCP}{28}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Tecnologías para el desarrollo del \textit {frontend} y del servidor}{28}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}Solución propuesta}{31}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Requisitos funcionales}{31}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Requisitos no funcionales}{31}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Priorización de requisitos. MoSCoW}{32}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Historias de usuario}{35}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}Plan de trabajo}{40}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Diseño de la solución}{43}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Arquitectura del sistema}{43}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Justificación de la arquitectura adoptada}{44}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Arquitectura detallada por componente}{45}{subsection.5.1.2}%
+\contentsline {subsubsection}{\numberline {5.1.2.1}Extensión sobre bpmn.io (cliente MCP)}{45}{subsubsection.5.1.2.1}%
+\contentsline {subsubsection}{\numberline {5.1.2.2}Servidor MCP}{46}{subsubsection.5.1.2.2}%
+\contentsline {paragraph}{\numberline {5.1.2.2.1}Herramienta de análisis PERVAL (\texttt {analyze\_perval}).}{47}{paragraph.5.1.2.2.1}%
+\contentsline {section}{\numberline {5.2}Diseño detallado}{48}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Modelo de datos}{48}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Flujo de comunicación}{49}{subsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.2.1}Generación y refinamiento iterativo de modelos BPMN}{49}{subsubsection.5.2.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2.2}Análisis PERVAL}{50}{subsubsection.5.2.2.2}%
+\contentsline {section}{\numberline {5.3}Tecnología utilizada}{51}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Diseño}{51}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Programación}{52}{subsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.1}Lenguajes y tecnologías utilizados en cada componente}{52}{subsubsection.5.3.2.1}%
+\contentsline {paragraph}{\numberline {5.3.2.1.1}Extensión sobre bpmn.io.}{52}{paragraph.5.3.2.1.1}%
+\contentsline {paragraph}{\numberline {5.3.2.1.2}Servidor MCP.}{52}{paragraph.5.3.2.1.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.2}\textit {Frameworks} y bibliotecas}{53}{subsubsection.5.3.2.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.3}Entornos de desarrollo}{54}{subsubsection.5.3.2.3}%
+\contentsline {subsection}{\numberline {5.3.3}Control de versiones}{54}{subsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}Despliegue}{54}{subsection.5.3.4}%
+\contentsline {chapter}{\numberline {6}Desarrollo e implementación}{55}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Evolución del proyecto por \textit {sprints}}{55}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}\textit {Sprint} 0 (26/05/2026 -- 01/06/2026)}{55}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}\textit {Sprint} 1 (02/06/2026 -- 08/06/2026)}{56}{subsection.6.1.2}%
+\contentsline {subsection}{\numberline {6.1.3}\textit {Sprint} 2 (09/06/2026 -- 15/06/2026)}{56}{subsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.1.4}\textit {Sprint} 3 (16/06/2026 -- 22/06/2026)}{57}{subsection.6.1.4}%
+\contentsline {subsection}{\numberline {6.1.5}\textit {Sprint} 4 (23/06/2026 -- 29/06/2026)}{57}{subsection.6.1.5}%
+\contentsline {subsection}{\numberline {6.1.6}\textit {Sprint} 5 (30/06/2026 -- 06/07/2026)}{58}{subsection.6.1.6}%
+\contentsline {subsection}{\numberline {6.1.7}\textit {Sprint} 6 (07/07/2026 -- 13/07/2026)}{58}{subsection.6.1.7}%
+\contentsline {subsection}{\numberline {6.1.8}\textit {Sprint} 7 (14/07/2026 -- 20/07/2026)}{59}{subsection.6.1.8}%
+\contentsline {section}{\numberline {6.2}Implementación de los componentes técnicos clave}{59}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}La función \texttt {callOpenAI} y el mecanismo de \textit {fallback}}{60}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Prompts del flujo de generación iterativa}{61}{subsection.6.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.2.1}\texttt {buildStructureSystemPrompt} — herramienta \texttt {identify\_structure}}{61}{subsubsection.6.2.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.2.2}\texttt {buildModifyStructurePrompt} — herramienta \texttt {modify\_structure}}{62}{subsubsection.6.2.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.2.3}\texttt {buildFlowStartPrompt} — herramienta \texttt {suggest\_flow\_start}}{62}{subsubsection.6.2.2.3}%
+\contentsline {subsubsection}{\numberline {6.2.2.4}\texttt {buildNextStepPrompt} — herramienta \texttt {suggest\_next\_step}}{63}{subsubsection.6.2.2.4}%
+\contentsline {subsubsection}{\numberline {6.2.2.5}\texttt {buildGatewayBranchesPrompt} — herramienta \texttt {suggest\_gateway\_branches}}{65}{subsubsection.6.2.2.5}%
+\contentsline {subsubsection}{\numberline {6.2.2.6}\texttt {buildBranchStepPrompt} — herramienta \texttt {suggest\_branch\_step}}{66}{subsubsection.6.2.2.6}%
+\contentsline {subsubsection}{\numberline {6.2.2.7}\texttt {bpmnJsonExpertPrompt} — \textit {prompt} de sistema auxiliar}{67}{subsubsection.6.2.2.7}%
+\contentsline {subsection}{\numberline {6.2.3}Renderizado programático del XML BPMN}{67}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}Prompts de refinamiento conversacional}{72}{subsection.6.2.4}%
+\contentsline {subsubsection}{\numberline {6.2.4.1}\texttt {buildRefinementSystemPrompt}}{73}{subsubsection.6.2.4.1}%
+\contentsline {subsubsection}{\numberline {6.2.4.2}\texttt {buildRefinementMessage}}{73}{subsubsection.6.2.4.2}%
+\contentsline {subsection}{\numberline {6.2.5}Prompt de análisis PERVAL}{74}{subsection.6.2.5}%
+\contentsline {subsubsection}{\numberline {6.2.5.1}\texttt {buildPervalSystemPrompt}}{74}{subsubsection.6.2.5.1}%
+\contentsline {subsubsection}{\numberline {6.2.5.2}\texttt {buildPervalUserMessage}}{75}{subsubsection.6.2.5.2}%
+\contentsline {subsection}{\numberline {6.2.6}Robustez ante respuestas imprecisas del LLM}{75}{subsection.6.2.6}%
+\contentsline {subsubsection}{\numberline {6.2.6.1}\texttt {parseLLMJson}}{75}{subsubsection.6.2.6.1}%
+\contentsline {subsubsection}{\numberline {6.2.6.2}\texttt {cleanXML}}{76}{subsubsection.6.2.6.2}%
+\contentsline {subsection}{\numberline {6.2.7}Funciones auxiliares}{77}{subsection.6.2.7}%
+\contentsline {subsubsection}{\numberline {6.2.7.1}\texttt {effectiveLanes}}{77}{subsubsection.6.2.7.1}%
+\contentsline {subsubsection}{\numberline {6.2.7.2}\texttt {elementLabel}}{77}{subsubsection.6.2.7.2}%
+\contentsline {chapter}{\numberline {7}Ejecución y funcionamiento del sistema}{79}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Interfaz general del sistema}{79}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Generación iterativa de modelos BPMN}{79}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Paso 1 --- Descripción del proceso}{80}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{80}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{81}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{81}{subsection.7.2.4}%
+\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{82}{subsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{82}{subsection.7.2.6}%
+\contentsline {section}{\numberline {7.3}Edición conversacional del diagrama}{84}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{84}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{84}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{84}{subsection.7.4.2}%
+\contentsline {section}{\numberline {7.5}Entrada por voz}{86}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Soporte multilingüe}{86}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Despliegue en producción}{88}{section.7.7}%
+\contentsline {chapter}{\numberline {8}Validación de la propuesta}{91}{chapter.8}%
+\contentsline {section}{\numberline {8.1}El Modelo de Aceptación Tecnológica (TAM)}{91}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Diseño del estudio}{92}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}Participantes}{92}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Procedimiento}{92}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Caso de uso para la evaluación}{93}{subsection.8.2.3}%
+\contentsline {section}{\numberline {8.3}Instrumento de medida: el cuestionario}{94}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Bloque A: Datos demográficos y perfil del participante}{94}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Bloque B: Utilidad percibida (PU)}{94}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}Bloque C: Facilidad de uso percibida (PEOU)}{95}{subsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.3.4}Bloque D: Intención de uso (ITU)}{96}{subsection.8.3.4}%
+\contentsline {subsection}{\numberline {8.3.5}Bloque E: Ítems específicos de la herramienta}{97}{subsection.8.3.5}%
+\contentsline {subsection}{\numberline {8.3.6}Preguntas abiertas}{97}{subsection.8.3.6}%
+\contentsline {section}{\numberline {8.4}Análisis de los datos}{97}{section.8.4}%
+\contentsline {chapter}{Bibliografía}{100}{chapter*.9}%
+\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{101}{appendix*.10}%
+\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{101}{section.Alph0.1}%
+\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{102}{section.Alph0.2}%
+\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{102}{subsection.Alph0.2.1}%
+\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{102}{subsection.Alph0.2.2}%
+\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{102}{subsection.Alph0.2.3}%
+\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{103}{section.Alph0.3}%
+\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{103}{section.Alph0.4}%
+\contentsline {chapter}{Anexo II}{105}{appendix*.11}%

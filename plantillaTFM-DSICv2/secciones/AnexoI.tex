@@ -1,12 +1,108 @@
-\chapter{Anexo I}
-Este capítulo es opcional, y se escribirá de acuerdo con las indicaciones del Tutor. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Anexo I — Aplicación de la herramienta a su propio proceso de uso
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
+\chapter{Aplicación de la herramienta a su propio proceso de uso}
+\label{anx:metademo}
 
+Este anexo recoge una demostración meta-reflexiva de la herramienta desarrollada en este trabajo: se emplea la propia herramienta de modelado BPMN conversacional para generar un diagrama que representa su propio proceso de uso. La motivación es doble. Por un lado, sirve como prueba de concepto adicional que complementa el capítulo de ejecución y funcionamiento (capítulo~\ref{cap:ejecucion}), mostrando la capacidad del sistema para modelar procesos de naturaleza técnica (en los que los participantes son componentes de \textit{software} en lugar de departamentos de negocio) sin ninguna adaptación especial. Por otro lado, constituye un ejemplo reproducible y autocontenido: cualquier lector que desee verificar el funcionamiento de la herramienta puede partir de las instrucciones exactas recogidas aquí y obtener un resultado equivalente.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Descripción del proceso modelado}
+\label{sec:anx1-proceso}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+El proceso que se modela es el ciclo completo de interacción entre el usuario y el sistema cuando se desea generar un diagrama BPMN a partir de una descripción en lenguaje natural. Dicho ciclo comprende, en orden, las siguientes etapas:
 
+\begin{enumerate}
+  \item Introducción de la descripción del proceso en el panel conversacional.
+  \item Identificación y validación de los participantes (\textit{pool} y \textit{lanes}).
+  \item Especificación del evento de inicio del proceso.
+  \item Generación del diagrama en modo guiado o modo completo.
+  \item Renderizado del XML BPMN 2.0 en el editor bpmn.io.
+  \item Refinamiento conversacional del diagrama (paso opcional).
+  \item Análisis de valor percibido PERVAL (paso opcional).
+\end{enumerate}
 
+Para este ejercicio se optó por el \textbf{modo de generación completa}, de modo que, tras confirmar la estructura de participantes y el evento de inicio, el sistema generó el diagrama íntegro en una sola llamada al LLM. Posteriormente se aplicó una instrucción de refinamiento conversacional para precisar un detalle del flujo de control.
 
- 
+Los participantes del proceso modelado son tres:
+
+\begin{itemize}
+  \item \textbf{Usuario} --- el actor humano que interactúa con el sistema desde el navegador web.
+  \item \textbf{Servidor MCP} --- el servidor intermedio que orquesta las llamadas al LLM y ejecuta las herramientas del sistema: \texttt{identify\_structure}, \texttt{render\_diagram}, \texttt{refine\_diagram} y \texttt{analyze\_perval}.
+  \item \textbf{Editor bpmn.io} --- el editor de diagramas integrado en la interfaz, responsable de cargar y renderizar el XML BPMN 2.0 generado por el sistema.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Instrucciones proporcionadas al sistema}
+\label{sec:anx1-instrucciones}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A continuación se reproducen literalmente los mensajes introducidos en el panel conversacional durante la sesión de modelado, junto con las capturas del estado del sistema en los momentos más relevantes.
+
+%%---------------------------------------------------------
+\subsection{Descripción inicial del proceso}
+\label{subsec:anx1-descInicial}
+%%---------------------------------------------------------
+
+El primer mensaje proporcionó al sistema la descripción completa del proceso a modelar. Se redactó de forma deliberadamente detallada, especificando los participantes y el flujo principal, para que el LLM pudiera identificar la estructura sin ambigüedades:
+
+\begin{lstlisting}[style=promptbox]
+Modela el proceso completo que sigue esta herramienta cuando un usuario genera
+un diagrama BPMN a partir de una descripción en lenguaje natural. Los
+participantes son: el Usuario (que interactúa desde el navegador), el
+Servidor MCP (que gestiona la lógica y las herramientas del sistema) y el
+Editor bpmn.io (que renderiza el resultado). El proceso comienza cuando el
+Usuario introduce la descripción de un proceso de negocio en el panel
+conversacional. El Servidor MCP identifica la estructura del proceso y la
+presenta al Usuario para su validación; el Usuario puede confirmar o corregir
+los participantes propuestos. A continuación, el Servidor MCP identifica el
+punto de inicio del proceso y el Usuario lo confirma. Una vez confirmado, el
+Usuario elige entre el modo guiado -con confirmaciones por cada elemento del
+flujo- o el modo de generación completa -en el que el sistema genera el
+diagrama íntegro en una sola llamada al LLM-. El Servidor MCP construye el
+XML BPMN 2.0 y el Editor bpmn.io lo carga y renderiza en el lienzo.
+Finalmente, el Usuario puede solicitar refinamientos conversacionales del
+diagrama o lanzar el análisis PERVAL sobre el proceso generado.
+\end{lstlisting}
+
+%%---------------------------------------------------------
+\subsection{Validación de la estructura de participantes}
+\label{subsec:anx1-estructura}
+%%---------------------------------------------------------
+
+El sistema respondió con la estructura de participantes identificada mediante la herramienta \texttt{identify\_structure}: un \textit{pool} principal denominado \textit{Sistema de modelado BPMN conversacional} con las tres \textit{lanes} descritas (Usuario, Servidor MCP y Editor bpmn.io), sin \textit{pools} externos adicionales. La estructura propuesta se aceptó sin modificaciones pulsando el botón de confirmación de la tarjeta.
+
+%%---------------------------------------------------------
+\subsection{Especificación del punto de inicio y activación del modo completo}
+\label{subsec:anx1-inicio}
+%%---------------------------------------------------------
+
+Tras confirmar los participantes, el sistema identificó el punto de inicio del proceso y lo presentó al usuario para su validación. El sistema identificó el siguiente punto de inicio: 
+
+\begin{lstlisting}[style=promptbox]
+El proceso empieza en la calle del Usuario, con el evento de inicio
+"Usuario introduce descripción de proceso" y no utiliza disparador.
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Resultado: diagrama BPMN generado}
+\label{sec:anx1-resultado}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La figura~\ref{fig:anx1Diagrama} muestra el diagrama BPMN~2.0 obtenido tras la generación completa inicial. El diagrama incluye las tres calles del \textit{pool} principal, el flujo de control desde la introducción de la descripción hasta el renderizado del modelo y el flujo opcional de refinamiento conversacional representado mediante un bucle de retorno.
+
+\screenfig[10cm]{anexo1_03_diagrama}%
+  {Diagrama BPMN 2.0 generado por la herramienta para representar su propio proceso de uso.}%
+  {anx1Diagrama}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Observaciones sobre el ejercicio}
+\label{sec:anx1-observaciones}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+El ejercicio demuestra que la herramienta es capaz de representar correctamente procesos de naturaleza técnica en los que los participantes son componentes de \textit{software} en lugar de departamentos o actores de negocio. El sistema no requirió ningún ajuste especial: las mismas herramientas (\texttt{identify\_structure} y \texttt{render\_diagram}) y el mismo flujo de interacción empleados en los casos de uso de comercio electrónico del capítulo~\ref{cap:ejecucion} se aplicaron aquí sin modificación.

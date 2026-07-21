@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  14 JUL 2026 12:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.1)  21 JUL 2026 12:38
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -580,6 +580,13 @@ Package footmisc Info: Declaring symbol style lamport* on input line 597.
 Package footmisc Info: Declaring symbol style lamport*-robust on input line 618.
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/parskip\parskip.sty
 Package: parskip 2021-03-14 v2.0h non-zero parskip adjustments
+) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count347
+\float@exts=\toks48
+\float@box=\box77
+\@float@everytoks=\toks49
+\@floatcapt=\box78
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/fancyhdr\fancyhdr.sty
 Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 \f@nch@headwidth=\skip65
@@ -596,12 +603,12 @@ Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 \f@nch@widthL=\skip76
 \f@nch@widthC=\skip77
 \f@nch@widthR=\skip78
-\@temptokenb=\toks48
+\@temptokenb=\toks50
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/appendix\appendix.sty
 Package: appendix 2020/02/08 v1.2c extra appendix facilities
-\c@@pps=\count347
-\c@@ppsavesec=\count348
-\c@@ppsaveapp=\count349
+\c@@pps=\count348
+\c@@ppsavesec=\count349
+\c@@ppsaveapp=\count350
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/tools\dcolumn.sty
 Package: dcolumn 2025/10/21 v1.06 decimal alignment package (DPC)
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty
@@ -611,28 +618,28 @@ Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
 \TX@old@col=\dimen296
 \TX@target=\dimen297
 \TX@delta=\dimen298
-\TX@cols=\count350
-\TX@ftn=\toks49
+\TX@cols=\count351
+\TX@ftn=\toks51
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.sty
-\lst@mode=\count351
-\lst@gtempboxa=\box77
-\lst@token=\toks50
-\lst@length=\count352
+\lst@mode=\count352
+\lst@gtempboxa=\box79
+\lst@token=\toks52
+\lst@length=\count353
 \lst@currlwidth=\dimen299
-\lst@column=\count353
-\lst@pos=\count354
+\lst@column=\count354
+\lst@pos=\count355
 \lst@lostspace=\dimen300
 \lst@width=\dimen301
-\lst@newlines=\count355
-\lst@lineno=\count356
+\lst@newlines=\count356
+\lst@lineno=\count357
 \lst@maxwidth=\dimen302
  (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstpatch.sty
 File: lstpatch.sty 2025/11/14 1.11b (Carsten Heinz)
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty
 File: lstmisc.sty 2025/11/14 1.11b (Carsten Heinz)
-\c@lstnumber=\count357
-\lst@skipnumbers=\count358
-\lst@framebox=\box78
+\c@lstnumber=\count358
+\lst@skipnumbers=\count359
+\lst@framebox=\box80
 ) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cfg
 File: listings.cfg 2025/11/14 1.11b listings configuration
 ))
@@ -642,4 +649,1369 @@ Package: listings 2025/11/14 1.11b (Carsten Heinz)
     Expected:
         2024/09/23 1.10c (Carsten Heinz)
     but found:
-        2025/11/14 1.11b (Carste
+        2025/11/14 1.11b (Carsten Heinz)
+    so I'm assuming it got fixed.
+) (secciones/00_DatosTFM.tex)
+LaTeX Font Info:    Trying to load font information for T1+pbk on input line 28.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pbk.fd
+File: t1pbk.fd 2001/06/04 font definitions for T1/pbk.
+)
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <10.95> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 28.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
+File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count360
+) (plantilla_TFM.aux
+LaTeX Info: Redefining \. on input line 11.
+LaTeX Info: Redefining \% on input line 11.
+Package babel Info: 'spanish' activates 'spanish' shorthands.
+(babel)             Reported on input line 11.
+
+
+LaTeX Warning: Label `subsec:seleccionLLM' multiply defined.
+
+)
+\openout1 = `plantilla_TFM.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Info: Redefining \. on input line 28.
+LaTeX Info: Redefining \% on input line 28.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count361
+\scratchdimen=\dimen303
+\scratchbox=\box81
+\nofMPsegments=\count362
+\nofMParguments=\count363
+\everyMPshowfont=\toks53
+\MPscratchCnt=\count364
+\MPscratchDim=\dimen304
+\MPnumerator=\count365
+\makeMPintoPDFobject=\count366
+\everyMPtoPDFconversion=\toks54
+) (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: twoside 
+* h-part:(L,W,R)=(72.2698pt, 452.96826pt, 72.2698pt)
+* v-part:(T,H,B)=(85.35826pt, 674.33032pt, 85.35826pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=452.96826pt
+* \textheight=674.33032pt
+* \oddsidemargin=-0.00018pt
+* \evensidemargin=-0.00018pt
+* \topmargin=-18.78552pt
+* \headheight=18.0pt
+* \headsep=19.8738pt
+* \topskip=11.0pt
+* \footskip=27.46295pt
+* \marginparwidth=106.0pt
+* \marginparsep=7.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidetrue
+* \@mparswitchtrue
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+Package hyperref Info: Link coloring OFF on input line 28.
+(plantilla_TFM.out) (plantilla_TFM.out)
+\@outlinefile=\write4
+\openout4 = `plantilla_TFM.out'.
+
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/pdflscape\pdflscape.sty
+Package: pdflscape 2022-10-27 v0.13 Display of landscape pages in PDF
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/pdflscape\pdflscape-nometadata.sty
+Package: pdflscape-nometadata 2022-10-28 v0.13 Display of landscape pages in PDF (HO)
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/graphics\lscape.sty
+Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
+)
+Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
+))
+\c@lstlisting=\count367
+ (include/Portada.tex
+<include/logo-upv.png, id=542, 136.8312pt x 158.2713pt>
+File: include/logo-upv.png Graphic file (type png)
+<use include/logo-upv.png>
+Package pdftex.def Info: include/logo-upv.png  used on input line 12.
+(pdftex.def)             Requested size: 102.62314pt x 118.70317pt.
+
+Underfull \hbox (badness 1454) in paragraph at lines 10--13
+[]|  []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10--13
+
+ []
+
+LaTeX Font Info:    Trying to load font information for U+msa on input line 13.
+(C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 13.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <20.74> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 16.
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <14.4> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 18.
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <14.4> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 18.
+<include/DSIC.png, id=544, 92.7465pt x 64.3203pt>
+File: include/DSIC.png Graphic file (type png)
+<use include/DSIC.png>
+Package pdftex.def Info: include/DSIC.png  used on input line 22.
+(pdftex.def)             Requested size: 83.47107pt x 57.88771pt.
+
+Overfull \hbox (29.1171pt too wide) in paragraph at lines 22--23
+[][] 
+ []
+
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <20.74> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 37.
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <12> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 43.
+
+Underfull \hbox (badness 10000) in paragraph at lines 42--48
+
+ []
+
+[1
+
+
+{C:/Users/USUARIO/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc} <./include/logo-upv.png> <./include/DSIC.png>]
+LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <12> not available
+(Font)              Font shape `T1/pbk/l/it' tried instead on input line 63.
+ [2]) (secciones/01_Resumen.tex
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <24.88> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 6.
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <24.88> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 6.
+LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <10.95> not available
+(Font)              Font shape `T1/pbk/l/it' tried instead on input line 10.
+ [1
+
+
+] [2
+
+] [3] [4
+
+]) [5] [6
+
+] (plantilla_TFM.toc
+LaTeX Info: Redefining \. on input line 1.
+LaTeX Info: Redefining \% on input line 1.
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <10.95> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 2.
+ [7]
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 46.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+Overfull \hbox (5.70313pt too wide) in paragraph at lines 46--46
+ [][] [][]\T1/pbk/l/n/10.95 Herramienta de aná-li-sis PER-VAL (\T1/pcr/m/n/10.95 analyze_perval\T1/pbk/l/n/10.95 ).[] [][]  
+ []
+
+
+Overfull \hbox (59.51279pt too wide) in paragraph at lines 75--75
+ [][] [][]\T1/pcr/m/n/10.95 buildStructureSystemPrompt \T1/pbk/l/n/10.95 ^^V he-rra-mien-ta \T1/pcr/m/n/10.95 identify_structure[] [][]  
+ []
+
+
+Overfull \hbox (46.3728pt too wide) in paragraph at lines 76--76
+ [][] [][]\T1/pcr/m/n/10.95 buildModifyStructurePrompt \T1/pbk/l/n/10.95 ^^V he-rra-mien-ta \T1/pcr/m/n/10.95 modify_structure[] [][]  
+ []
+
+
+Overfull \hbox (20.09283pt too wide) in paragraph at lines 77--77
+ [][] [][]\T1/pcr/m/n/10.95 buildFlowStartPrompt \T1/pbk/l/n/10.95 ^^V he-rra-mien-ta \T1/pcr/m/n/10.95 suggest_flow_start[] [][]  
+ []
+
+
+Overfull \hbox (6.95285pt too wide) in paragraph at lines 78--78
+ [][] [][]\T1/pcr/m/n/10.95 buildNextStepPrompt \T1/pbk/l/n/10.95 ^^V he-rra-mien-ta \T1/pcr/m/n/10.95 suggest_next_step[] [][]  
+ []
+
+
+Overfull \hbox (98.93274pt too wide) in paragraph at lines 79--79
+ [][] [][]\T1/pcr/m/n/10.95 buildGatewayBranchesPrompt \T1/pbk/l/n/10.95 ^^V he-rra-mien-ta \T1/pcr/m/n/10.95 suggest_gateway_branches[] [][]  
+ []
+
+
+Overfull \hbox (33.23282pt too wide) in paragraph at lines 80--80
+ [][] [][]\T1/pcr/m/n/10.95 buildBranchStepPrompt \T1/pbk/l/n/10.95 ^^V he-rra-mien-ta \T1/pcr/m/n/10.95 suggest_branch_step[] [][]  
+ []
+
+LaTeX Info: Redefining \. on input line 83.
+LaTeX Info: Redefining \% on input line 83.
+Package babel Info: 'spanish' activates 'spanish' shorthands.
+(babel)             Reported on input line 83.
+[8]
+Overfull \hbox (3.3943pt too wide) detected at line 127
+ []\T1/pbk/l/n/10.95 101
+ []
+
+
+Overfull \hbox (3.3943pt too wide) detected at line 128
+ []\T1/pbk/l/n/10.95 102
+ []
+
+LaTeX Info: Redefining \. on input line 129.
+LaTeX Info: Redefining \% on input line 129.
+[9]
+Overfull \hbox (3.3943pt too wide) detected at line 129
+ []\T1/pbk/l/n/10.95 102
+ []
+
+
+Overfull \hbox (3.3943pt too wide) detected at line 130
+ []\T1/pbk/l/n/10.95 102
+ []
+
+
+Overfull \hbox (3.3943pt too wide) detected at line 131
+ []\T1/pbk/l/n/10.95 104
+ []
+
+
+Overfull \hbox (3.3943pt too wide) detected at line 132
+ []\T1/pbk/l/n/10.95 104
+ []
+
+
+Overfull \hbox (3.3943pt too wide) detected at line 133
+ []\T1/pbk/l/n/10.95 104
+ []
+
+
+Overfull \hbox (3.3943pt too wide) detected at line 134
+ []\T1/pbk/l/n/10.95 106
+ []
+
+)
+\tf@toc=\write5
+\openout5 = `plantilla_TFM.toc'.
+
+LaTeX Info: Redefining \. on input line 41.
+LaTeX Info: Redefining \% on input line 41.
+ [10] (secciones/02_Introduccion.tex
+Cap\'{\i }tulo 1.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.19 \section
+             {MotivaciÃ³n} [1
+
+
+]
+LaTeX Info: Redefining \. on input line 45.
+LaTeX Info: Redefining \% on input line 45.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.45     \item[$\bullet$]
+                          analizar los resultados de la encuesta TAM y evalu... [2]
+LaTeX Info: Redefining \. on input line 80.
+LaTeX Info: Redefining \% on input line 80.
+ [3]
+LaTeX Info: Redefining \. on input line 99.
+LaTeX Info: Redefining \% on input line 99.
+ [4]) (secciones/03_Fundamentos.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [5]
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [6]
+Cap\'{\i }tulo 2.
+[7
+
+]
+LaTeX Info: Redefining \. on input line 32.
+LaTeX Info: Redefining \% on input line 32.
+ [8]
+LaTeX Info: Redefining \. on input line 48.
+LaTeX Info: Redefining \% on input line 48.
+ [9]
+LaTeX Info: Redefining \. on input line 67.
+LaTeX Info: Redefining \% on input line 67.
+ [10]
+LaTeX Info: Redefining \. on input line 91.
+LaTeX Info: Redefining \% on input line 91.
+ [11]
+LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <14.4> not available
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 95.
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <10> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 164.
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <10> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 164.
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <6> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 164.
+LaTeX Info: Redefining \. on input line 176.
+LaTeX Info: Redefining \% on input line 176.
+LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <10.95> not available
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 176.
+ [12
+pdfTeX warning (ext4): destination with the same identifier (name{figure.2.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.176 
+      ]) (secciones/04_EstadoDelArte.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [13] [14
+
+]
+Cap\'{\i }tulo 3.
+LaTeX Font Info:    Font shape `T1/pbk/b/n' in size <12> not available
+(Font)              Font shape `T1/pbk/db/n' tried instead on input line 17.
+[15]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 82.
+LaTeX Info: Redefining \% on input line 82.
+ [16]
+LaTeX Info: Redefining \. on input line 115.
+LaTeX Info: Redefining \% on input line 115.
+ [17]
+LaTeX Info: Redefining \. on input line 147.
+LaTeX Info: Redefining \% on input line 147.
+ [18]) (secciones/05_AnalisisProblema.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [19] [20
+
+]
+Cap\'{\i }tulo 4.
+[21]
+LaTeX Font Info:    Font shape `T1/pbk/m/it' in size <10> not available
+(Font)              Font shape `T1/pbk/l/it' tried instead on input line 53.
+LaTeX Info: Redefining \. on input line 109.
+LaTeX Info: Redefining \% on input line 109.
+ [22
+pdfTeX warning (ext4): destination with the same identifier (name{figure.4.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.109 \end{figure}
+                  ]
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <8> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 175.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \vbox (badness 4108) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 238.
+LaTeX Info: Redefining \% on input line 238.
+ [23
+pdfTeX warning (ext4): destination with the same identifier (name{figure.4.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.238 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.4.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.238 
+      ]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 244.
+LaTeX Info: Redefining \% on input line 244.
+ [24
+pdfTeX warning (ext4): destination with the same identifier (name{figure.4.4}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.244 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.4.5}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.244 
+      ]
+LaTeX Info: Redefining \. on input line 266.
+LaTeX Info: Redefining \% on input line 266.
+ [25]
+LaTeX Info: Redefining \. on input line 285.
+LaTeX Info: Redefining \% on input line 285.
+ [26]
+LaTeX Info: Redefining \. on input line 311.
+LaTeX Info: Redefining \% on input line 311.
+ [27]
+LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <12> not available
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 327.
+LaTeX Info: Redefining \. on input line 334.
+LaTeX Info: Redefining \% on input line 334.
+ [28]
+LaTeX Font Info:    Font shape `T1/pbk/m/n' in size <9> not available
+(Font)              Font shape `T1/pbk/l/n' tried instead on input line 349.
+
+Underfull \hbox (badness 1527) in paragraph at lines 388--388
+[]|\T1/pbk/db/n/9 Alternativas con-si-de-ra-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+[]|\T1/pbk/db/n/9 Criterio prin-ci-pal de
+ []
+
+
+Underfull \hbox (badness 6526) in paragraph at lines 388--388
+[]|\T1/pbk/l/n/9 Disponibilidad de plan
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+[]|\T1/pbk/db/n/9 GitHub Mo-dels
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 (mo-de-lo prin-ci-pal
+ []
+
+
+Underfull \hbox (badness 3209) in paragraph at lines 388--388
+\T1/pbk/l/n/9 nis-mo de \T1/pbk/l/it/9 fall-back
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+[]|\T1/pbk/l/n/9 Llamadas di-rec-tas del
+ []
+
+
+Underfull \hbox (badness 2134) in paragraph at lines 388--388
+\T1/pbk/l/n/9 clien-te al pro-vee-dor de
+ []
+
+
+Underfull \hbox (badness 5274) in paragraph at lines 388--388
+[]|\T1/pbk/l/n/9 Comunicación con
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 vee-dor (Ope-nAI SDK,
+ []
+
+
+Underfull \hbox (badness 1286) in paragraph at lines 388--388
+\T1/pbk/l/n/9 Goo-gle AI SDK...); API
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 REST com-pa-ti-ble con
+ []
+
+
+Underfull \hbox (badness 1226) in paragraph at lines 388--388
+[]|\T1/pbk/l/n/9 Unificación de lla-ma-das
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 multi-modelo y com-
+ []
+
+
+Underfull \hbox (badness 7486) in paragraph at lines 388--388
+\T1/pbk/l/n/9 pa-ti-bi-li-dad di-rec-ta con
+ []
+
+
+Underfull \hbox (badness 2088) in paragraph at lines 388--388
+\T1/pbk/l/n/9 GitHub Mo-dels sin de-
+ []
+
+
+Underfull \hbox (badness 1852) in paragraph at lines 388--388
+\T1/pbk/db/n/9 ti-ble con Ope-nAI
+ []
+
+
+Underfull \hbox (badness 7221) in paragraph at lines 388--388
+\T1/pbk/l/n/9 (pun-to de ac-ce-so
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+[]|\T1/pbk/l/n/9 React/Vue +
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 Python/Flask; Ja-vaS-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 (bpmn-js, jQuery,
+ []
+
+
+Underfull \hbox (badness 2591) in paragraph at lines 388--388
+\T1/pbk/l/n/9 Web-pack); ser-vi-dor
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+\T1/pbk/l/n/9 (No-de.js, Ex-press,
+ []
+
+LaTeX Info: Redefining \. on input line 398.
+LaTeX Info: Redefining \% on input line 398.
+[29]
+LaTeX Info: Redefining \. on input line 398.
+LaTeX Info: Redefining \% on input line 398.
+ [30
+pdfTeX warning (ext4): destination with the same identifier (name{table.4.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.398 
+      ]
+LaTeX Info: Redefining \. on input line 475.
+LaTeX Info: Redefining \% on input line 475.
+ [31]
+LaTeX Info: Redefining \. on input line 489.
+LaTeX Info: Redefining \% on input line 489.
+ [32]
+LaTeX Info: Redefining \. on input line 507.
+LaTeX Info: Redefining \% on input line 507.
+ [33]
+LaTeX Info: Redefining \. on input line 521.
+LaTeX Info: Redefining \% on input line 521.
+ [34]
+Underfull \hbox (badness 3219) in paragraph at lines 544--544
+[]|\T1/pbk/l/n/10 01, 02, 03,
+ []
+
+
+Underfull \hbox (badness 3209) in paragraph at lines 548--548
+[]|\T1/pbk/l/n/10 Configuración/UX (RF-
+ []
+
+
+Underfull \hbox (badness 2103) in paragraph at lines 571--571
+[]|\T1/pbk/l/n/10 Arquitectura y ca-li-dad
+ []
+
+LaTeX Info: Redefining \. on input line 592.
+LaTeX Info: Redefining \% on input line 592.
+[35]
+LaTeX Info: Redefining \. on input line 635.
+LaTeX Info: Redefining \% on input line 635.
+ [36]
+LaTeX Info: Redefining \. on input line 678.
+LaTeX Info: Redefining \% on input line 678.
+ [37]
+Overfull \hbox (30.91061pt too wide) in paragraph at lines 691--692
+[]\T1/pbk/l/n/10.95 Estudio de las di-men-sio-nes de va-lor per-ci-bi-do (emo-cio-nal, so-cial, ca-li-dad/rendimiento,
+ []
+
+
+Overfull \hbox (1.59607pt too wide) in paragraph at lines 693--694
+[]\T1/pbk/l/n/10.95 Diseño del \T1/pbk/l/it/10.95 prompt \T1/pbk/l/n/10.95 de aná-li-sis PER-VAL, in-clu-yen-do el ám-bi-to (ta-reas/entregables)
+ []
+
+LaTeX Info: Redefining \. on input line 723.
+LaTeX Info: Redefining \% on input line 723.
+[38]
+LaTeX Info: Redefining \. on input line 771.
+LaTeX Info: Redefining \% on input line 771.
+ [39]
+Overfull \hbox (9.12006pt too wide) in paragraph at lines 776--777
+[]\T1/pbk/l/n/10.95 Configuración del fi-che-ro \T1/pcr/m/n/10.95 render.yaml \T1/pbk/l/n/10.95 con los dos ser-vi-cios (\T1/pcr/m/n/10.95 tfm-bpmn-frontend
+ []
+
+LaTeX Info: Redefining \. on input line 803.
+LaTeX Info: Redefining \% on input line 803.
+[40]
+Underfull \hbox (badness 3449) in paragraph at lines 818--818
+\T1/pbk/l/n/10 ni-fi-ca-ción), US02 (Con-fi-gu-ra-ción
+ []
+
+
+Underfull \hbox (badness 7326) in paragraph at lines 822--822
+[]|\T1/pbk/l/n/10 US05 (Ge-ne-ra-ción de mo-de-los
+ []
+
+
+Underfull \hbox (badness 1817) in paragraph at lines 826--826
+\T1/pbk/l/n/10 PER-VAL), US09 (Im-ple-men-ta-ción
+ []
+
+
+Underfull \hbox (badness 2512) in paragraph at lines 832--832
+[]|\T1/pbk/l/n/10 US14 (Des-plie-gue en \T1/pbk/l/it/10 Ren-der \T1/pbk/l/n/10 y
+ []
+
+) (secciones/06_DisenoSolucion.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [41] [42
+
+]
+Cap\'{\i }tulo 5.
+[43]
+LaTeX Info: Redefining \. on input line 132.
+LaTeX Info: Redefining \% on input line 132.
+ [44
+pdfTeX warning (ext4): destination with the same identifier (name{figure.5.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.132 \end{itemize}
+                   ]
+LaTeX Info: Redefining \. on input line 155.
+LaTeX Info: Redefining \% on input line 155.
+ [45]
+LaTeX Font Info:    Trying to load font information for TS1+pbk on input line 171.
+ (C:\Users\USUARIO\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1pbk.fd
+File: ts1pbk.fd 2001/06/04 font definitions for TS1/pbk.
+)
+LaTeX Font Info:    Font shape `TS1/pbk/m/n' in size <10> not available
+(Font)              Font shape `TS1/pbk/l/n' tried instead on input line 171.
+
+Overfull \hbox (77.6218pt too wide) in paragraph at lines 193--194
+\T1/pbk/l/n/10.95 nue-va ins-tan-cia del ser-vi-dor MCP (\T1/pcr/m/n/10.95 McpServer\T1/pbk/l/n/10.95 ) y su trans-por-te (\T1/pcr/m/n/10.95 StreamableHTTPServerTransport\T1/pbk/l/n/10.95 ),
+ []
+
+
+Underfull \hbox (badness 1616) in paragraph at lines 216--217
+[]|\T1/pbk/l/n/10 Genera el XML BPMN 2.0 com-ple-to y va-li-da-
+ []
+
+LaTeX Info: Redefining \. on input line 228.
+LaTeX Info: Redefining \% on input line 228.
+[46
+pdfTeX warning (ext4): destination with the same identifier (name{figure.5.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.228 
+      ]
+LaTeX Font Info:    Font shape `T1/pbk/b/it' in size <10> not available
+(Font)              Font shape `T1/pbk/db/it' tried instead on input line 246.
+LaTeX Info: Redefining \. on input line 267.
+LaTeX Info: Redefining \% on input line 267.
+ [47
+pdfTeX warning (ext4): destination with the same identifier (name{table.5.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.267 \section
+              {DiseÃ±o detallado}]
+LaTeX Info: Redefining \. on input line 283.
+LaTeX Info: Redefining \% on input line 283.
+ [48
+pdfTeX warning (ext4): destination with the same identifier (name{figure.5.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.283 
+      ]
+Overfull \hbox (22.36726pt too wide) in paragraph at lines 286--287
+[]\T1/pbk/db/n/10.95 Resultado PER-VAL: \T1/pbk/l/n/10.95 es-truc-tu-ra JSON de-vuel-ta por la he-rra-mien-ta \T1/pcr/m/n/10.95 analyze_perval\T1/pbk/l/n/10.95 .
+ []
+
+
+Overfull \hbox (54.5402pt too wide) in paragraph at lines 305--306
+\T1/pbk/l/n/10.95 ción pa-so a pa-so del pro-ce-so, in-vo-can-do su-ce-si-va-men-te las he-rra-mien-tas \T1/pcr/m/n/10.95 suggest_flow_start\T1/pbk/l/n/10.95 ,
+ []
+
+LaTeX Info: Redefining \. on input line 308.
+LaTeX Info: Redefining \% on input line 308.
+[49]
+Overfull \hbox (7.81181pt too wide) in paragraph at lines 342--343
+ [][] 
+ []
+
+LaTeX Info: Redefining \. on input line 355.
+LaTeX Info: Redefining \% on input line 355.
+[50
+pdfTeX warning (ext4): destination with the same identifier (name{figure.5.4}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.355 
+      ]
+LaTeX Info: Redefining \. on input line 403.
+LaTeX Info: Redefining \% on input line 403.
+ [51
+pdfTeX warning (ext4): destination with the same identifier (name{figure.5.5}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.403 \end{center}
+                  ]
+LaTeX Info: Redefining \. on input line 437.
+LaTeX Info: Redefining \% on input line 437.
+ [52]
+Underfull \vbox (badness 1221) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 495.
+LaTeX Info: Redefining \% on input line 495.
+ [53
+pdfTeX warning (ext4): destination with the same identifier (name{table.5.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.495 
+      ]) (secciones/07_DesarrolloImplementacion.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [54]
+Cap\'{\i }tulo 6.
+[55
+
+]
+Overfull \hbox (78.24pt too wide) in paragraph at lines 43--44
+\T1/pbk/l/n/10.95 (\T1/pcr/m/n/10.95 identify_structure\T1/pbk/l/n/10.95 , \T1/pcr/m/n/10.95 suggest_flow_start\T1/pbk/l/n/10.95 , \T1/pcr/m/n/10.95 suggest_next_step\T1/pbk/l/n/10.95 , \T1/pcr/m/n/10.95 suggest_gateway_branches\T1/pbk/l/n/10.95 ,
+ []
+
+LaTeX Info: Redefining \. on input line 44.
+LaTeX Info: Redefining \% on input line 44.
+[56]
+LaTeX Info: Redefining \. on input line 64.
+LaTeX Info: Redefining \% on input line 64.
+ [57]
+LaTeX Info: Redefining \. on input line 84.
+LaTeX Info: Redefining \% on input line 84.
+ [58]
+Overfull \hbox (88.16742pt too wide) in paragraph at lines 93--94
+\T1/pbk/l/n/10.95 pa-ra ser-vir la ex-ten-sión em-pa-que-ta-da por Web-pack, y un ser-vi-cio web No-de.js (\T1/pcr/m/n/10.95 tfm-bpmn-mcp-server\T1/pbk/l/n/10.95 )
+ []
+
+LaTeX Info: Redefining \. on input line 105.
+LaTeX Info: Redefining \% on input line 105.
+[59]
+LaTeX Info: Redefining \. on input line 151.
+LaTeX Info: Redefining \% on input line 151.
+ [60]
+LaTeX Info: Redefining \. on input line 197.
+LaTeX Info: Redefining \% on input line 197.
+ [61]
+LaTeX Info: Redefining \. on input line 250.
+LaTeX Info: Redefining \% on input line 250.
+ [62]
+LaTeX Info: Redefining \. on input line 302.
+LaTeX Info: Redefining \% on input line 302.
+ [63]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 346.
+LaTeX Info: Redefining \% on input line 346.
+ [64]
+Overfull \hbox (20.0372pt too wide) in paragraph at lines 371--371
+[]\T1/pcr/b/n/10.95 buildGatewayBranchesPrompt \T1/pbk/db/n/10.95 ^^V he-rra-mien-ta \T1/pcr/b/n/10.95 suggest_gateway_branches 
+ []
+
+LaTeX Info: Redefining \. on input line 402.
+LaTeX Info: Redefining \% on input line 402.
+[65]
+Underfull \vbox (badness 2384) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 449.
+LaTeX Info: Redefining \% on input line 449.
+ [66]
+Overfull \hbox (41.27055pt too wide) in paragraph at lines 488--489
+\T1/pbk/l/n/10.95 en \T1/pcr/m/n/10.95 renderDiagramFromState()\T1/pbk/l/n/10.95 , im-ple-men-ta-da en \T1/pcr/m/n/10.95 mcp-server/src/diagramRenderer.js\T1/pbk/l/n/10.95 ,
+ []
+
+LaTeX Info: Redefining \. on input line 490.
+LaTeX Info: Redefining \% on input line 490.
+[67]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 549.
+LaTeX Info: Redefining \% on input line 549.
+ [68]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 598.
+LaTeX Info: Redefining \% on input line 598.
+ [69]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 649.
+LaTeX Info: Redefining \% on input line 649.
+ [70]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 700.
+LaTeX Info: Redefining \% on input line 700.
+ [71]
+Overfull \hbox (96.82509pt too wide) in paragraph at lines 751--752
+\T1/pbk/l/n/10.95 nes en len-gua-je na-tu-ral. Ope-ra en dos par-tes: el \T1/pbk/l/it/10.95 prompt \T1/pbk/l/n/10.95 de sis-te-ma (\T1/pcr/m/n/10.95 buildRefinementSystemPrompt()\T1/pbk/l/n/10.95 )
+ []
+
+
+Overfull \hbox (43.66669pt too wide) in paragraph at lines 751--752
+\T1/pbk/l/n/10.95 fi-ja las re-glas de mo-di-fi-ca-ción del XML, y el men-sa-je de usua-rio (\T1/pcr/m/n/10.95 buildRefinementMessage()\T1/pbk/l/n/10.95 )
+ []
+
+LaTeX Info: Redefining \. on input line 755.
+LaTeX Info: Redefining \% on input line 755.
+[72]
+LaTeX Info: Redefining \. on input line 808.
+LaTeX Info: Redefining \% on input line 808.
+ [73]
+LaTeX Info: Redefining \. on input line 861.
+LaTeX Info: Redefining \% on input line 861.
+ [74]
+LaTeX Info: Redefining \. on input line 912.
+LaTeX Info: Redefining \% on input line 912.
+ [75]
+LaTeX Info: Redefining \. on input line 964.
+LaTeX Info: Redefining \% on input line 964.
+ [76]) (secciones/08_EjecucionFuncionamiento.tex
+LaTeX Info: Redefining \. on input line 6.
+LaTeX Info: Redefining \% on input line 6.
+ [77] [78
+
+]
+Cap\'{\i }tulo 7.
+[79]
+LaTeX Info: Redefining \. on input line 71.
+LaTeX Info: Redefining \% on input line 71.
+ [80
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.71 
+     
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.71 
+     ]
+LaTeX Info: Redefining \. on input line 95.
+LaTeX Info: Redefining \% on input line 95.
+ [81
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.95 
+     
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.4}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.95 
+     ]
+LaTeX Info: Redefining \. on input line 127.
+LaTeX Info: Redefining \% on input line 127.
+ [82
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.5}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.127 
+      ]
+LaTeX Info: Redefining \. on input line 127.
+LaTeX Info: Redefining \% on input line 127.
+ [83
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.6}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.127 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.7}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.127 
+      ]
+LaTeX Info: Redefining \. on input line 169.
+LaTeX Info: Redefining \% on input line 169.
+ [84
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.8}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.169 
+      ]
+LaTeX Info: Redefining \. on input line 169.
+LaTeX Info: Redefining \% on input line 169.
+ [85
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.9}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.169 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.10}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.169 
+      ]
+LaTeX Info: Redefining \. on input line 200.
+LaTeX Info: Redefining \% on input line 200.
+ [86
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.11}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.200   {multiidioma}
+                     ]
+LaTeX Info: Redefining \. on input line 200.
+LaTeX Info: Redefining \% on input line 200.
+ [87
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.12}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.200   {multiidioma}
+                     
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.13}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.200   {multiidioma}
+                     ]
+Overfull \hbox (15.94644pt too wide) in paragraph at lines 207--208
+\T1/pbk/l/n/10.95 tes de-fi-ni-dos en el fi-che-ro \T1/pcr/m/n/10.95 render.yaml \T1/pbk/l/n/10.95 del re-po-si-to-rio. El pri-me-ro (\T1/pcr/m/n/10.95 tfm-bpmn-frontend\T1/pbk/l/n/10.95 )
+ []
+
+
+Overfull \hbox (76.60347pt too wide) in paragraph at lines 207--208
+\T1/pbk/l/n/10.95 es un si-tio es-tá-ti-co que sir-ve el \T1/pbk/l/it/10.95 bund-le \T1/pbk/l/n/10.95 Web-pack de la ex-ten-sión. El se-gun-do (\T1/pcr/m/n/10.95 tfm-bpmn-mcp-server\T1/pbk/l/n/10.95 )
+ []
+
+LaTeX Info: Redefining \. on input line 214.
+LaTeX Info: Redefining \% on input line 214.
+[88
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.14}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.214 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{figure.7.15}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.214 
+      ]) (secciones/09_ValidacionPropuesta.tex
+LaTeX Info: Redefining \. on input line 7.
+LaTeX Info: Redefining \% on input line 7.
+ [89] [90
+
+]
+Cap\'{\i }tulo 8.
+[91]
+LaTeX Info: Redefining \. on input line 75.
+LaTeX Info: Redefining \% on input line 75.
+ [92
+pdfTeX warning (ext4): destination with the same identifier (name{figure.8.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.75 
+     ]
+LaTeX Info: Redefining \. on input line 111.
+LaTeX Info: Redefining \% on input line 111.
+ [93]
+Overfull \hbox (7.12848pt too wide) in paragraph at lines 123--123
+[]|[]\T1/pbk/db/n/10.95 Cód.| 
+ []
+
+
+Underfull \hbox (badness 1383) in paragraph at lines 131--131
+[]|\T1/pbk/l/n/10.95 Conocimiento pre-vio de la
+ []
+
+
+Underfull \hbox (badness 1168) in paragraph at lines 135--135
+[]|\T1/pbk/l/n/10.95 Frecuencia de uso de he-
+ []
+
+
+Overfull \hbox (2.8603pt too wide) in paragraph at lines 152--152
+[]|[]\T1/pbk/db/n/10.95 Cód.| 
+ []
+
+
+Overfull \hbox (6.14545pt too wide) in paragraph at lines 163--163
+[]|\T1/pbk/l/n/10.95 PU10| 
+ []
+
+
+Overfull \hbox (6.14545pt too wide) in paragraph at lines 164--164
+[]|\T1/pbk/l/n/10.95 PU11| 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 168.
+LaTeX Info: Redefining \% on input line 168.
+ [94
+pdfTeX warning (ext4): destination with the same identifier (name{table.8.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.168 
+      ]
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 181--181
+[]|[]\T1/pbk/l/n/10.95 PEOU1| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 182--182
+[]|\T1/pbk/l/n/10.95 PEOU2| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 183--183
+[]|\T1/pbk/l/n/10.95 PEOU3| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 184--184
+[]|\T1/pbk/l/n/10.95 PEOU4| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 185--185
+[]|\T1/pbk/l/n/10.95 PEOU5| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 186--186
+[]|\T1/pbk/l/n/10.95 PEOU6| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 187--187
+[]|\T1/pbk/l/n/10.95 PEOU7| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 188--188
+[]|\T1/pbk/l/n/10.95 PEOU8| 
+ []
+
+
+Overfull \hbox (10.30998pt too wide) in paragraph at lines 189--189
+[]|\T1/pbk/l/n/10.95 PEOU9| 
+ []
+
+
+Overfull \hbox (17.09892pt too wide) in paragraph at lines 190--190
+[]|\T1/pbk/l/n/10.95 PEOU10| 
+ []
+
+
+Overfull \hbox (17.09892pt too wide) in paragraph at lines 191--191
+[]|\T1/pbk/l/n/10.95 PEOU11| 
+ []
+
+
+Overfull \hbox (17.09892pt too wide) in paragraph at lines 192--192
+[]|\T1/pbk/l/n/10.95 PEOU12| 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 196.
+LaTeX Info: Redefining \% on input line 196.
+ [95
+pdfTeX warning (ext4): destination with the same identifier (name{table.8.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.196 
+      ]
+Overfull \hbox (2.8603pt too wide) in paragraph at lines 208--208
+[]|[]\T1/pbk/db/n/10.95 Cód.| 
+ []
+
+
+Overfull \hbox (3.07939pt too wide) in paragraph at lines 210--210
+[]|[]\T1/pbk/l/n/10.95 ITU1| 
+ []
+
+
+Overfull \hbox (3.07939pt too wide) in paragraph at lines 211--211
+[]|\T1/pbk/l/n/10.95 ITU2| 
+ []
+
+
+Overfull \hbox (3.07939pt too wide) in paragraph at lines 212--212
+[]|\T1/pbk/l/n/10.95 ITU3| 
+ []
+
+
+Overfull \hbox (3.07939pt too wide) in paragraph at lines 213--213
+[]|\T1/pbk/l/n/10.95 ITU4| 
+ []
+
+
+Overfull \hbox (3.07939pt too wide) in paragraph at lines 214--214
+[]|\T1/pbk/l/n/10.95 ITU5| 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 223.
+LaTeX Info: Redefining \% on input line 223.
+ [96
+pdfTeX warning (ext4): destination with the same identifier (name{table.8.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.223 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{table.8.4}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.223 
+      ]
+Overfull \hbox (5.70575pt too wide) in paragraph at lines 230--230
+[]|[]\T1/pbk/db/n/10.95 Cód.| 
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 232--232
+[]|[]\T1/pbk/l/n/10.95 SP1| 
+ []
+
+
+Underfull \hbox (badness 6510) in paragraph at lines 234--234
+\T1/pbk/l/n/10.95 humano--LLM (\T1/pbk/l/it/10.95 human-in-
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 235--235
+[]|\T1/pbk/l/n/10.95 SP2| 
+ []
+
+
+Underfull \hbox (badness 1168) in paragraph at lines 237--237
+[]|\T1/pbk/l/n/10.95 Democratización del mo-
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 238--238
+[]|\T1/pbk/l/n/10.95 SP3| 
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 241--241
+[]|\T1/pbk/l/n/10.95 SP4| 
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 244--244
+[]|\T1/pbk/l/n/10.95 SP5| 
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 247--247
+[]|\T1/pbk/l/n/10.95 SP6| 
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 250--250
+[]|\T1/pbk/l/n/10.95 SP7| 
+ []
+
+
+Underfull \hbox (badness 1655) in paragraph at lines 251--251
+\T1/pbk/l/n/10.95 gra-ma (ins-truc-cio-nes en len-gua-je
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 253--253
+[]|\T1/pbk/l/n/10.95 SP8| 
+ []
+
+
+Overfull \hbox (0.88802pt too wide) in paragraph at lines 257--257
+[]|\T1/pbk/l/n/10.95 SP9| 
+ []
+
+
+Overfull \hbox (7.67696pt too wide) in paragraph at lines 261--261
+[]|\T1/pbk/l/n/10.95 SP10| 
+ []
+
+
+Overfull \hbox (7.67696pt too wide) in paragraph at lines 265--265
+[]|\T1/pbk/l/n/10.95 SP11| 
+ []
+
+)
+LaTeX Info: Redefining \. on input line 63.
+LaTeX Info: Redefining \% on input line 63.
+ [97]
+LaTeX Info: Redefining \. on input line 63.
+LaTeX Info: Redefining \% on input line 63.
+ [98
+pdfTeX warning (ext4): destination with the same identifier (name{table.8.5}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.63 \backmatter
+                ] (secciones/06_Bibliografia.tex
+Underfull \hbox (badness 1107) in paragraph at lines 16--17
+[]\T1/pbk/l/n/10.95 L. F. Hör-ner, M. Mö-ller y M. Reichert, ``Au-to-ma-ti-cally Ge-ne-ra-ting BPMN
+ []
+
+
+Underfull \hbox (badness 2582) in paragraph at lines 16--17
+\T1/pbk/l/n/10.95 2.0 Pro-cess Mo-dels from Na-tu-ral Lan-gua-ge Pro-cess Des-crip-tions: Cha-
+ []
+
+
+Underfull \hbox (badness 3713) in paragraph at lines 16--17
+\T1/pbk/l/n/10.95 llen-ges, Fra-me-work, Qua-lity As-sess-ment,'' \T1/pbk/l/it/10.95 Bu-si-ness & In-for-ma-tion Sys-
+ []
+
+
+Underfull \hbox (badness 7012) in paragraph at lines 22--23
+[]\T1/pbk/l/n/10.95 J. Köp-ke y A. Sa-fan, ``In-tro-du-cing the BPMN-Chatbot for Ef-fi-cient
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 22--23
+\T1/pbk/l/n/10.95 LLM-Based Pro-cess Mo-de-ling,'' en \T1/pbk/l/it/10.95 CEUR Workshop Pro-cee-dings\T1/pbk/l/n/10.95 , vol.
+ []
+
+
+Underfull \hbox (badness 5578) in paragraph at lines 22--23
+\T1/pbk/l/n/10.95 3758, pa-per 15, BPM 2024 Fo-rum, Cra-co-via, 2024. Dis-po-ni-ble en:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 31--32
+[]\T1/pbk/l/n/10.95 Object Ma-na-ge-ment Group (OMG), ``Bu-si-ness Pro-cess Mo-del and
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 31--32
+\T1/pbk/l/n/10.95 No-ta-tion (BPMN), Ver-sion 2.0,'' enero de 2011. Dis-po-ni-ble en:
+ []
+
+[99
+
+
+]
+Underfull \hbox (badness 1661) in paragraph at lines 40--41
+[]\T1/pbk/l/n/10.95 Parlamento Eu-ro-peo y Con-se-jo de la Unión Eu-ro-pea, ``Re-gla-men-to (UE)
+ []
+
+
+Underfull \hbox (badness 3623) in paragraph at lines 40--41
+\T1/pbk/l/n/10.95 so-nas fí-si-cas en lo que res-pec-ta al tra-ta-mien-to de da-tos per-so-na-les
+ []
+
+
+Underfull \hbox (badness 2142) in paragraph at lines 40--41
+\T1/pbk/l/n/10.95 y a la li-bre cir-cu-la-ción de es-tos da-tos (RGPD),'' 2016. Dis-po-ni-ble en:
+ []
+
+
+Underfull \hbox (badness 1215) in paragraph at lines 46--47
+[]\T1/pbk/l/n/10.95 A. Kar-pathy, ``The-re's a new kind of co-ding I call `vi-be co-ding'...,'' [Pu-
+ []
+
+
+Underfull \hbox (badness 2418) in paragraph at lines 46--47
+\T1/pbk/l/n/10.95 bli-ca-ción en X (an-tes Twit-ter)], 2 de fe-bre-ro de 2025. Dis-po-ni-ble en:
+ []
+
+
+Underfull \hbox (badness 1721) in paragraph at lines 66--70
+[]\T1/pbk/l/n/10.95 Feuerriegel, S., Hart-mann, J., Ja-niesch, C., & Zs-chech, P. (2024). Ge-
+ []
+
+)
+LaTeX Info: Redefining \. on input line 70.
+LaTeX Info: Redefining \% on input line 70.
+ [100] (secciones/AnexoI.tex [101
+
+
+]
+LaTeX Info: Redefining \. on input line 89.
+LaTeX Info: Redefining \% on input line 89.
+ [102]) (secciones/AnexoII.tex
+LaTeX Info: Redefining \. on input line 1.
+LaTeX Info: Redefining \% on input line 1.
+ [103
+pdfTeX warning (ext4): destination with the same identifier (name{figure.Alph0.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Anexo II}] [104
+
+]) [105] (plantilla_TFM.aux
+LaTeX Info: Redefining \. on input line 11.
+LaTeX Info: Redefining \% on input line 11.
+)
+ ***********
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-11-06>
+ ***********
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+
+Package rerunfilecheck Warning: File `plantilla_TFM.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `plantilla_TFM.out':
+(rerunfilecheck)             Before: 073067D16DED54DE64B161EA100B4836;30895
+(rerunfilecheck)             After:  DFE3F6EF2472613E351E4A96E2426BC7;30602.
+ )
+(\end occurred inside a group at level 1)
+
+### simple group (level 1) entered at line 27 ({)
+### bottom level 
+Here is how much of TeX's memory you used:
+ 29134 strings out of 467871
+ 531327 string characters out of 5417408
+ 1712426 words of memory out of 5000000
+ 56329 multiletter control sequences out of 15000+600000
+ 677417 words of font info for 137 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 89i,13n,107p,1556b,2383s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{figure.Alph0.5} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{subsection.Alph0.2.4} has been referenced but does not exist, replaced by a fixed one
+
+<C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkd8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkdi8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkl8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/bookman/ubkli8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrb8a.pfb><C:/Users/USUARIO/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
+Output written on plantilla_TFM.pdf (117 pages, 742578 bytes).
+PDF statistics:
+ 2446 PDF objects out of 2487 (max. 8388607)
+ 1136 named destinations out of 1200 (max. 500000)
+ 1095 words of extra memory for PDF output out of 10000 (max. 10000000)
+

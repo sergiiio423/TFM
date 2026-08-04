@@ -33,7 +33,7 @@ async function callAzure(provider, systemPrompt, messages) {
       body: JSON.stringify({
         messages: [{ role: 'system', content: systemPrompt }, ...messages],
         temperature: 0.3,
-        max_tokens: 8000
+        max_completion_tokens: 8000
       }),
       signal: controller.signal
     });

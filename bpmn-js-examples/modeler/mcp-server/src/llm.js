@@ -1,21 +1,57 @@
 import { t } from '../../src/i18n.js';
 
-// ─── LLAMADA A LA API ─────────────────────────────────────────────────────────
-// Por defecto se usa el modelo GPT más potente disponible (gpt-4.1, y si no
-// gpt-4o). GitHub Models limita las peticiones POR MODELO y día (p.ej.
-// 150/día para gpt-4o-mini), así que si un modelo falla (cuota 429, modelo
-// retirado/desconocido, error transitorio...) se prueba con el siguiente de
-// la lista, de más a menos potente; solo se lanza error si fallan TODOS.
-export const LLM_MODELS = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'Phi-4'];
-let _llmModelIdx = 0; // recuerda el último modelo que funcionó en esta sesión
+// ─── PROVEEDOR: Azure OpenAI o GitHub Models ──────────────────────────────────
+// Si están presentes AZURE_OPENAI_KEY + AZURE_OPENAI_ENDPOINT → Azure OpenAI.
+// Si solo está GITHUB_TOKEN → GitHub Models (fallback legacy).
+function getProvider() {
+  const azureKey      = process.env.AZURE_OPENAI_KEY;
+  const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
+  const githubToken   = process.env.GITHUB_TOKEN;
 
-export function getApiKey() {
-  const key = process.env.GITHUB_TOKEN;
-  if (!key) throw new Error('Falta GITHUB_TOKEN en el entorno del servidor MCP (ver mcp-server/.env.example)');
-  return key;
+  if (azureKey && azureEndpoint) return { type: 'azure', key: azureKey, endpoint: azureEndpoint.replace(/\/$/, '') };
+  if (githubToken)                return { type: 'github', key: githubToken };
+  throw new Error('Falta configuración LLM: define AZURE_OPENAI_KEY + AZURE_OPENAI_ENDPOINT, o GITHUB_TOKEN.');
 }
 
-export async function callOpenAI(apiKey, systemPrompt, messages) {
+export function getApiKey() {
+  return getProvider().key;
+}
+
+// ─── AZURE OPENAI ─────────────────────────────────────────────────────────────
+const AZURE_DEPLOYMENT   = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+const AZURE_API_VERSION  = '2024-08-01-preview';
+
+async function callAzure(provider, systemPrompt, messages) {
+  const url = `${provider.endpoint}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions?api-version=${AZURE_API_VERSION}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 60000); // 60s
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': provider.key },
+      body: JSON.stringify({
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
+        temperature: 0.3,
+        max_tokens: 8000
+      }),
+      signal: controller.signal
+    });
+  } finally { clearTimeout(timer); }
+
+  if (response.ok) {
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  }
+  const err = await response.json().catch(() => ({}));
+  throw new Error(err.error?.message || `Azure OpenAI error ${response.status}`);
+}
+
+// ─── GITHUB MODELS (fallback) ─────────────────────────────────────────────────
+export const LLM_MODELS = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'Phi-4'];
+let _llmModelIdx = 0;
+
+async function callGitHub(provider, systemPrompt, messages) {
   let lastErr = null;
 
   for (let globalRetry = 0; globalRetry < 3; globalRetry++) {
@@ -27,11 +63,11 @@ export async function callOpenAI(apiKey, systemPrompt, messages) {
       const model = LLM_MODELS[idx];
       let response;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 30000); // 30s por modelo
+      const timer = setTimeout(() => controller.abort(), 30000);
       try {
         response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.key}` },
           body: JSON.stringify({
             model,
             messages: [{ role: 'system', content: systemPrompt }, ...messages],
@@ -55,7 +91,6 @@ export async function callOpenAI(apiKey, systemPrompt, messages) {
       lastErr = new Error(msg);
 
       if (response.status === 429) {
-        // Extraer el tiempo de espera sugerido para agrupar el backoff global
         const waitMatch = msg.match(/wait (\d+) second/i);
         if (waitMatch) minWaitMs = Math.max(minWaitMs, parseInt(waitMatch[1]) * 1000);
       } else {
@@ -63,17 +98,23 @@ export async function callOpenAI(apiKey, systemPrompt, messages) {
       }
     }
 
-    // Si todos los modelos dieron 429, esperar el mínimo sugerido antes de reintentar
     if (allRateLimited && globalRetry < 2) {
       const wait = minWaitMs > 0 ? Math.min(minWaitMs, 60000) : 15000;
       console.warn(`Todos los modelos en rate-limit. Reintentando en ${wait / 1000}s...`);
       await new Promise(r => setTimeout(r, wait));
     } else if (!allRateLimited) {
-      break; // error no recuperable (no es rate-limit): no reintentar
+      break;
     }
   }
 
   throw new Error(`Ningún modelo disponible (cuota agotada o modelos retirados). Espera unas horas o usa otro token. Último error: ${lastErr?.message || '?'}`);
+}
+
+// ─── PUNTO DE ENTRADA ÚNICO ───────────────────────────────────────────────────
+export async function callOpenAI(apiKey, systemPrompt, messages) {
+  const provider = getProvider();
+  if (provider.type === 'azure') return callAzure(provider, systemPrompt, messages);
+  return callGitHub(provider, systemPrompt, messages);
 }
 
 export function callAPI(apiKey, systemPrompt, messages) {

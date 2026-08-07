@@ -1,102 +1,167 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inicio del capítulo de desarrollo e implementación
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Desarrollo e implementación}
+\chapter{Desarrollo e Implementación}
 \label{cap:desarrollo}
 
-Dado que el desarrollo del proyecto se ha llevado a cabo siguiendo una metodología ágil con un enfoque iterativo e incremental, organizando el trabajo en \textit{sprints} semanales de acuerdo con la planificación definida en el capítulo de análisis (véase \S\ref{sec:planTrabajo}), el sistema ha experimentado una evolución progresiva a lo largo del tiempo. En cada iteración se ha partido del resultado de la anterior, incorporando nuevas funcionalidades y refinando las ya implementadas, con la participación activa del autor como desarrollador y usuario del sistema.
+En este capítulo se describe el proceso de desarrollo e implementación de la solución propuesta, mostrando cómo las decisiones arquitectónicas y de diseño presentadas en el capítulo anterior fueron materializadas en un sistema funcional. Más que documentar una secuencia cronológica de actividades, este capítulo tiene como objetivo explicar las principales decisiones de implementación adoptadas durante el desarrollo del artefacto software y justificar aquellas que resultaron determinantes para el funcionamiento de la herramienta.
+
+En primer lugar, se presenta la evolución del proyecto organizada en \textit{sprints} con el propósito de ilustrar el carácter iterativo e incremental del proceso de desarrollo. Esta planificación debe entenderse como una estrategia de gestión del proyecto basada en Scrum y no como el procedimiento metodológico utilizado para validar la investigación, cuya evaluación se aborda posteriormente mediante un estudio empírico basado en el TAM.
+
+A continuación, se describen los componentes técnicos más relevantes implementados durante el desarrollo, incluyendo los mecanismos de interacción con los modelos de lenguaje, la construcción de los principales prompts, el procesamiento y validación de los modelos BPMN generados, así como las estrategias incorporadas para aumentar la robustez del sistema frente a respuestas imprecisas producidas por los LLMs. En conjunto, estas implementaciones permiten materializar las funcionalidades definidas en los requisitos del sistema y constituyen la base tecnológica de la herramienta desarrollada. 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Evolución del proyecto por \textit{sprints}}
 \label{sec:evolucionSprints}
 
-En los siguientes apartados se describen, para cada iteración, las tareas realizadas, las historias de usuario completadas y los principales hitos técnicos alcanzados.
+El desarrollo de la herramienta se organizó en ocho sprints siguiendo el marco de trabajo Scrum, con el propósito de favorecer una construcción iterativa e incremental del artefacto.Cada iteración produjo un incremento funcional de la solución, permitiendo incorporar progresivamente nuevas capacidades y reducir los riesgos asociados a la integración de sus diferentes componentes.
+
+La elección de Scrum como marco de gestión y organización en ocho iteraciones semanales responde a dos razones principales. En primer lugar, la naturaleza exploratoria del proyecto, aconsejaba un enfoque iterativo que permitiera incorporar los aprendizajes de cada ciclo antes de comprometerse con el diseño del siguiente: al trabajar con LLMs, cuyo comportamientos ante diferentes estrategias de prompting es difícil de predecir sin experimentación, un desarrollo en cascada habría forzado a diseñar herramientas cuya viabilidad aun no había sido comprobada. En segundo lugar, la complejidad de integrar tres tecnologías nuevas (MCP, bpmn-js y la API de GitHub Models) justificaba comenzar por la integraciones de mayor riesgo técnico, como la configuración del entorno en el Sprint 0 y el servidor MCP en el Sprint 1 y añadir funcionalidades de mayor valor únicamente una vez estabilizadas esas capas base.
+
+En los siguientes apartados se describen, para cada iteración, las tareas realizadas, las historias de usuario completadas y los principales hitos técnicos alcanzados. Asimismo, se destaca el incremento funcional obtenido al finalizar cada \textit{sprint}, evidenciando la evolución progresiva de la herramienta desde la configuración inicial del entorno hasta la implementación de todas sus funcionalidades.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\textit{Sprint} 0 (26/05/2026 -- 01/06/2026)}
 \label{subsec:sprint0}
 
-El Sprint~0 estuvo dedicado a la selección tecnológica, la planificación del proyecto y la configuración del entorno de desarrollo, abarcando las historias de usuario US01 y US02.
+El \textit{Sprint} 0 estuvo dedicado a la selección tecnológica, la planificación del proyecto y la configuración del entorno de desarrollo, abarcando las historias de usuario US01 y US02. Aunque esta iteración no incorporó funcionalidades visibles para el usuario final, resultó fundamental para establecer la infraestructura tecnológica y organizativa sobre la que se desarrolló el resto del proyecto.
 
-En el marco de la US01, se llevó a cabo un análisis exhaustivo de las alternativas disponibles para abordar los objetivos del TFM. Respecto al editor BPMN, se estudiaron las opciones de \textit{draw.io} y \textit{bpmn.io}: mientras que \textit{draw.io} ofrece soporte general para diagramas BPMN, no proporciona una API que permita la manipulación programática del modelo ni la integración de un panel conversacional propio, por lo que se descartó en favor de \textit{bpmn.io} (\textit{bpmn-js}), que sí ofrece estas capacidades a través de su arquitectura modular de \textit{plugins}. En cuanto al proveedor de LLM, se compararon el acceso directo a las API de OpenAI y de Google con el servicio GitHub Models, optándose finalmente por este último por su plan gratuito y por la posibilidad de acceder a múltiples modelos (\texttt{gpt-4.1}, \texttt{gpt-4o}, \texttt{Phi-4}, entre otros) a través de una única API compatible con el formato OpenAI. Asimismo, se definió la arquitectura de integración basada en el protocolo MCP, que permite desacoplar la extensión del cliente de la lógica de llamada al LLM y almacenar las credenciales de forma segura en el servidor. Finalmente, se estableció el \textit{backlog} inicial de historias de usuario y se planificó la distribución del trabajo en los ocho \textit{sprints} del proyecto.
+En el marco de la US01, se llevó a cabo un análisis exhaustivo de las alternativas disponibles para abordar los objetivos del TFM. Respecto al editor BPMN, se estudiaron las opciones de \textit{draw.io} y \textit{bpmn.io}: mientras que \textit{draw.io} ofrece soporte general para diagramas BPMN, no proporciona una API que permita la manipulación programática del modelo ni la integración de un panel conversacional propio, por lo que se descartó en favor de \textit{bpmn.io} (\textit{bpmn-js}), que sí ofrece estas capacidades a través de su arquitectura modular de \textit{plugins}. En cuanto al proveedor de LLM, se compararon el acceso directo a las API de OpenAI y de Google con el servicio GitHub Models, optándose finalmente por este último por su plan gratuito y por la posibilidad de acceder a múltiples modelos (\texttt{gpt-4.1}, \texttt{gpt-4o}, \texttt{Phi-4}, entre otros) a través de una única API compatible con el formato OpenAI. Asimismo, se definió la arquitectura de integración basada en el protocolo MCP, que permite desacoplar la extensión de la parte del cliente de la lógica de interacción con el LLM y almacenar las credenciales de forma segura en el servidor. Finalmente, se estableció el \textit{backlog} inicial de historias de usuario y se planificó la distribución del trabajo en los ocho \textit{sprints} del proyecto.
+La US02 se centró en la configuración del entorno de desarrollo. Se clonó el repositorio \texttt{bpmn-js-examples} y se tomó como punto de partida el ejemplo \texttt{modeler}, que proporciona un editor BPMN 2.0 funcional en el navegador con soporte para la importación y exportación de XML. Posteriormente, se configuró el sistema de empaquetado mediante \textbf{Webpack 5}, se verificó que todas las dependencias de \textit{bpmn-js} se resolvieran correctamente y se comprobó el funcionamiento básico del editor. 
 
-La US02 se centró en la configuración del entorno de desarrollo. Se clonó el repositorio \texttt{bpmn-js-examples} y se tomó como punto de partida el ejemplo \texttt{modeler}, que proporciona un editor BPMN 2.0 funcional en el navegador con soporte de importación y exportación de XML. Se configuró el sistema de empaquetado mediante \textbf{Webpack 5}, se verificó que todas las dependencias de \textit{bpmn-js} se resolvieran correctamente y se comprobó el funcionamiento básico del editor. Al finalizar el sprint, se disponía de un entorno de desarrollo operativo sobre el que construir la extensión.
+Como resultado de este \textit{sprint}, quedó establecido un entorno de desarrollo completamente operativo y una base tecnológica sólida sobre la que se implementaron las funcionalidades incorporadas en las iteraciones posteriores.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\textit{Sprint} 1 (02/06/2026 -- 08/06/2026)}
 \label{subsec:sprint1}
 
-El Sprint~1 abordó el diseño e implementación del servidor MCP y su integración con la API de GitHub Models, correspondiendo a las historias US03 y US04.
+El Sprint~1 abordó el diseño e implementación del servidor MCP y su integración con la API de GitHub Models, correspondiendo a las historias de usuario US03 y US04. Esta iteración tuvo como principal objetivo establecer la infraestructura de comunicación entre la extensión desarrollada y los modelos de lenguaje, proporcionando la base necesaria para incorporar posteriormente las funcionalidades inteligentes de la herramienta.
+La US03 comenzó con el estudio de la especificación del \textit{Model Context Protocol} (MCP) y del SDK oficial \texttt{@modelcontextprotocol/sdk} para Node.js. A continuación, se implementó el servidor utilizando el framework \textbf{Express} (versión 5.2.1), que expone un único \textit{endpoint} \texttt{POST /mcp}. El servidor crea, por cada petición recibida, una instancia del \texttt{McpServer} y del transporte \texttt{StreamableHTTPServerTransport}, los conecta, procesa la petición y los destruye al finalizar la respuesta, siguiendo el modelo \textit{stateless} descrito durante la fase de diseño. Asimismo, se definió la estructura base para el registro de herramientas MCP, especificando para cada una su nombre, descripción y  los esquemas de entrada y salida mediante la librería \textbf{Zod}. Al finalizar esta historia se realizaron pruebas de comunicación entre una extensión de prueba en el navegador y el servidor, verificando que el correcto funcionamiento del protocolo MCP en el entorno local.
 
-La US03 comenzó con el estudio de la especificación del \textit{Model Context Protocol} y del SDK oficial \texttt{@modelcontextprotocol/sdk} para Node.js. A continuación, se implementó el servidor utilizando el framework \textbf{Express} (versión 5.2.1), que expone un único \textit{endpoint} \texttt{POST /mcp}. El servidor crea, por cada petición recibida, una instancia del \texttt{McpServer} y del transporte \texttt{StreamableHTTPServerTransport}, los conecta, procesa la petición y los destruye al finalizar la respuesta, siguiendo el modelo \textit{stateless} descrito en el diseño. Se definió la estructura base de registro de herramientas MCP, especificando para cada una su nombre, descripción y esquemas de entrada y salida mediante la librería \textbf{Zod}. Al finalizar esta historia se realizaron pruebas de conexión entre una extensión de prueba en el navegador y el servidor, verificando que el protocolo MCP funcionaba correctamente en el entorno local.
+La US04 añadió la integración con la API de GitHub Models. Se implementó la función \texttt{callOpenAI}, encargada de construir la solicitud HTTP a la API con los \textit{prompts} de sistema y de usuario correspondientes, gestionar la respuesta y devolver el texto generado. El acceso se configuró mediante la variable de entorno \texttt{GITHUB\_TOKEN}, gestionada con la librería \textbf{dotenv}, evitando así la exposición de credenciales en el código fuente. 
+Con el propósito de aumentar la robustez de la solución frente a las limitaciones propias de los servicios LLM, se implementó además un mecanismo de \textit{fallback} automático. Cuando el modelo principal (\texttt{gpt-4.1}) devuelve un error  relacionado con la disponible o con la indisponibilidad temporal del servicio, el sistema intenta sucesivamente la ejecución utilizando los modelos \texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano} y \texttt{Phi-4}, notificando un error únicamente cuando ninguno de ellos consigue procesar la solicitud. Este mecanismo resultó especialmente útil durante el desarrollo, cuando las restricciones del plan gratuito provocaban interrupciones frecuentes en el acceso a los modelos.
 
-La US04 añadió la integración con la API de GitHub Models. Se implementó la función \texttt{callOpenAI}, encargada de construir la solicitud HTTP a la API de GitHub Models con el \textit{prompt} de sistema y de usuario correspondiente, gestionar la respuesta y devolver el texto generado. Se configuró el acceso mediante la variable de entorno \texttt{GITHUB\_TOKEN}, gestionada con la librería \textbf{dotenv} para evitar su exposición en el código fuente. Se implementó también el mecanismo de \textit{fallback} automático: si el modelo principal (\texttt{gpt-4.1}) devuelve un error de cuota o de disponibilidad, la función intenta sucesivamente con \texttt{gpt-4o}, \texttt{gpt-4o-mini}, \texttt{gpt-4.1-mini}, \texttt{gpt-4.1-nano} y \texttt{Phi-4}, lanzando un error únicamente si todos fallan. Este mecanismo resultó especialmente útil durante el desarrollo, cuando los límites de peticiones del plan gratuito se alcanzaban con frecuencia.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{\textit{Sprint} 2 (09/06/2026 -- 15/06/2026)}
 \label{subsec:sprint2}
 
-El Sprint~2 se dedicó íntegramente a la implementación de la generación de modelos BPMN a partir de descripciones en lenguaje natural (US05), que constituye la funcionalidad central del sistema.
+El Sprint~2 se dedicó íntegramente a la implementación de la generación de modelos BPMN a partir de descripciones en lenguaje natural (US05), funcionalidad que constituye el núcleo de la solución propuesta y materializa el principal objetivo del sistema transformar especificaciones textuales en modelos BPMN de manera automática.
 
-El principal reto de esta historia fue el diseño de los \textit{prompts} de las herramientas de generación iterativa. Para cada una de las seis herramientas del flujo de generación (\texttt{identify\_structure}, \texttt{suggest\_flow\_start}, \texttt{suggest\_next\_step}, \texttt{suggest\_gateway\_branches}, \texttt{suggest\_branch\_step} y \texttt{render\_diagram}), se elaboró un \textit{prompt} de sistema que especifica con precisión el formato de la respuesta esperada (objeto JSON o XML BPMN 2.0 válido), los elementos BPMN soportados y las convenciones de nomenclatura y estructura del diagrama. Se implementó la función \texttt{parseLLMJson}, que extrae y deserializa el objeto JSON de la respuesta del LLM incluso cuando esta incluye texto adicional o bloques de código Markdown, lo que resultó necesario dado que los modelos de lenguaje no siempre devuelven JSON puro.
+El principal reto de esta historia fue el diseño de los \textit{prompts} que soportan las herramientas de generación iterativa. Para cada una de las seis herramientas del flujo de generación (\textit{identify\_structure}, \textit{suggest\_flow\_start}, \textit{suggest\_next\_step}, \textit{suggest\_gateway\_branches}, \textit{suggest\_branch\_step} y \textit{render\_diagram}), se elaboró un \textit{prompt} de sistema que especifica con precisión el formato de la respuesta esperada (objeto JSON o XML BPMN 2.0 válido), los elementos BPMN soportados y las convenciones de nomenclatura y estructura del diagrama.Con el fin de aumentar la fiabilidad del procesamiento de las respuestas generadas por el LLM, se implementó la función \texttt{parseLLMJson}, encargada de extrae y deserializa el objeto JSON incluso cuando la respuesta incluye texto adicional o bloques de código Markdown, situación frecuente en este tipo de modelos lo que resultó necesario dado que los modelos de lenguaje no siempre devuelven JSON puro.
 
-En el lado de la extensión, se implementó la lógica de carga del XML BPMN generado en el editor \textit{bpmn-js}: al recibir el XML del servidor MCP, la extensión lo importa mediante la API de la librería (\texttt{bpmnViewer.importXML}), actualiza la vista del editor y centra automáticamente el lienzo en el contenido del diagrama. Se realizaron pruebas con descripciones de proceso de diferente complejidad (procesos lineales, procesos con \textit{gateways} y múltiples participantes) para verificar la calidad de los modelos generados y ajustar los \textit{prompts} en consecuencia. Al finalizar el sprint se disponía de un sistema capaz de generar un modelo BPMN 2.0 completo a partir de una descripción en lenguaje natural.
+En el lado de la extensión, se implementó la lógica de carga del XML BPMN generado en el editor \textit{bpmn-js}. Al recibir el XML desde el servidor MCP, la extensión lo importa mediante la API de la librería (\texttt{bpmnViewer.importXML}), actualiza automáticamente la vista del editor y centra el lienzo sobre el contenido del diagrama para facilitar su visualización.
+
+Finalmente, se realizaron pruebas utilizando descripciones de procesos con diferentes niveles de complejidad (incluyendo procesos lineales, procesos con \textit{gateways} y múltiples participantes) con el objetivo de evaluar la calidad de los modelos generados y refinar progresivamente los \textit{prompts} utilizados durante la generación automática. 
+Como resultado de este \textit{sprint}, la herramienta pasó a ser capaz de generar automáticamente modelos BPMN 2.0 completo a partir de descripciones en lenguaje natural, incorporando además mecanismos que aumentan la robustez del procesamiento de las respuestas producidas por los modelos de lenguaje.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{\textit{Sprint} 3 (16/06/2026 -- 22/06/2026)}
 \label{subsec:sprint3}
 
-En el Sprint~3 se implementaron la edición conversacional iterativa del modelo (US06) y la validación y reparación automática del XML BPMN (US07).
+En el Sprint~3 se implementaron la edición conversacional iterativa del modelo (US06) y la validación y reparación automática del XML BPMN (US07). Esta iteración tuvo como objetivo ampliar la interacción entre el usuario y la herramienta, permitiendo no solo la generación inicial del modelo, sino también su refinamiento progresivo mediante instrucciones expresadas en lenguaje natural, al tiempo que se incrementaba la robustez del sistema frente a las limitaciones inherentes de los modelos de lenguaje.
 
-La US06 incorporó al sistema la posibilidad de realizar modificaciones sobre el diagrama generado mediante instrucciones en lenguaje natural. Se implementó la herramienta MCP \texttt{refine\_diagram}, que recibe el XML BPMN actual del diagrama junto con la instrucción de modificación expresada por el usuario y devuelve el XML modificado. El \textit{prompt} de esta herramienta fue especialmente cuidado para garantizar que el LLM preservara los elementos no afectados por la modificación y que el XML devuelto fuera válido. En el lado de la extensión, se diseñó e implementó el panel conversacional: un área lateral que muestra el historial de mensajes intercambiados entre el usuario y el sistema, con un campo de entrada de texto y un botón de envío. Se implementó la gestión del historial de la conversación en el cliente, que se transmite al servidor en cada petición para mantener el contexto de la interacción.
+La US06 incorporó al sistema la posibilidad de realizar modificaciones sobre el diagrama generado mediante instrucciones en lenguaje natural. Para ello, se implementó la herramienta MCP \textit{refine\_diagram}, que recibe el XML BPMN actual del diagrama junto con la instrucción de modificación expresada por el usuario y devuelve el XML actualizado . El \textit{prompt}  asociado a esta herramienta fue  diseñado especialmente para garantizar que el LLM preservara los elementos no afectados por la modificación y que el XML  generado mantuviera su validez estructural. En el lado de la extensión, se diseñó e implementó un  panel conversacional  compuesto por un área lateral que muestra el historial de mensajes intercambiados entre el usuario y el sistema, junto con un campo de entrada de texto y un botón de envío. Asimismo, se  implementó la gestión del historial de la conversación en el cliente, transmitiéndolo al servidor en cada petición para mantener el contexto durante toda la interacción.
 
-La US07 abordó un problema detectado durante el Sprint~2: los LLM generan con frecuencia XML BPMN malformado o truncado, especialmente cuando el diagrama es complejo y la respuesta supera los límites de tokens del modelo. Se analizaron los errores más habituales (etiquetas sin cerrar, comentarios XML incrustados, texto adicional antes o después del bloque XML, comillas sin escapar) y se implementó la función \texttt{cleanXML}, que aplica una secuencia de transformaciones para sanear la respuesta antes de intentar cargarla en \textit{bpmn-js}. Esta función resultó crítica para la fiabilidad del sistema: sin ella, una proporción significativa de las respuestas del LLM no podía cargarse en el editor.
+La US07 abordó un problema detectado durante el Sprint~2: los LLM generan con frecuencia documentos XML BPMN malformado o truncado, especialmente cuando el diagrama es complejo y la respuesta supera los límites de \textit{tokens} del modelo. Tras analizar los errores más habituales (como etiquetas sin cerrar, comentarios XML incrustados, texto adicional antes o después del bloque XML y comillas sin escapar),  se implementó la función \texttt{cleanXML}, que aplica una secuencia de transformaciones destinadas a sanear la respuesta antes de intentar su cargar en \textit{bpmn-js}. Esta función resultó crítica para la fiabilidad del sistema, ya que una proporción significativa de las respuestas generadas por el del LLM no podía ser importada correctamente en el editor sin un preprocesamiento previo.
+
+Como resultado de este \textit{sprint}, la herramienta pasó a soportar un ciclo completo de interacción iterativa con el usuario, permitiendo modificar modelos BPMN previamente generados y aumentando significativamente la robustez del sistema mediante mecanismos automáticos de validación y reparación del XML.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{\textit{Sprint} 4 (23/06/2026 -- 29/06/2026)}
 \label{subsec:sprint4}
 
-El Sprint~4 se centró en el diseño e implementación de la herramienta de análisis PERVAL, abarcando las historias US08 y US09.
+El Sprint~4 se centró en el diseño e implementación de la herramienta de análisis PERVAL, abarcando las historias US08 y US09. El objetivo de esta iteración fue incorporar al sistema un mecanismo capaz de analizar automáticamente el valor percibido en los modelos BPMN generados, ampliando las capacidades de la herramienta más allá de la generación y edición de diagramas.
 
-La US08 se dedicó al diseño de la herramienta. Se realizó un estudio detallado del modelo PERVAL de Sweeney y Soutar~\cite{sweeney2001perval}, prestando especial atención a la operacionalización de las cuatro dimensiones de valor percibido (\textit{Quality}, \textit{Price}, \textit{Emotional} y \textit{Social}) en el contexto de tareas y entregas de procesos de negocio. A partir de este estudio se diseñó el esquema de entrada de la herramienta: el XML BPMN del diagrama, la lista de tareas o entregas a analizar, el nombre del actor externo cuyo punto de vista se adopta, el alcance del análisis (entregas al cliente externo o todas las tareas del proceso) y el idioma de los textos generados. Se diseñó asimismo el \textit{prompt} de análisis PERVAL, que instruye al LLM a clasificar cada elemento del proceso según las cuatro dimensiones de valor y a devolver un objeto JSON estructurado con las clasificaciones individuales, un resumen por dimensión y una valoración general del proceso.
+La US08 se dedicó al diseño de la herramienta. Para ello, se realizó un estudio detallado del modelo PERVAL de Sweeney y Soutar~\cite{sweeney2001perval}, prestando especial atención a la operacionalización de las cuatro dimensiones de valor percibido (\textit{Quality}, \textit{Price}, \textit{Emotional} y \textit{Social}) en el contexto de tareas y entregas de procesos de negocio. A partir de este estudio se diseñó el esquema de entrada de la herramienta, compuesto por el XML BPMN del diagrama, la lista de tareas o entregas a analizar, el nombre del actor externo cuyo punto de vista se adopta, el alcance del análisis (entregas al cliente externo o todas las tareas del proceso) y el idioma de los textos generados. Se diseñó asimismo el \textit{prompt} de análisis PERVAL, que instruye al LLM a clasificar cada elemento del proceso según las cuatro dimensiones de valor y a devolver un objeto JSON estructurado con las clasificaciones individuales, un resumen por dimensión y una valoración general del proceso.
 
-La US09 completó la implementación de la herramienta. Se registró \texttt{analyze\_perval} en el servidor MCP con su esquema Zod correspondiente, se implementó la lógica de extracción de las tareas y entregas directamente a partir del XML BPMN recibido y se verificó el cálculo del resumen agregado por dimensión a partir de las clasificaciones individuales devueltas por el LLM. Se realizaron pruebas con modelos BPMN de diferente complejidad y con distintos actores externos para validar la calidad y consistencia de los resultados del análisis.
+
+La US09 completó la implementación de la herramienta. Se registró \textit{analyze\_perval} en el servidor MCP junto con su esquema Zod correspondiente, se implementó la lógica de extracción automática de las tareas y entregas directamente a partir del XML BPMN recibido y se verificó el cálculo del resumen agregado por dimensión a partir de las clasificaciones individuales devueltas por el LLM. Finalmente, se realizaron pruebas utilizando modelos BPMN de diferente complejidad y  distintos actores externos con el propósito de comprobar  la calidad,  consistencia y coherencia de los resultados obtenidos por el análisis.
+
+Como resultado de este sprint, la herramienta incorporó una nueva capacidad de análisis basada en el modelo PERVAL, permitiendo evaluar automáticamente el valor percibido asociado a los elementos de un proceso de negocio y complementando las funcionalidades de generación y edición implementadas en las iteraciones anteriores.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{\textit{Sprint} 5 (30/06/2026 -- 06/07/2026)}
 \label{subsec:sprint5}
 
-El Sprint~5 abordó la visualización de los resultados del análisis PERVAL (US10) y el diseño e implementación de la interfaz del panel conversacional (US11).
+El Sprint~5 abordó la visualización de los resultados del análisis PERVAL (US10) y el diseño e implementación de la interfaz del panel conversacional (US11). El objetivo de esta iteración fue mejorar la interacción entre el usuario y la herramienta, facilitando tanto la interpretación de los resultados del análisis como la utilización de las funcionalidades implementadas en los \textit{sprints} anteriores.
 
-En el marco de la US10, se implementó en la extensión la interfaz de configuración del análisis PERVAL: un formulario que permite al usuario seleccionar el alcance del análisis (tareas o entregas al cliente externo), introducir el nombre del actor externo cuyo punto de vista se desea adoptar y lanzar el análisis. Una vez recibida la respuesta del servidor, la extensión presenta los resultados de forma estructurada en el panel conversacional: para cada elemento analizado se muestran las cuatro dimensiones PERVAL con su clasificación y la justificación textual generada por el LLM, y se añade un resumen global por dimensión junto con la valoración general del proceso. Se implementó también el resaltado visual sobre el diagrama BPMN de los elementos analizados, de modo que el usuario pueda identificar fácilmente qué tareas o entregas han sido evaluadas.
+En el marco de la US10, se implementó en la extensión la interfaz de configuración del análisis PERVAL: un formulario que permite al usuario seleccionar el alcance del análisis (tareas o entregas al cliente externo), introducir el nombre del actor externo cuyo punto de vista se desea adoptar y lanzar el análisis. Una vez recibida la respuesta del servidor, la extensión presenta los resultados de forma estructurada en el panel conversacional. Para cada elemento analizado se muestran las cuatro dimensiones PERVAL con su clasificación y la justificación textual generada por el LLM, y se añade un resumen global por dimensión junto con una valoración general del proceso. Con el propósito de facilitar la interpretación de los resultados, se implementó también el resaltado visual de los elementos analizados sobre el diagrama BPMN, permitiendo al usuario identificar de forma inmediata las tareas o entregas evaluadas .
 
-La US11 se centró en el diseño visual del panel conversacional. Se definió una paleta de colores basada en tonos azul y verde para diferenciar los mensajes del usuario y las respuestas del sistema, y se seleccionó la fuente \textit{Inter} por su legibilidad en pantallas de alta densidad. Se implementaron los estilos del panel adaptados a diferentes tamaños de pantalla, se añadieron indicadores de estado de carga (animación de puntos durante el procesamiento de peticiones) y mensajes de error con el formato adecuado para cada tipo de fallo (error de conexión con el servidor, error de cuota del LLM, XML inválido). Se realizaron pruebas de la interfaz en distintas resoluciones de pantalla y se ajustaron los estilos para garantizar una experiencia de usuario coherente.
+La US11 se centró en el diseño visual del panel conversacional. Se definió una paleta de colores basada en tonos azul y verde para diferenciar los mensajes del usuario de las respuestas del sistema, y se seleccionó la fuente \textit{Inter} por su buena legibilidad en pantallas de alta densidad. Se implementaron los estilos del panel adaptados a diferentes tamaños de pantalla, se añadieron indicadores de estado de carga (animación de puntos durante el procesamiento de peticiones) y mensajes de error con el formato adecuado para cada tipo de fallo (como errores de conexión con el servidor, limitaciones de cuota del LLM o problemas derivados de XML inválido). Finalmente, se realizaron pruebas de la interfaz en distintas resoluciones de pantalla y se ajustaron los estilos para garantizar una experiencia de usuario consistente.
+
+Como resultado de este \textit{sprint}, la herramienta incorporó una interfaz de usuario más completa e intuitiva, facilitando tanto la ejecución del análisis PERVAL como la interpretación visual de sus resultados y mejorando significativamente la experiencia de interacción con el sistema.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\textit{Sprint} 6 (07/07/2026 -- 13/07/2026)}
 \label{subsec:sprint6}
 
-El Sprint~6 se destinó a la internacionalización de la interfaz y los \textit{prompts} (US12) y a la implementación de las pruebas \textit{end-to-end} con \textit{Playwright} (US13).
+El Sprint~6 se destinó a la internacionalización de la interfaz y los \textit{prompts} (US12) y a la implementación de las pruebas \textit{end-to-end} con \textit{Playwright} (US13). El objetivo de esta iteración fue aumentar la accesibilidad de la herramienta para usuarios de diferentes idiomas y reforzar la verificación sistemática de las funcionalidades implementadas en los \textit{sprints} anteriores.
 
-La US12 implementó el soporte multilingüe del sistema. Se extrajeron todos los textos de la interfaz a ficheros de idioma (\texttt{i18n/es.js} y \texttt{i18n/en.js}), cubriendo los mensajes del panel conversacional, los textos de los formularios, los indicadores de estado y los mensajes de error. El idioma activo se selecciona mediante un selector en la interfaz y se almacena en el estado de la extensión. Los \textit{prompts} de todas las herramientas MCP se parametrizaron según el idioma activo, de modo que las respuestas del LLM —incluidas las justificaciones del análisis PERVAL— se generan directamente en el idioma seleccionado, sin necesidad de traducción posterior. Se verificó el funcionamiento completo del sistema en ambos idiomas mediante pruebas manuales de los flujos principales.
+La US12 implementó el soporte multilingüe del sistema. Para ello, se extrajeron todos los textos de la interfaz a ficheros de idioma (\texttt{i18n/es.js} y \texttt{i18n/en.js}), cubriendo los mensajes del panel conversacional, los textos de los formularios, los indicadores de estado y los mensajes de error. El idioma activo se selecciona mediante un selector disponible en la interfaz y se almacena en el estado de la extensión. Los \textit{prompts} de todas las herramientas MCP se parametrizaron en función del idioma seleccionado, permitiendo que las respuestas del LLM se generan directamente en el idioma elegido por el usuario, sin necesidad de realizar traducciones posteriores. Finalmente, se verificó el funcionamiento completo del sistema en ambos idiomas mediante pruebas manuales de los flujos principales.
 
-La US13 configuró \textit{Playwright} sobre el proyecto e implementó un conjunto de pruebas \textit{end-to-end} que verifican el funcionamiento de los flujos principales del sistema en un navegador real (Chromium). Las pruebas cubren la generación de un modelo BPMN a partir de una descripción en lenguaje natural, la modificación conversacional del modelo generado y la ejecución del análisis PERVAL sobre el diagrama resultante. Dado que las pruebas realizan llamadas reales a la API de GitHub Models, los tiempos de ejecución son variables y pueden superar el minuto en modelos de mayor latencia; por ello, se configuraron \textit{timeouts} generosos y se añadieron verificaciones intermedias del estado de la interfaz que permiten distinguir entre un sistema lento y uno que ha fallado.
+La US13 incorporó una estrategia de validación automatizada basada en \textit{Playwright}. Se configuró esta herramienta sobre el proyecto y se implementó un conjunto de pruebas \textit{end-to-end} destinadas a verificar el funcionamiento de los principales flujos del sistema en un navegador real (Chromium). Las pruebas cubren la generación de un modelo BPMN a partir de una descripción en lenguaje natural, la modificación conversacional del modelo generado y la ejecución del análisis PERVAL sobre el diagrama resultante. Dado que las pruebas realizan llamadas reales a la API de \textit{GitHub Models}, los tiempos de ejecución son variables y pueden superar el minuto en modelos de mayor latencia; por ello, se configuraron \textit{timeouts} generosos y se añadieron verificaciones intermedias del estado de la interfaz que permiten distinguir entre un sistema lento y uno que ha fallado.
+
+Como resultado de este \textit{sprint}, la herramienta amplió su capacidad de uso en entornos multilingües y pasó a disponer de un mecanismo automatizado de validación funcional, incrementando tanto la accesibilidad del sistema como la confianza en la estabilidad de las funcionalidades implementadas. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\textit{Sprint} 7 (14/07/2026 -- 20/07/2026)}
 \label{subsec:sprint7}
 
-El Sprint~7 cerró el desarrollo del proyecto con el despliegue en producción (US14) y la validación de la solución con usuarios mediante el modelo TAM (US15).
+El Sprint~7 cerró el desarrollo del proyecto con el despliegue de la solución en un entorno de producción (US14) y la validación de la solución con usuarios mediante el modelo TAM (US15). El objetivo de esta iteración fue preparar la solución para su utilización en un entorno operativo y obtener evidencias iniciales sobre su aceptación por parte de los usuarios.
 
-La US14 configuró el despliegue continuo en la plataforma \textit{Render.com}. Se elaboró el fichero \texttt{render.yaml}, que define dos servicios: un sitio estático (\texttt{tfm-bpmn-frontend}) para servir la extensión empaquetada por Webpack, y un servicio web Node.js (\texttt{tfm-bpmn-mcp-server}) para el servidor MCP. Ambos servicios se despliegan automáticamente al hacer \textit{push} al repositorio de GitHub, con reinicio automático ante fallos y acceso HTTPS mediante certificados gestionados por la propia plataforma. Se realizaron pruebas de integración entre la extensión desplegada en \textit{Render} y el servidor MCP, verificando el correcto funcionamiento del sistema en el entorno de producción y documentando las variables de entorno necesarias para futuras configuraciones.
+La US14 configuró el despliegue continuo en la plataforma \textit{Render.com}. Para ello, se elaboró el fichero \texttt{render.yaml}, que define dos servicios: un sitio estático para servir la extensión empaquetada por \textit{Webpack} y un servicio \textit{web Node.js} para el servidor MCP. Ambos servicios se despliegan automáticamente al hacer \textit{push} al repositorio de GitHub, con reinicio automático ante fallos y acceso HTTPS mediante certificados gestionados por la propia plataforma. Se realizaron pruebas de integración entre la extensión desplegada en \textit{Render} y el servidor MCP, verificando el correcto funcionamiento del sistema en el entorno de producción y documentando las variables de entorno necesarias para futuras configuraciones.
 
-La US15 completó la validación de la solución con un grupo de aproximadamente quince participantes, siguiendo el modelo de aceptación de la tecnología (\textit{Technology Acceptance Model}, TAM)~\cite{davis1989tam}. Se diseñó un cuestionario que mide tres constructos: la utilidad percibida (PU), la facilidad de uso percibida (PEOU) y la intención de uso (IU), adaptando los ítems estándar del TAM al contexto específico de la herramienta. Los participantes utilizaron la versión desplegada del sistema para generar y editar modelos BPMN a partir de descripciones de proceso propuestas, y completaron el cuestionario al finalizar la sesión. Los resultados obtenidos se presentan y analizan en el capítulo de Resultados.
+La US15 completó la validación de la solución mediante un estudio con un grupo de aproximadamente quince participantes, siguiendo el modelo TAM. Para ello, se diseñó un cuestionario que mide tres constructos: la utilidad percibida (Perceived Usefulness – PU), la facilidad de uso percibida (Perceived Ease of Use – PEOU) y la intención de uso (Intention to Use – IU), adaptando los ítems estándar del TAM al contexto específico de la herramienta. Los participantes utilizaron la versión desplegada del sistema para generar y editar modelos BPMN a partir de descripciones de proceso propuestas, y completaron el cuestionario al finalizar la sesión. Los resultados obtenidos se presentan y analizan en el capítulo de Resultados.
 
-Los aspectos técnicos más relevantes de la implementación —la lógica de llamada al LLM, los \textit{prompts} de generación y análisis PERVAL, el renderizador programático del XML BPMN y las funciones de robustez— se describen en detalle en la sección~\ref{sec:componentesClave}.
+Como resultado de este sprint, la solución quedó completamente operativa en un entorno de producción y se obtuvieron las primeras evidencias empíricas sobre su aceptación por parte de los usuarios, completando así el ciclo de desarrollo e iniciando la fase de evaluación del artefacto.
+
+La tabla~\ref{tab:incrementoSprints} sintetiza el estado del artefacto al finalizar cada iteración, mostrando qué historias de usuario se completaron y qué capacidad nueva quedó incorporada al sistema, respondiendo de forma compacta a cómo cada \textit{sprint} contribuyó a la construcción del artefacto y qué mejora incremental se obtuvo en cada iteración.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|c|l|p{8.3cm}|}
+\hline
+\rowcolor{gray!20} \textbf{\textit{Sprint}} & \textbf{Historias} & \textbf{Incremento funcional acumulado al finalizar la iteración} \\
+\hline
+0 & US01--US02 & Entorno de desarrollo operativo; tecnologías y arquitectura seleccionadas. \\
+\hline
+1 & US03--US04 & Servidor MCP funcional con integración a GitHub Models y \textit{fallback} automático. \\
+\hline
+2 & US05 & Generación de modelos BPMN~2.0 completos desde descripciones en lenguaje natural. \\
+\hline
+3 & US06--US07 & Edición conversacional del diagrama; robustez frente a XML malformado o truncado. \\
+\hline
+4 & US08--US09 & Análisis PERVAL integrado sobre el diagrama generado. \\
+\hline
+5 & US10--US11 & Interfaz completa con visualización de resultados PERVAL y resaltado visual del diagrama. \\
+\hline
+6 & US12--US13 & Soporte multilingüe español/inglés; pruebas \textit{end-to-end} automatizadas con Playwright. \\
+\hline
+7 & US14--US15 & Despliegue en producción (\textit{Render.com}); validación de aceptación con usuarios (TAM). \\
+\hline
+\end{tabular}
+\caption{Incremento funcional acumulado del artefacto al finalizar cada \textit{sprint}.}
+\label{tab:incrementoSprints}
+\end{table}
+
+
+Los aspectos técnicos más relevantes de la implementación se describen en detalle en la sección~\ref{sec:componentesClave}.
+
 
 \shorthandoff{<>}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementación de los componentes técnicos clave}
 \label{sec:componentesClave}
@@ -180,8 +245,6 @@ export async function callOpenAI(apiKey, systemPrompt, messages) {
 
 El flujo de generación descompone la tarea en seis llamadas al LLM más un \textit{prompt} auxiliar. En los bloques siguientes se reproduce el texto exacto en lenguaje natural que recibe el modelo en cada llamada. Las partes entre \texttt{[corchetes]} son valores dinámicos inyectados en tiempo de ejecución desde el estado de la conversación; el resto es texto estático del \textit{prompt}.
 
-Nota: todos los \textit{prompts} incluyen, cuando la interfaz está en modo inglés, una directiva de idioma final (\textit{«IMPORTANT — LANGUAGE: Generate all human-readable content in English...»}) que garantiza que las respuestas del LLM se generen en el idioma activo. En modo español dicha directiva es una cadena vacía y no aparece en el \textit{prompt}.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{\texttt{buildStructureSystemPrompt} — herramienta \texttt{identify\_structure}}
 
@@ -235,7 +298,7 @@ Estructura actual:
   "resumen": "Proceso de venta online entre el cliente y la tienda"
 }
 
-
+Modificación: "[instrucción del usuario, p.ej.: añade el departamento Finanzas]"
 
 Devuelve ÚNICAMENTE el JSON modificado (mismo formato, conservando el campo "rol" de
 cada poolExterno --"cliente" o "colaborador"-- y ajustándolo solo si la modificación
@@ -811,7 +874,9 @@ Actores externos: [Cliente, Transportista]
 === XML BPMN ACTUAL ===
 [XML BPMN completo del diagrama en su estado actual]
 
-
+=== INSTRUCCIÓN DEL USUARIO ===
+"[instrucción de modificación del usuario, p.ej.: añade un evento de espera
+de 24 horas antes de la preparación del envío]"
 
 Aplica la modificación y devuelve el XML COMPLETO (desde <?xml hasta </definitions>)
 con la sección bpmndi:BPMNDiagram.

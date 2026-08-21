@@ -172,6 +172,8 @@ Los apartados anteriores han narrado la evolución del sistema iteración a iter
 \subsection{La función \texttt{callOpenAI} y el mecanismo de \textit{fallback}}
 \label{subsec:callOpenAI}
 
+Centralizar toda la comunicación con el LLM en una única función de acceso es una decisión arquitectónica fundamental: garantiza que los parámetros de generación sean consistentes en las herramientas del servidor y convierte el mecanismos de \textit{fallback} en un servicio transversal sin duplicación de código. Esta decisión responde además a un problema concreto observado: las restricciones de cuota de plan gratuito de GitHub Models interrumpían con frecuencia sesisiones de modelado en curso, lo que exigía una estrategia de resiliencia completamente transparente para las herramientas de nivel superior. 
+
 Toda la comunicación con el LLM se canaliza a través de \texttt{callOpenAI}, implementada en \texttt{mcp-server/src/llm.js}. La función construye una petición \texttt{POST} al \textit{endpoint} de inferencia de GitHub Models, transmitiendo un \textit{prompt} de sistema, un historial de mensajes y los parámetros de generación: temperatura 0,3 y límite de 8.000 \textit{tokens} de salida. El mecanismo de \textit{fallback} opera en dos niveles: rotación automática entre los seis modelos de la lista \texttt{LLM\_MODELS} ante errores de cuota o disponibilidad, y reintento global con espera adaptativa cuando todos los modelos devuelven error 429 simultáneamente. Cada llamada individual dispone de un \textit{timeout} de 30 segundos implementado con \texttt{AbortController}.
 
 \begin{lstlisting}[style=promptbox]
@@ -243,10 +245,14 @@ export async function callOpenAI(apiKey, systemPrompt, messages) {
 \subsection{Prompts del flujo de generación iterativa}
 \label{subsec:promptsGeneracion}
 
+La decisión de descomponer la generación del diagrama en diferentes prompts, en lugar de usar un único prompt, es el núcleo de la estrategia de \textit{prompting} iterativo con validación humana en el bucle. Cada prompt tiene un contexto acotado y una tarea semánticamente bien definida, lo que reduce el espacio de respuestas posibles del LLM y mejora la conformidad con el esquema de salida esperado. Esta descomposición es también la que habilita la validación en cada paso, donde el usuario puede corregir cada elemento antes de que el LLM lo incorpore como contexto para la siguiente llamada, evitando que un error temprano se propague por todo el diagrama. 
+
 El flujo de generación descompone la tarea en seis llamadas al LLM más un \textit{prompt} auxiliar. En los bloques siguientes se reproduce el texto exacto en lenguaje natural que recibe el modelo en cada llamada. Las partes entre \texttt{[corchetes]} son valores dinámicos inyectados en tiempo de ejecución desde el estado de la conversación; el resto es texto estático del \textit{prompt}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{\texttt{buildStructureSystemPrompt} — herramienta \texttt{identify\_structure}}
+
+La identificación de la estructura de participantes es la primera decisión del modelado y condiciona irrevocablemente toda la generación posterior: los pools y lanes establecidos aqui son el marco de referencia para las siguientes herramientas. La decisión de diseño central fue exigir una respuesta JSON con una distinción explicita de roles para actores externos, ya que sin esta distinción el LLM tendía a asignar flujos de mensaje de forma indiscriminada entre todos los participantes. 
 
 Primer paso del flujo: identifica los participantes del proceso y los devuelve en JSON puro. Exige JSON sin texto adicional, distingue entre actores con rol \texttt{cliente} (receptor del valor) y \texttt{colaborador} (participante sin recibir el resultado final), y prohíbe inventar departamentos no mencionados.
 
@@ -339,6 +345,8 @@ RESPONDE SOLO con JSON (sin texto adicional):
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{\texttt{buildNextStepPrompt} — herramienta \texttt{suggest\_next\_step}}
+
+Este prompt debe resolver simultáneamente dos problemas: elegir el tipo semántico correcto del elemento BPMN entre más de diez opciones posibles y determinar si el proceso ha concluido. Sin instrucciones de clasificación explícitas, los LLMs convergen por defecto al tipo genérico \texttt{task} para cualquier acción, ignorando la semántica de \texttt{userTask}, \texttt{serviceTask}, \texttt{sendTask} y los eventos intermedios, lo que produce diagramas semánticamente vacíos. Los bloques de reglas marcados con «OBLIGATORIO» y «NUNCA» surgen de sesiones de pruebas en las que formulaciones más suaves eran ignoradas consistentemente por el modelo. 
 
 El \textit{prompt} más extenso del sistema. En cada llamada recibe el inventario cronológico de pasos ya confirmados y propone el siguiente elemento del flujo principal. Incluye reglas detalladas de clasificación de tipo BPMN para evitar el uso del tipo genérico \texttt{task}, que era el comportamiento por defecto de los modelos sin esta guía. Los marcadores «OBLIGATORIO» y «NUNCA» responden a observaciones empíricas: formulaciones más suaves eran ignoradas con frecuencia.
 
@@ -547,6 +555,10 @@ Eres experto en modelado BPMN. Responde SOLO con JSON.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Renderizado programático del XML BPMN}
 \label{subsec:renderDiagram}
+
+La decisión de general el XML de forma completamente programática, en lugar de delegar esa tarea al LLM, representa uno de los aportes de ingeniería más significativos del sistema. La alternativa de pedir al LLM el XML completo en una sola llamada fue explorada inicialmente y descartada porque los modelos generaban con frecuencia identificadores duplicados, referencias rotas en los \texttt{sequenceFlow} y coordenadas de posicionamiento incoherentes. La separación entre razonamiento semántico (qué elementos y en qué orden, tarea del LLM a través de las herramientas de generación iterativa) y construcción sintáctica es lo que permite que la herramienta produzxa diagramas  importables en bpmn.io de forma fiable.
+
+
 
 La herramienta \texttt{render\_diagram} no llama al LLM para producir el XML final. Delega en \texttt{renderDiagramFromState()}, implementada en \texttt{mcp-server/src/diagramRenderer.js}, que construye el XML BPMN 2.0 de forma completamente programática a partir del estado del diagrama acumulado. Esta decisión elimina las alucinaciones de XML que aparecían cuando se pedía al LLM el artefacto completo (identificadores duplicados, \texttt{sequenceFlow} rotos, coordenadas incoherentes). Los pasos principales se distribuyen con un espaciado horizontal fijo de 160 píxeles (\texttt{DX}); las ramas de una puerta lógica se desplazan verticalmente con un separador de 110 píxeles (\texttt{BRANCH\_GAP}); la altura de cada calle se ajusta dinámicamente al número máximo de ramas del proceso.
 
@@ -811,6 +823,9 @@ export function buildStructureBPMN(structure) {
 \subsection{Prompts de refinamiento conversacional}
 \label{subsec:promptRefinamiento}
 
+Una vez generado el diagrama inicial, el usuario debe poder ajustarlo mediante instrucciones en lenguaje natural sin necesidad de regeneral el modelo desde cero: esta es la segunda mitad del paradigma de \textit{vibe modeling} guiado e híbrido. El reto de diseño fue determinar qué contexto necesita el LLM para aplicar una modificación puntual sin alterar el resto del diagrama; la experiencia mostró que proporcionar únicamente la instrucción y el XML resultaba insuficiente para cambios estructurales ya que el modelo alteraba elementos no mencionados, mientras que añadir el inventario explícito de elementos actuales (nombres, tipos y posición en el flujo) mejoró significativamente la precisión de las modificaciones. 
+
+
 La herramienta \texttt{refine\_diagram} permite modificar el diagrama mediante instrucciones en lenguaje natural. Opera en dos partes: el \textit{prompt} de sistema (\texttt{buildRefinementSystemPrompt()}) fija las reglas de modificación del XML, y el mensaje de usuario (\texttt{buildRefinementMessage()}) inyecta en cada petición el inventario de elementos actuales, el XML BPMN completo y la instrucción del usuario. Este contexto enriquecido es necesario porque el LLM necesita conocer los identificadores exactos de los \texttt{sequenceFlow} para reconectar el flujo tras una modificación.
 
 \subsubsection{\texttt{buildRefinementSystemPrompt}}
@@ -885,6 +900,8 @@ con la sección bpmndi:BPMNDiagram.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Prompt de análisis PERVAL}
 \label{subsec:promptPerval}
+
+La herramienta de análisis PERVAL constituye la contribucción más directa de este TFM al problema de la alineación entre el valor diseñado en el proceso y el valor percibido por el cliente. La decisión de implementarla como una herramienta integrada en el servidor MCP y no como un módulo externo responde a un principio de integración: el usuario puede lanzar el análisis sobre el diagrama que acaba de generar o editar sin cambiar de herramienta ni exportar el modelo. La operacionalización de las cuatro dimensiones PERVAL en el contexto de tareas y entregas de procesos BPMN, es una adaptación original que fue refinada iterativamente a partir de los resultados de las pruebas.
 
 La herramienta \texttt{analyze\_perval} guía al LLM en la clasificación de los elementos del proceso según las cuatro dimensiones de valor percibido del modelo de Sweeney y Soutar~\cite{sweeney2001perval}. El \textit{prompt} de sistema parametriza el actor de referencia y el alcance del análisis (\texttt{entregas} solo evalúa los mensajes hacia el cliente externo; sin alcance definido, evalúa todas las tareas). El mensaje de usuario transmite la lista numerada de elementos y el XML BPMN completo.
 
@@ -964,6 +981,8 @@ XML BPMN:
 \subsection{Robustez ante respuestas imprecisas del LLM}
 \label{subsec:robustez}
 
+Este módulo representa la respuesta de ingeniería a una limitación de los LLMs actuales: la imposibilidad de garantizar el formato de salida incluso cuando el prompt lo exige explícitamente. Durante el desarrollo, una proporción significativa de las respuesta de generación y refinamiento llegaban en formatos no parseables directamente. Sin este módulo, el sistema habría fallado en una fracción importante de las interacciones, lo que habría comprometido directamente la evaluación de aceptación con usuarios. 
+
 Incluso con \textit{prompts} que exigen respuestas en formato estricto, los LLMs producen con cierta frecuencia salidas que envuelven el contenido en bloques de código Markdown, añaden texto explicativo o truncan la respuesta al alcanzar el límite de \textit{tokens}. Las dos funciones siguientes, implementadas en \texttt{mcp-server/src/llm.js}, gestionan estos casos.
 
 \subsubsection{\texttt{parseLLMJson}}
@@ -1032,6 +1051,8 @@ export function cleanXML(raw) {
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Funciones auxiliares}
 \label{subsec:helpers}
+
+Estas funciones surgieron como refactorizaciones de lógica que, en versiones tempranas del servidor, aparecía duplicadas en varios prompts. Su extracción a un módulo compartido aplica el principio DRY (\textit{Don't Repeat Yourself}) al nivel de construcción de prompts: centralizar aquí el tratamiento de los casos límite y garantiza que cualquier corrección futura se aplique uniformemente a todas las herramientas del sistema. 
 
 Las dos funciones siguientes, implementadas en \texttt{mcp-server/src/helpers.js}, son utilizadas internamente por los \textit{prompts} de generación para construir el resumen cronológico de pasos y para normalizar la denominación de los departamentos cuando la organización no tiene calles definidas.
 

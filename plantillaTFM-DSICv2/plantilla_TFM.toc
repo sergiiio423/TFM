@@ -77,58 +77,58 @@
 \contentsline {subsubsection}{\numberline {6.2.2.3}\texttt {buildFlowStartPrompt} — herramienta \texttt {suggest\_flow\_start}}{65}{subsubsection.6.2.2.3}%
 \contentsline {subsubsection}{\numberline {6.2.2.4}\texttt {buildNextStepPrompt} — herramienta \texttt {suggest\_next\_step}}{66}{subsubsection.6.2.2.4}%
 \contentsline {subsubsection}{\numberline {6.2.2.5}\texttt {buildGatewayBranchesPrompt} — herramienta \texttt {suggest\_gateway\_branches}}{68}{subsubsection.6.2.2.5}%
-\contentsline {subsubsection}{\numberline {6.2.2.6}\texttt {buildBranchStepPrompt} — herramienta \texttt {suggest\_branch\_step}}{68}{subsubsection.6.2.2.6}%
+\contentsline {subsubsection}{\numberline {6.2.2.6}\texttt {buildBranchStepPrompt} — herramienta \texttt {suggest\_branch\_step}}{69}{subsubsection.6.2.2.6}%
 \contentsline {subsubsection}{\numberline {6.2.2.7}\texttt {bpmnJsonExpertPrompt} — \textit {prompt} de sistema auxiliar}{70}{subsubsection.6.2.2.7}%
 \contentsline {subsection}{\numberline {6.2.3}Renderizado programático del XML BPMN}{70}{subsection.6.2.3}%
-\contentsline {subsection}{\numberline {6.2.4}Prompts de refinamiento conversacional}{75}{subsection.6.2.4}%
-\contentsline {subsubsection}{\numberline {6.2.4.1}\texttt {buildRefinementSystemPrompt}}{75}{subsubsection.6.2.4.1}%
-\contentsline {subsubsection}{\numberline {6.2.4.2}\texttt {buildRefinementMessage}}{76}{subsubsection.6.2.4.2}%
-\contentsline {subsection}{\numberline {6.2.5}Prompt de análisis PERVAL}{76}{subsection.6.2.5}%
-\contentsline {subsubsection}{\numberline {6.2.5.1}\texttt {buildPervalSystemPrompt}}{77}{subsubsection.6.2.5.1}%
-\contentsline {subsubsection}{\numberline {6.2.5.2}\texttt {buildPervalUserMessage}}{77}{subsubsection.6.2.5.2}%
-\contentsline {subsection}{\numberline {6.2.6}Robustez ante respuestas imprecisas del LLM}{78}{subsection.6.2.6}%
-\contentsline {subsubsection}{\numberline {6.2.6.1}\texttt {parseLLMJson}}{78}{subsubsection.6.2.6.1}%
-\contentsline {subsubsection}{\numberline {6.2.6.2}\texttt {cleanXML}}{78}{subsubsection.6.2.6.2}%
-\contentsline {subsection}{\numberline {6.2.7}Funciones auxiliares}{79}{subsection.6.2.7}%
-\contentsline {subsubsection}{\numberline {6.2.7.1}\texttt {effectiveLanes}}{79}{subsubsection.6.2.7.1}%
-\contentsline {subsubsection}{\numberline {6.2.7.2}\texttt {elementLabel}}{80}{subsubsection.6.2.7.2}%
-\contentsline {chapter}{\numberline {7}Ejecución y funcionamiento del sistema}{81}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Interfaz general del sistema}{81}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Generación iterativa de modelos BPMN}{81}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}Paso 1 --- Descripción del proceso}{82}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{82}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{83}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{83}{subsection.7.2.4}%
-\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{84}{subsection.7.2.5}%
-\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{84}{subsection.7.2.6}%
-\contentsline {section}{\numberline {7.3}Edición conversacional del diagrama}{86}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{86}{section.7.4}%
-\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{86}{subsection.7.4.1}%
-\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{86}{subsection.7.4.2}%
-\contentsline {section}{\numberline {7.5}Entrada por voz}{88}{section.7.5}%
-\contentsline {section}{\numberline {7.6}Soporte multilingüe}{88}{section.7.6}%
-\contentsline {section}{\numberline {7.7}Despliegue en producción}{90}{section.7.7}%
-\contentsline {chapter}{\numberline {8}Validación de la propuesta}{93}{chapter.8}%
-\contentsline {section}{\numberline {8.1}El Modelo de Aceptación Tecnológica (TAM)}{93}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Diseño del estudio}{94}{section.8.2}%
-\contentsline {subsection}{\numberline {8.2.1}Participantes}{94}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Procedimiento}{94}{subsection.8.2.2}%
-\contentsline {subsection}{\numberline {8.2.3}Caso de uso para la evaluación}{95}{subsection.8.2.3}%
-\contentsline {section}{\numberline {8.3}Instrumento de medida: el cuestionario}{96}{section.8.3}%
-\contentsline {subsection}{\numberline {8.3.1}Bloque A: Datos demográficos y perfil del participante}{96}{subsection.8.3.1}%
-\contentsline {subsection}{\numberline {8.3.2}Bloque B: Utilidad percibida (PU)}{96}{subsection.8.3.2}%
-\contentsline {subsection}{\numberline {8.3.3}Bloque C: Facilidad de uso percibida (PEOU)}{97}{subsection.8.3.3}%
-\contentsline {subsection}{\numberline {8.3.4}Bloque D: Intención de uso (ITU)}{98}{subsection.8.3.4}%
-\contentsline {subsection}{\numberline {8.3.5}Bloque E: Ítems específicos de la herramienta}{99}{subsection.8.3.5}%
-\contentsline {subsection}{\numberline {8.3.6}Preguntas abiertas}{99}{subsection.8.3.6}%
-\contentsline {section}{\numberline {8.4}Análisis de los datos}{99}{section.8.4}%
-\contentsline {chapter}{Bibliografía}{102}{chapter*.9}%
-\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{103}{appendix*.10}%
-\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{103}{section.Alph0.1}%
-\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{104}{section.Alph0.2}%
-\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{104}{subsection.Alph0.2.1}%
-\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{104}{subsection.Alph0.2.2}%
-\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{104}{subsection.Alph0.2.3}%
-\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{105}{section.Alph0.3}%
-\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{105}{section.Alph0.4}%
-\contentsline {chapter}{Anexo II}{107}{appendix*.11}%
+\contentsline {subsection}{\numberline {6.2.4}Prompts de refinamiento conversacional}{76}{subsection.6.2.4}%
+\contentsline {subsubsection}{\numberline {6.2.4.1}\texttt {buildRefinementSystemPrompt}}{76}{subsubsection.6.2.4.1}%
+\contentsline {subsubsection}{\numberline {6.2.4.2}\texttt {buildRefinementMessage}}{77}{subsubsection.6.2.4.2}%
+\contentsline {subsection}{\numberline {6.2.5}Prompt de análisis PERVAL}{77}{subsection.6.2.5}%
+\contentsline {subsubsection}{\numberline {6.2.5.1}\texttt {buildPervalSystemPrompt}}{78}{subsubsection.6.2.5.1}%
+\contentsline {subsubsection}{\numberline {6.2.5.2}\texttt {buildPervalUserMessage}}{79}{subsubsection.6.2.5.2}%
+\contentsline {subsection}{\numberline {6.2.6}Robustez ante respuestas imprecisas del LLM}{79}{subsection.6.2.6}%
+\contentsline {subsubsection}{\numberline {6.2.6.1}\texttt {parseLLMJson}}{79}{subsubsection.6.2.6.1}%
+\contentsline {subsubsection}{\numberline {6.2.6.2}\texttt {cleanXML}}{80}{subsubsection.6.2.6.2}%
+\contentsline {subsection}{\numberline {6.2.7}Funciones auxiliares}{81}{subsection.6.2.7}%
+\contentsline {subsubsection}{\numberline {6.2.7.1}\texttt {effectiveLanes}}{81}{subsubsection.6.2.7.1}%
+\contentsline {subsubsection}{\numberline {6.2.7.2}\texttt {elementLabel}}{81}{subsubsection.6.2.7.2}%
+\contentsline {chapter}{\numberline {7}Ejecución y funcionamiento del sistema}{83}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Interfaz general del sistema}{83}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Generación iterativa de modelos BPMN}{83}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Paso 1 --- Descripción del proceso}{84}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{84}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{85}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{85}{subsection.7.2.4}%
+\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{86}{subsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{86}{subsection.7.2.6}%
+\contentsline {section}{\numberline {7.3}Edición conversacional del diagrama}{88}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{88}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{88}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{88}{subsection.7.4.2}%
+\contentsline {section}{\numberline {7.5}Entrada por voz}{90}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Soporte multilingüe}{90}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Despliegue en producción}{92}{section.7.7}%
+\contentsline {chapter}{\numberline {8}Validación de la propuesta}{95}{chapter.8}%
+\contentsline {section}{\numberline {8.1}El Modelo de Aceptación Tecnológica (TAM)}{95}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Diseño del estudio}{96}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}Participantes}{96}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Procedimiento}{96}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Caso de uso para la evaluación}{97}{subsection.8.2.3}%
+\contentsline {section}{\numberline {8.3}Instrumento de medida: el cuestionario}{98}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Bloque A: Datos demográficos y perfil del participante}{98}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Bloque B: Utilidad percibida (PU)}{98}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}Bloque C: Facilidad de uso percibida (PEOU)}{99}{subsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.3.4}Bloque D: Intención de uso (ITU)}{100}{subsection.8.3.4}%
+\contentsline {subsection}{\numberline {8.3.5}Bloque E: Ítems específicos de la herramienta}{101}{subsection.8.3.5}%
+\contentsline {subsection}{\numberline {8.3.6}Preguntas abiertas}{101}{subsection.8.3.6}%
+\contentsline {section}{\numberline {8.4}Análisis de los datos}{101}{section.8.4}%
+\contentsline {chapter}{Bibliografía}{104}{chapter*.9}%
+\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{105}{appendix*.10}%
+\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{105}{section.Alph0.1}%
+\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{106}{section.Alph0.2}%
+\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{106}{subsection.Alph0.2.1}%
+\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{106}{subsection.Alph0.2.2}%
+\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{106}{subsection.Alph0.2.3}%
+\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{107}{section.Alph0.3}%
+\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{107}{section.Alph0.4}%
+\contentsline {chapter}{Anexo II}{109}{appendix*.11}%

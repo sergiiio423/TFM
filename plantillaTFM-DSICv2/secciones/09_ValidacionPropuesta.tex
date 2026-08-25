@@ -9,6 +9,8 @@
 
 La validación de la herramienta desarrollada en este TFM se lleva a cabo mediante un cuestionario de validación basado en el Modelo de Aceptación Tecnológica (\textit{Technology Acceptance Model}, TAM). El objetivo es determinar en qué medida los usuarios perciben el sistema como útil y fácil de usar, y en qué medida estarían dispuestos a adoptarlo en su actividad habitual. La validación recoge la percepción de un grupo de usuarios que interactúan directamente con el sistema y cumplimentan un cuestionario diseñado ad hoc, que cubre tanto las dimensiones clásicas del TAM como aspectos específicos de la herramienta que el modelo original no contempla. Los resultados se presentan en el capítulo siguiente.
 
+Conviene delimitar con precisión el alcance de la validación antes de entrar en su descripción. Lo que se valida en este capítulo es la aceptación de la herramienta por parte de sus potenciales usuarios, no la calidad sintáctica o semántica de los modelos BPMN que el LLM produce, ni la calidad de los modelos de lenguaje subyacentes, ni la arquitectura MCP en sí misma. El TAM no está diseñado para evaluar si los diagramas generados son formalmente correctos o semánticamente completos, sino para determinar en qué medida los usuarios perciben el sistema como útil y fácil de usar y en qué medida estarían dispuestos a adoptarlos en su actividad habitual. Esta distinción es importante para interpretar correctamente los resultados: una puntuación alta en las dimensiones PU, PEOU e ITU indicará que las herramientas es aceptada como instrumento de trabajo por perfiles técnicos representativos, independientemente de otros aspectos de la calidad de los modelos generados cuya evaluación requeriría un diseño experimental diferente. 
+
 %%---------------------------------------------------------
 \section{El Modelo de Aceptación Tecnológica (TAM)}
 \label{sec:tam}
@@ -61,6 +63,7 @@ El estudio se lleva a cabo con un grupo de aproximadamente quince participantes.
 
 Se establece un requisito previo de conocimiento básico de BPMN y de experiencia previa con LLMs. Cualquier persona con estos conocimientos y que disponga de un navegador modernos puede participar sin instalar ningún software adicional.
 
+El número de participantes previsto (aproximadamente quince) responde al objetivo del estudio: obtener una primera evaluación de la aceptación de la herramienta por parte de usuarios representativos del público objetivo, no realizar inferencias estadísticas para una población amplia. En la literatura sobre validación con TAM, estudios piloto de herramientas de nueva creación con entre diez y veinte participantes de perfil homogéneo son habituales y han permitido obtener evidencias iniciales significativas sobre la aceptación tecnológica. El diseño prioriza la homogeneidad del perfil sobre el volumen de la muestra, de modo que los resultados sea interpretables en relación con el público técnico para el que la herramienta ha sido concebida, minimizando la la varianza debida a diferencias de perfil no relacionadas con la herramienta.
 
 
 \subsection{Procedimiento}
@@ -101,6 +104,18 @@ Para homogeneizar la experiencia de todos los participantes, se proporciona a ca
 \bigskip
 
 Este proceso presenta las siguientes características relevantes para la evaluación: (i)~tres departamentos internos (Ventas, Almacén, Atención al Cliente); (ii)~tres actores externos (Cliente, Transportista y Pasarela de pago); (iii)~una puerta lógica exclusiva principal (disponibilidad de producto) con dos ramas, una de las cuales contiene a su vez una bifurcación adicional (esperar o cancelar); y (iv)~flujos de mensaje hacia el cliente externo en distintos momentos del proceso.
+
+\subsection{Amenazas a la validez}
+Toda validación está sujeto a limitaciones que conviene reconocer explícitamente para interpretar correctamente sus resultados. Se identifican las siguientes amenazas a la validez: 
+
+\begin{itemize}
+    \item \textbf{Amenazas a la validez interna.} La principal amenaza es la posible influencia de la experiencia previa de los participantes con herramientas de modelados de procesos o con LLMs sobre su percepción de la herramientas. Para mitigarla, el bloque demográfico del cuestionario recoge estas variables, lo que permitirá analizar a posteriori si existen diferencias de percepción entre subgrupos. Al realizarse la evaluación de forma autónoma e individual, se reduce además el riesgo de sesgo por influencia social entre participantes.
+
+    \item \textbf{Amenazas a la validez externa.} La muestra de tamaño reducido y concentrada en perfiles técnicos, limita la generalización de los resultados a otros colectivos. Adicionalmente, la evaluación se realiza con un único escenario de proceso de negocio de complejidad moderada, por lo que los resultados podrían no ser directamente extrapolables a procesos de mayor complejidad o a dominios de negocio muy específicos.
+
+    \item \textbf{Amenazas a la validez de constructo.} El TAM mide la aceptación percibida en un momento puntual, no el uso real sostenido en el tiempo: una alta puntuación en ITU no garantiza que el usuario adopte efectivamente la herramienta en su actividad habitual. Por ello se ha incorporado el bloque E de ítems específicos que capturan dimensiones adicionales que el TAM clásico no contempla, aportando así una visión más completa de la experiencia de usuario.
+\end{itemize}
+
 
 %%---------------------------------------------------------
 \section{Instrumento de medida: el cuestionario}
@@ -301,6 +316,10 @@ Los datos recogidos se analizarán siguiendo las fases habituales en estudios de
 \end{enumerate}
 
 Los resultados del estudio se presentan en el capítulo siguiente.
+
+En conjunto, el diseño presentado en este capítulo estables una validación cuyo objeto de evaluación es la aceptación de la herramienta por parte de sus potenciales usuarios, medida a través del modelo TAM, y no la calidad intrínseca de los modelos BPMN generados por el LLM. El instrumento de medida combina las tres dimensiones clásicas del TAM con un bloque de ítems específicos que captura dimensiones propias de un sistema de modelado conversacional basado en LLM, como el control en la interacción \textit{human-in-the-loop}, la confianza en el output generado o la utilidad de la integración PERVAL. Estos ítems específicos constituyen una aportación exploratoria original del presente trabajo que complementa la información que el TAM clásico no puede proporcionar. 
+
+Las decisiones de diseño del estudio han sido justificadas y sus limitaciones han sido explicitadas en forma de amenazas a la validez interna, externa y de constructo. El análisis de datos recogidos, que incluirá estadística descriptiva, fiabilidad de las escalas, correlaciones entre constructos TAM y análisis cualitativo de las respuestas abiertas, se presenta en el capítulo siguiente. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de validación de la propuesta

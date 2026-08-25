@@ -31,6 +31,8 @@
 
 Este capítulo presenta el sistema en funcionamiento mediante una demostración guiada de sus principales flujos de uso. Se parte de la interfaz general del sistema para, a continuación, recorrer el ciclo completo de trabajo: descripción del proceso en lenguaje natural (por texto o por voz), generación iterativa del diagrama BPMN con validación humana en cada paso, edición conversacional del modelo resultante y análisis de valor percibido según el modelo PERVAL. Se ilustra también el soporte multilingüe español--inglés y el despliegue en producción en la plataforma \textit{Render.com}.
 
+La organización del capítulo en flujos de uso concretos responde a una decisión metodológica: en lugar de describir las funcionalidades de forma abstracta, se presenta el sistema en funcionamiento para verificar que las decisiones arquitectónicas del capítulos de diseño de la solución se materializan efectivamente en la solución desplegada.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Interfaz general del sistema}
 \label{sec:interfazGeneral}
@@ -51,12 +53,16 @@ El lienzo BPMN~(2) es el editor \textit{bpmn-js} estándar, con soporte de arras
 
 La generación de un diagrama BPMN parte de una descripción en lenguaje natural introducida por el usuario. El sistema ofrece dos modos de generación: el \textbf{modo guiado} (paso a paso), en el que el LLM propone cada elemento del flujo individualmente y el usuario confirma o corrige antes de continuar; y el \textbf{modo completo}, en el que, tras confirmar la estructura de participantes, el usuario únicamente especifica el evento de inicio y el sistema genera el diagrama íntegro de forma autónoma. Los pasos~1, 2 y~3 son comunes a ambos modos.
 
+El enfoque iterativo de generación constituye la decisión de diseño central de este trabajo: frente a sistemas que producen diagramas en una sola operación sin intervención humana, la herramienta descompone el modelado en etapas que el usuario valida de forma progresiva.
+
 %%---------------------------------------------------------
 \subsection{Paso 1 --- Descripción del proceso}
 \label{subsec:demoDescripcion}
 %%---------------------------------------------------------
 
 El usuario introduce en el panel conversacional una descripción libre del proceso de negocio que desea modelar. La descripción puede ser breve (dos o tres frases) o extensa; el sistema utiliza su contenido íntegro como contexto para todas las llamadas posteriores al LLM. En la figura~\ref{fig:genDescripcion} se muestra un ejemplo con un proceso de compra en línea.
+
+El diseño de esta etapa como entrada de texto libre en lenguaje natural es una decisión deliberada que reduce la barrera de adopción de la herramienta: el usuario no necesita conocer la sintaxis BPMN ni la terminología del modelado de procesos para iniciar el trabajo. Delegar en el LLM la tarea de estructurar la información implica, sin embargo, que las etapas siguientes deben incorporar mecanismos de validación humana para compensar posibles ambigüedades en la interpretación inicial de la descripción. 
 
 \screenfig[5cm]{generacion_01_descripcion}%
   {Introducción de la descripción del proceso en el panel conversacional. El usuario ha descrito un proceso de compra en línea con varios departamentos internos y actores externos.}%
@@ -74,6 +80,8 @@ Tras recibir la descripción, el sistema lanza la herramienta \texttt{identify\_
   {genEstructura}
 
 Si el usuario no está satisfecho con la estructura propuesta puede introducir una corrección directamente en el chat y el sistema la integra antes de continuar.
+
+La exposición explícita de la estructura de participantes antes de continuar con el modelado del flujo responde a la relevancia crítica de esta decisión sobre la arquitectura del diagrama: una asignación incorrecta de calles (lanes) o una clasificación errónea de los pools externos condiciona todos los elementos que se modelen a continuación. Al presentar este resultado y solicitar confirmación, el sistema garantiza que el LLM y el usuario comparten la misma comprensión de los actores del proceso y sus relaciones antes de avanzar a etapas más costosas de revertir.
 
 %%---------------------------------------------------------
 \subsection{Paso 3 --- Identificación del inicio del proceso}
@@ -97,7 +105,7 @@ Una vez confirmada la estructura y el punto de inicio, el sistema propone cada e
   {Generación paso a paso del flujo del proceso. El sistema propone una puerta exclusiva (XOR).}%
   {genFlujo}
 
-En cualquier momento durante la generación paso a paso, el usuario dispone de dos acciones adicionales. Por un lado, puede solicitar que el sistema genere automáticamente el resto del diagrama sin más preguntas, lo que equivale a pasar al modo completo a partir del punto en que se encuentra: el LLM toma los pasos ya confirmados como contexto e infiere los elementos restantes hasta completar el proceso. Por otro lado, el usuario puede ampliar o corregir la descripción original introduciendo información adicional en el chat ---por ejemplo, añadir una condición de error no mencionada inicialmente o precisar el rol de un actor externo---, con lo que el sistema actualiza su contexto y continúa la generación teniendo en cuenta los nuevos datos.
+En cualquier momento durante la generación paso a paso, el usuario dispone de dos acciones adicionales. Por un lado, puede solicitar que el sistema genere automáticamente el resto del diagrama sin más preguntas, lo que equivale a pasar al modo completo a partir del punto en que se encuentra: el LLM toma los pasos ya confirmados como contexto e infiere los elementos restantes hasta completar el proceso. Por otro lado, el usuario puede ampliar o corregir la descripción original introduciendo información adicional en el chat (por ejemplo, añadir una condición de error no mencionada inicialmente o precisar el rol de un actor externo), con lo que el sistema actualiza su contexto y continúa la generación teniendo en cuenta los nuevos datos.
 
 %%---------------------------------------------------------
 \subsection{Paso 5 --- Diagrama BPMN generado}
@@ -107,7 +115,7 @@ En cualquier momento durante la generación paso a paso, el usuario dispone de d
 Cuando el sistema detecta que el proceso ha llegado a su fin, llama automáticamente a la herramienta \texttt{render\_diagram}, que construye el XML BPMN 2.0 de forma completamente programática y lo carga en el editor \textit{bpmn-js}. El diagrama aparece centrado en el lienzo y muestra piscinas, calles, tareas, puertas y flujos de secuencia con sus etiquetas (figura~\ref{fig:genDiagrama}).
 
 \screenfig[8cm]{generacion_04_diagrama}%
-  {Diagrama BPMN 2.0 generado y cargado en el editor bpmn.io. Se aprecian las tres calles del \textit{pool} principal (Ventas, Logística, Atención al Cliente), el \textit{pool} externo del Cliente, los \textit{gateways} con sus ramas y los flujos de mensaje entre participantes.}%
+  {Diagrama BPMN 2.0 generado y cargado en el editor bpmn.io.}%
   {genDiagrama}
 
 Desde este punto el usuario puede editar el diagrama directamente en el lienzo de bpmn.io o continuar la interacción mediante el panel conversacional para introducir refinamientos.
@@ -119,11 +127,15 @@ Desde este punto el usuario puede editar el diagrama directamente en el lienzo d
 
 Como alternativa al modo guiado, el sistema permite generar el diagrama completo en una sola llamada al LLM. Tras identificar el inicio del proceso (paso~3), el usuario activa la generación completa; el LLM infiere entonces el flujo íntegro a partir de la descripción original y del nodo de inicio ya confirmado, y llama directamente a \texttt{render\_diagram} sin requerir confirmaciones intermedias para cada elemento.
 
+
+
 \screenfig[5cm]{generacion_completa}%
   {Modo de generación completa. Tras confirmar la estructura, el usuario activa la generación automática: el sistema solicita únicamente el evento de inicio y, a continuación, genera y renderiza el diagrama BPMN íntegro en una sola operación.}%
   {genCompleta}
 
 Este modo resulta especialmente útil cuando el usuario tiene una descripción detallada del proceso y desea obtener un borrador completo rápidamente, que posteriormente podrá refinar mediante instrucciones conversacionales (véase \S\ref{sec:demoEdicion}).
+
+En conjunto, los flujos de generación presentados en esta sección materializan la arquitectura de colaboración progresiva usuario-LLM definida en el capítulo de diseño de la solución. El modo guiado maximiza la capacidad de corrección humana en cada elemento del diagrama, mientras que el modo completo optimiza la eficiencia cuando el usuario dispone de una descripción suficientemente detallada del proceso: ambas opciones comparten la misma secuencia de validación de participantes y punto de inicio, garantizando que el diagrama siempre parte de una base acordada entre el sistema y el usuario. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Edición conversacional del diagrama}
@@ -132,15 +144,20 @@ Este modo resulta especialmente útil cuando el usuario tiene una descripción d
 
 La herramienta \texttt{refine\_diagram} permite modificar el diagrama existente mediante instrucciones en lenguaje natural, sin necesidad de conocer la sintaxis XML de BPMN~2.0. El usuario describe el cambio deseado en el panel conversacional y el sistema devuelve el XML actualizado, que se recarga automáticamente en el editor.
 
+La edición conversacional materializa la decisión de que el XML del diagrama actúa como estado compartido entre el servidor MCP y el editor bpmn.io, lo que permitir que cualquier modificación producida por el LLM se recargue automáticamente en el lienzo sin pérdida de información. Esta elección evita que el usuario deba conocer la sintaxis XML de BPMN 2.0 o utilizar el editor gráfico para modificaciones estructurales complejas, reutilizando el canal conversacional como mecanismo unificado de generación y edición del diagrama. 
+
 \screenfig[5cm]{edicion_01_instruccion}%
-  {Instrucción de refinamiento introducida en el panel conversacional: el usuario solicita añadir un evento de espera entre la preparación del envío y la generación de la etiqueta. El historial de mensajes anterior sigue visible en el panel.}%
+  {Instrucción de refinamiento introducida en el panel conversacional.}%
   {edicionInstruccion}
 
 La figura~\ref{fig:edicionResultado} muestra el diagrama tras aplicar la modificación: el nuevo evento de temporizador aparece correctamente conectado en el flujo de la calle de Logística, entre las dos tareas indicadas.
 
 \screenfig[8cm]{edicion_02_resultado}%
-  {Diagrama BPMN actualizado tras la instrucción de refinamiento. Se ha insertado un evento de temporizador en la calle de Logística, con sus flujos de secuencia de entrada y salida correctamente reconectados.}%
+  {Diagrama BPMN actualizado tras la instrucción de refinamiento.}%
   {edicionResultado}
+
+El flujo de refinamiento conversacional demuestra así que la herramienta no es un generador puntual de diagramas, sino un entorno de edición continuada: el usuario puede describir, generar, refinar y volver a refinar el modelos de forma iterativa hasta que refleje con precisión el proceso de negocio objetivo, todo ello sin abandonar el canal conversacional ni exportar el diagrama a ningún sistema externo.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Análisis de valor percibido PERVAL}
@@ -148,6 +165,8 @@ La figura~\ref{fig:edicionResultado} muestra el diagrama tras aplicar la modific
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Una vez generado el diagrama, el usuario puede lanzar el análisis de valor percibido integrado. La herramienta \texttt{analyze\_perval} clasifica los elementos del proceso según las cuatro dimensiones del modelo PERVAL~\cite{sweeney2001perval} (\textit{Quality}, \textit{Price}, \textit{Emotional} y \textit{Social}), con un nivel de rendimiento y una justificación textual para cada elemento.
+
+La integración del análisis PERVAL como herramienta nativa del servidor MCP, en lugar de como módulo externo independiente, es una de las contribuciones originales de este trabajo. Esta decisión permite al usuario analizar el valor percibido del proceso que acaba de modelar sin necesidad de cambiar el contexto ni de exportar el diagrama, al mismo tiempo, el sistema puede proporcionar una justificación textual detallada para cada dimensión de valor porque dispone en este momento tanto del XML completo del diagrama como de la descripción original del proceso. 
 
 %%---------------------------------------------------------
 \subsection{Configuración del análisis}
@@ -157,7 +176,7 @@ Una vez generado el diagrama, el usuario puede lanzar el análisis de valor perc
 Antes de lanzar el análisis, el usuario selecciona el alcance (analizar solo las entregas al cliente externo, o todas las tareas del proceso) y puede especificar el nombre del actor externo cuyo punto de vista se adopta para la clasificación. El formulario de configuración se muestra en la figura~\ref{fig:pervalConfig}.
 
 \screenfig[5cm]{perval_01_config}%
-  {Formulario de configuración del análisis PERVAL en el panel conversacional. El usuario ha seleccionado el alcance «Entregas al cliente externo» y ha especificado «Cliente» como actor de referencia.}%
+  {Formulario de configuración del análisis PERVAL en el panel conversacional.}%
   {pervalConfig}
 
 %%---------------------------------------------------------
@@ -165,26 +184,24 @@ Antes de lanzar el análisis, el usuario selecciona el alcance (analizar solo la
 \label{subsec:demoPervalResultados}
 %%---------------------------------------------------------
 
-Los resultados se presentan en el panel conversacional en forma de tarjetas individuales por cada elemento analizado, con las dimensiones PERVAL aplicables, el nivel de rendimiento codificado por color y la justificación textual generada por el LLM, seguidas de un resumen global por dimensión y una valoración general del proceso (figura~\ref{fig:pervalResultados}).
+Los resultados se presentan en el panel conversacional en forma de tarjetas individuales por cada elemento analizado, con las dimensiones PERVAL aplicables, el nivel de rendimiento codificado por color y la justificación textual generada por el LLM, seguidas de un resumen global por dimensión y una valoración general del proceso. También muestra el resaltado visual sobre el diagrama: los elementos analizados se destacan con un color de fondo diferenciado que permite identificarlos de un vistazo en diagramas complejos.
+(figura~\ref{fig:pervalResultados})
 
 \screenfig[9cm]{perval_02_resultados}%
   {Resultados del análisis PERVAL en el panel conversacional. Cada elemento analizado muestra sus dimensiones PERVAL activas con el nivel de rendimiento codificado por color (muy bueno / bueno / regular / malo) y la justificación generada por el LLM. Al pie se presenta el resumen agregado por dimensión.}%
   {pervalResultados}
 
-\screenfig[8cm]{perval_03_diagrama}%
-  {Diagrama BPMN con los elementos analizados resaltados visualmente. Los elementos con impacto positivo en el valor percibido aparecen con fondo verde; los que presentan margen de mejora, con fondo ámbar.}%
-  {pervalDiagrama}
+En definitiva, el análisis PERVAL integrado evidencia que la herramienta trasciende la función de modelado: al combinar en un mismo entorno la generación del diagrama, la edición conversacional y la evaluación del valor percibido, ofrece al usuario un ciclo completo de análisis del proceso de negocio que, de otro modo, requeriría herramientas y metodologías separadas. Esta integración constituye, junto con la generación iterativa con validación humana, uno de los aportes diferenciadores del artefacto propuesto en este trabajo.
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Entrada por voz}
 \label{sec:demoVoz}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-El sistema admite tanto texto como voz como modalidad de entrada. El botón de micrófono, situado junto al campo de texto del panel conversacional, activa la API de reconocimiento de voz del navegador (\textit{Web Speech API}). Mientras el micrófono está activo, el botón muestra una animación de escucha y transcribe el audio en tiempo real al campo de texto. Al finalizar la locución, la transcripción se envía automáticamente como si el usuario hubiese escrito el mensaje.
-
-\screenfig[5cm]{voz_escuchando}%
-  {Entrada por voz activa. El botón de micrófono muestra la animación de escucha y la transcripción en tiempo real aparece en el campo de texto del panel conversacional.}%
-  {vozEscuchando}
+El sistema admite tanto texto como voz como modalidad de entrada. El botón de micrófono, situado junto al campo de texto del panel conversacional, activa la API de reconocimiento de voz del navegador (\textit{Web Speech API}). Mientras el micrófono está activo, el botón muestra una animación de escucha y transcribe el audio en tiempo real al campo de texto.
 
 Esta modalidad resulta especialmente útil para introducir descripciones largas de procesos o para dictar instrucciones de refinamiento sin necesidad de teclear.
 
@@ -192,11 +209,10 @@ Esta modalidad resulta especialmente útil para introducir descripciones largas 
 \section{Soporte multilingüe}
 \label{sec:demoMultiidioma}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-El sistema soporta español e inglés de forma completa: al cambiar de idioma mediante el selector de la interfaz, se actualizan simultáneamente todos los textos de la interfaz, los mensajes del sistema en el panel conversacional y la directiva de idioma añadida a cada \textit{prompt}, de modo que las respuestas del LLM ---incluidas las justificaciones del análisis PERVAL--- se generan directamente en la lengua seleccionada. La figura~\ref{fig:multiidioma} muestra la interfaz en modo inglés.
+El sistema soporta español e inglés de forma completa: al cambiar de idioma mediante el selector de la interfaz, se actualizan simultáneamente todos los textos de la interfaz, los mensajes del sistema en el panel conversacional y la directiva de idioma añadida a cada \textit{prompt}, de modo que las respuestas del LLM se generan directamente en la lengua seleccionada. La figura~\ref{fig:multiidioma} muestra la interfaz en modo inglés.
 
 \screenfig[7cm]{interfaz_ingles}%
-  {Interfaz del sistema en modo inglés. Los mensajes del panel conversacional, los botones de acción y los resultados del análisis PERVAL se muestran en inglés, al igual que los \textit{prompts} enviados al LLM.}%
+  {Interfaz del sistema en modo inglés}%
   {multiidioma}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

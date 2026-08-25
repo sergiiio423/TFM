@@ -96,39 +96,40 @@
 \contentsline {section}{\numberline {7.1}Interfaz general del sistema}{83}{section.7.1}%
 \contentsline {section}{\numberline {7.2}Generación iterativa de modelos BPMN}{83}{section.7.2}%
 \contentsline {subsection}{\numberline {7.2.1}Paso 1 --- Descripción del proceso}{84}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{84}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{85}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{85}{subsection.7.2.4}%
-\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{86}{subsection.7.2.5}%
-\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{86}{subsection.7.2.6}%
+\contentsline {subsection}{\numberline {7.2.2}Paso 2 --- Identificación de participantes y estructura}{85}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Paso 3 --- Identificación del inicio del proceso}{86}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Paso 4 --- Definición del flujo paso a paso}{86}{subsection.7.2.4}%
+\contentsline {subsection}{\numberline {7.2.5}Paso 5 --- Diagrama BPMN generado}{87}{subsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.2.6}Alternativa: generación completa del diagrama}{87}{subsection.7.2.6}%
 \contentsline {section}{\numberline {7.3}Edición conversacional del diagrama}{88}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{88}{section.7.4}%
-\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{88}{subsection.7.4.1}%
-\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{88}{subsection.7.4.2}%
-\contentsline {section}{\numberline {7.5}Entrada por voz}{90}{section.7.5}%
-\contentsline {section}{\numberline {7.6}Soporte multilingüe}{90}{section.7.6}%
+\contentsline {section}{\numberline {7.4}Análisis de valor percibido PERVAL}{90}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Configuración del análisis}{90}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Resultados del análisis}{90}{subsection.7.4.2}%
+\contentsline {section}{\numberline {7.5}Entrada por voz}{91}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Soporte multilingüe}{91}{section.7.6}%
 \contentsline {section}{\numberline {7.7}Despliegue en producción}{92}{section.7.7}%
 \contentsline {chapter}{\numberline {8}Validación de la propuesta}{95}{chapter.8}%
 \contentsline {section}{\numberline {8.1}El Modelo de Aceptación Tecnológica (TAM)}{95}{section.8.1}%
 \contentsline {section}{\numberline {8.2}Diseño del estudio}{96}{section.8.2}%
 \contentsline {subsection}{\numberline {8.2.1}Participantes}{96}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Procedimiento}{96}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.2}Procedimiento}{97}{subsection.8.2.2}%
 \contentsline {subsection}{\numberline {8.2.3}Caso de uso para la evaluación}{97}{subsection.8.2.3}%
-\contentsline {section}{\numberline {8.3}Instrumento de medida: el cuestionario}{98}{section.8.3}%
-\contentsline {subsection}{\numberline {8.3.1}Bloque A: Datos demográficos y perfil del participante}{98}{subsection.8.3.1}%
-\contentsline {subsection}{\numberline {8.3.2}Bloque B: Utilidad percibida (PU)}{98}{subsection.8.3.2}%
-\contentsline {subsection}{\numberline {8.3.3}Bloque C: Facilidad de uso percibida (PEOU)}{99}{subsection.8.3.3}%
-\contentsline {subsection}{\numberline {8.3.4}Bloque D: Intención de uso (ITU)}{100}{subsection.8.3.4}%
-\contentsline {subsection}{\numberline {8.3.5}Bloque E: Ítems específicos de la herramienta}{101}{subsection.8.3.5}%
-\contentsline {subsection}{\numberline {8.3.6}Preguntas abiertas}{101}{subsection.8.3.6}%
-\contentsline {section}{\numberline {8.4}Análisis de los datos}{101}{section.8.4}%
-\contentsline {chapter}{Bibliografía}{104}{chapter*.9}%
-\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{105}{appendix*.10}%
-\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{105}{section.Alph0.1}%
-\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{106}{section.Alph0.2}%
-\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{106}{subsection.Alph0.2.1}%
-\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{106}{subsection.Alph0.2.2}%
-\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{106}{subsection.Alph0.2.3}%
-\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{107}{section.Alph0.3}%
-\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{107}{section.Alph0.4}%
-\contentsline {chapter}{Anexo II}{109}{appendix*.11}%
+\contentsline {subsection}{\numberline {8.2.4}Amenazas a la validez}{98}{subsection.8.2.4}%
+\contentsline {section}{\numberline {8.3}Instrumento de medida: el cuestionario}{99}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Bloque A: Datos demográficos y perfil del participante}{99}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Bloque B: Utilidad percibida (PU)}{99}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}Bloque C: Facilidad de uso percibida (PEOU)}{100}{subsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.3.4}Bloque D: Intención de uso (ITU)}{101}{subsection.8.3.4}%
+\contentsline {subsection}{\numberline {8.3.5}Bloque E: Ítems específicos de la herramienta}{102}{subsection.8.3.5}%
+\contentsline {subsection}{\numberline {8.3.6}Preguntas abiertas}{102}{subsection.8.3.6}%
+\contentsline {section}{\numberline {8.4}Análisis de los datos}{102}{section.8.4}%
+\contentsline {chapter}{Bibliografía}{106}{chapter*.9}%
+\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{107}{appendix*.10}%
+\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{107}{section.Alph0.1}%
+\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{108}{section.Alph0.2}%
+\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{108}{subsection.Alph0.2.1}%
+\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{108}{subsection.Alph0.2.2}%
+\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{108}{subsection.Alph0.2.3}%
+\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{109}{section.Alph0.3}%
+\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{109}{section.Alph0.4}%
+\contentsline {chapter}{Anexo II}{111}{appendix*.11}%

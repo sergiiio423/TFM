@@ -1,12 +1,206 @@
-\chapter{Anexo II}
-Este capítulo es opcional, y se escribirá de acuerdo con las indicaciones del Tutor. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Anexo II --- Migración del proveedor LLM: GitHub Models → Azure OpenAI
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\chapter{Migración del proveedor LLM: de GitHub Models a Azure OpenAI}
+\label{anx:migracionLLM}
 
+Este anexo documenta la evolución del proveedor de modelos de lenguaje utilizado durante el desarrollo del proyecto. A lo largo de la mayor parte del ciclo de desarrollo la herramienta utilizó \textbf{GitHub Models} como fuente de inferencia LLM. En la fase final del proyecto, una degradación progresiva del servicio hizo necesario migrar a \textbf{Azure OpenAI Service} como proveedor principal, manteniendo GitHub Models como mecanismo de contingencia. El proceso de migración implicó cambios en la autenticación, en la construcción de la URL del \textit{endpoint}, en los parámetros de la solicitud y en la gestión de errores. Este anexo recoge las razones que motivaron el cambio, los ajustes técnicos realizados y la comparativa entre ambos proveedores.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{GitHub Models como proveedor inicial}
+\label{sec:anx2-githubmodels}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+GitHub Models es un servicio en fase de vista previa (\textit{preview}) ofrecido por GitHub que permite acceder a modelos de lenguaje de gran escala a través de la misma infraestructura y API que utiliza Azure OpenAI, pero autenticándose únicamente con un \textit{token} personal de GitHub (\texttt{GITHUB\_TOKEN}). El \textit{endpoint} público del servicio es:
 
+\begin{lstlisting}[style=promptbox]
+https://models.inference.ai.azure.com/chat/completions
+\end{lstlisting}
 
+La elección de GitHub Models como proveedor inicial respondió a tres razones. En primer lugar, su modelo de acceso es completamente gratuito durante la fase \textit{preview}, lo que eliminaba cualquier coste de inferencia durante el desarrollo iterativo. En segundo lugar, la autenticación se realiza con credenciales ya disponibles en el repositorio del proyecto (el \texttt{GITHUB\_TOKEN} de GitHub Actions o un \textit{personal access token}), lo que simplificó la configuración del entorno de desarrollo local y del despliegue en Render. En tercer lugar, el catálogo de modelos disponibles durante el desarrollo incluía los principales modelos de la familia GPT-4 de OpenAI y otros modelos abiertos, lo que permitió seleccionar el modelo más adecuado para cada tipo de tarea sin coste adicional.
 
+Durante los \textit{sprints} 0 al 6 (Sprint~0 hasta Sprint~6), la totalidad de las llamadas al LLM se realizaron a través de GitHub Models. El fichero de configuración del entorno (\texttt{.env.example}) únicamente documentaba la variable \texttt{GITHUB\_TOKEN}:
 
+\begin{lstlisting}[style=promptbox]
+# Token de GitHub Models (https://github.com/marketplace/models)
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
- 
+# Puerto del servidor MCP (transporte HTTP). Por defecto 3001.
+MCP_PORT=3001
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Limitaciones del servicio y gestión de la cuota}
+\label{sec:anx2-limitaciones}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+El acceso gratuito a GitHub Models está sujeto a \textit{rate limits} por modelo y por \textit{token}. En la práctica, un flujo de generación completo de la herramienta (que implica entre dos y cuatro llamadas al LLM por proceso: identificación de estructura, identificación del inicio, generación del diagrama y, opcionalmente, análisis PERVAL) puede alcanzar el límite de cuota de un modelo concreto en pocas sesiones de uso intensivo.
+
+Para mitigar este problema se implementó, desde el Sprint~4, un mecanismo de rotación automática de modelos. La función \texttt{callGitHub} recorre secuencialmente los seis modelos disponibles y, ante una respuesta con código HTTP~429 (\textit{Too Many Requests}), extrae el tiempo de espera sugerido en el mensaje de error y, si todos los modelos estaban limitados simultáneamente, reintenta el ciclo completo hasta tres veces con una espera entre reintentos. Los modelos disponibles en el catálogo durante el desarrollo fueron:
+
+\begin{center}
+\begin{tabular}{@{} l l @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Identificador en la API} & \textbf{Familia} \\
+\hline
+\rule{0pt}{10pt}\texttt{gpt-4.1}      & GPT-4.1 (OpenAI) \\
+\texttt{gpt-4o}       & GPT-4o (OpenAI) \\
+\texttt{gpt-4o-mini}  & GPT-4o mini (OpenAI) \\
+\texttt{gpt-4.1-mini} & GPT-4.1 mini (OpenAI) \\
+\texttt{gpt-4.1-nano} & GPT-4.1 nano (OpenAI) \\
+\texttt{Phi-4}        & Phi-4 (Microsoft) \\
+\hline
+\end{tabular}
+\end{center}
+
+El mecanismo de rotación también actuaba ante retiradas de modelos del catálogo (respuesta de error distinta de 429): si un modelo dejaba de estar disponible, la función avanzaba al siguiente de la lista sin interrumpir la sesión del usuario. La posición actual en el ciclo se mantenía en la variable de módulo \texttt{\_llmModelIdx}, de modo que las llamadas sucesivas comenzaban por el último modelo que había respondido correctamente, distribuyendo así la carga entre los distintos modelos.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Degradación del servicio y decisión de migrar}
+\label{sec:anx2-interrupcion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A partir del Sprint~7, coincidiendo con la fase final de desarrollo y con el inicio de las sesiones de evaluación con participantes reales, el servicio de GitHub Models comenzó a mostrar una disponibilidad muy reducida. Los modelos de la familia GPT-4 (los más relevantes para la generación de XML BPMN estructuralmente correcto) dejaron de responder sistemáticamente, y el mecanismo de rotación agotaba los tres reintentos sin obtener una respuesta satisfactoria. El mensaje de error final que recibían los usuarios era:
+
+\begin{lstlisting}[style=promptbox]
+Ningún modelo disponible (cuota agotada o modelos retirados).
+Espera unas horas o usa otro token. Último error: ...
+\end{lstlisting}
+
+Esta situación era incompatible con las sesiones de evaluación del estudio empírico TAM, en las que los participantes debían poder utilizar la herramienta de forma autónoma y sin interrupciones. Se tomó entonces la decisión de integrar \textbf{Azure OpenAI Service} como proveedor principal de producción, manteniendo GitHub Models únicamente como contingencia para entornos de desarrollo sin acceso a credenciales de Azure.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Integración de Azure OpenAI Service}
+\label{sec:anx2-azure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Azure OpenAI Service es el servicio gestionado de Microsoft que ofrece los modelos de OpenAI (GPT-4o, GPT-4 Turbo, etc.) con garantías de nivel de servicio (\textit{SLA}) y sin los límites de cuota propios de los planes gratuitos. La integración requirió tres cambios de configuración:
+
+\begin{enumerate}
+  \item \textbf{Nuevas variables de entorno.} Se añadieron dos variables obligatorias y una opcional al servidor MCP:
+  \begin{itemize}
+    \item \texttt{AZURE\_OPENAI\_KEY}: clave de API del recurso Azure OpenAI.
+    \item \texttt{AZURE\_OPENAI\_ENDPOINT}: URL base del recurso (p.~ej.\ \texttt{https://\textit{nombre-recurso}.openai.azure.com}).
+    \item \texttt{AZURE\_OPENAI\_DEPLOYMENT} (opcional): nombre del \textit{deployment} del modelo. Por defecto \texttt{gpt-4o}.
+  \end{itemize}
+
+  \item \textbf{Despliegue en Render.com.} Las credenciales de Azure se configuraron como secretos en el panel de administración de Render (fuera del fichero \texttt{render.yaml} para no exponerlas en el repositorio público). El fichero \texttt{render.yaml} mantiene la variable \texttt{GITHUB\_TOKEN} como alternativa de contingencia.
+
+  \item \textbf{Versión de API.} El servicio de Azure OpenAI requiere especificar la versión de la API en la URL de la solicitud. Se fijó la versión \texttt{2024-08-01-preview}, que soporta los modelos de la familia GPT-4o.
+\end{enumerate}
+
+La URL del \textit{endpoint} de Azure adopta el siguiente esquema, distinto al de GitHub Models:
+
+\begin{lstlisting}[style=promptbox]
+{AZURE_OPENAI_ENDPOINT}/openai/deployments/{deployment}/
+  chat/completions?api-version=2024-08-01-preview
+\end{lstlisting}
+
+La autenticación también difiere: mientras que GitHub Models usa la cabecera estándar \texttt{Authorization: Bearer \{token\}}, Azure OpenAI utiliza una cabecera propia \texttt{api-key: \{clave\}}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Diferencias técnicas detectadas y adaptaciones}
+\label{sec:anx2-diferencias}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Durante la integración de Azure OpenAI se detectó una incompatibilidad que no estaba documentada de forma prominente en la documentación oficial en el momento de la migración: \textbf{el modelo \texttt{gpt-4o} desplegado en Azure OpenAI no acepta el parámetro \texttt{max\_tokens}} en el cuerpo de la solicitud. Al incluirlo, la API devuelve un error de validación que interrumpe la llamada. El parámetro equivalente en Azure OpenAI es \texttt{max\_completion\_tokens}.
+
+Este comportamiento difiere del de la API estándar de OpenAI y del de GitHub Models, ambos compatibles con \texttt{max\_tokens}. La tabla~\ref{tab:parametrosAPI} recoge las diferencias de parámetros entre ambos proveedores:
+
+\begin{table}[H]
+\centering
+\caption{Diferencias en los parámetros de la solicitud HTTP entre proveedores.}
+\label{tab:parametrosAPI}
+\begin{tabular}{@{} p{4.5cm} p{4.5cm} p{4.5cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Aspecto} & \textbf{GitHub Models} & \textbf{Azure OpenAI} \\
+\hline
+\rule{0pt}{10pt}Cabecera de autenticación & \texttt{Authorization: Bearer} & \texttt{api-key} \\[4pt]
+Selección de modelo & \texttt{"model": "gpt-4o"} en el cuerpo & \textit{Deployment} en la URL \\[4pt]
+Límite de tokens de salida & \texttt{max\_tokens} & \texttt{max\_completion\_tokens} \\[4pt]
+Versión de API & No requerida & Obligatoria (\textit{query param}) \\[4pt]
+Tiempo de espera (\textit{timeout}) & 30\,s & 60\,s \\[4pt]
+Rotación de modelos & Automática (6 modelos) & No aplica (1 \textit{deployment}) \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+El ajuste en el código se limitó a un único punto, la función \texttt{callAzure} en el módulo \texttt{llm.js}, que construye el cuerpo de la solicitud con \texttt{max\_completion\_tokens} en lugar de \texttt{max\_tokens}. El resto de la lógica de la herramienta (construcción de \textit{prompts}, parseo de respuestas, renderizado del XML) permaneció inalterada, puesto que la interfaz pública de la función \texttt{callOpenAI} es idéntica para ambos proveedores.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Arquitectura final de doble proveedor}
+\label{sec:anx2-arquitectura}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La solución definitiva implementa una selección de proveedor mediante la función \texttt{getProvider()}, que inspecciona las variables de entorno disponibles en tiempo de ejecución y determina cuál de los dos \textit{backends} utilizar:
+
+\begin{lstlisting}[style=promptbox]
+function getProvider() {
+  if (AZURE_OPENAI_KEY && AZURE_OPENAI_ENDPOINT)
+    => proveedor Azure OpenAI (produccion)
+  if (GITHUB_TOKEN)
+    => proveedor GitHub Models (contingencia/desarrollo)
+  => error: falta configuracion LLM
+}
+\end{lstlisting}
+
+La función pública \texttt{callOpenAI(apiKey, systemPrompt, messages)} actúa como punto de entrada único e independiente del proveedor: redirige internamente a \texttt{callAzure} o a \texttt{callGitHub} según el resultado de \texttt{getProvider()}, de modo que el resto del código del servidor MCP ---las nueve herramientas que construyen \textit{prompts} y procesan respuestas--- no necesitó ninguna modificación. La figura~\ref{fig:anx2Arquitectura} ilustra este diseño.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=4pt, minimum width=3.6cm, minimum height=1cm,
+              align=center, font=\small\ttfamily, fill=blue!6},
+  decision/.style={draw, diamond, aspect=2.2, minimum width=4cm, minimum height=1.1cm,
+                   align=center, font=\small, fill=yellow!15},
+  >=Stealth, thick, node distance=1.3cm
+]
+
+\node[box] (caller) at (0,0) {callOpenAI()};
+\node[decision, below=of caller] (prov) {Azure keys\\presentes?};
+\node[box, below left=1.2cm and 1.8cm of prov]  (azure)  {callAzure()\\Azure OpenAI};
+\node[box, below right=1.2cm and 1.8cm of prov] (github) {callGitHub()\\GitHub Models};
+
+\draw[->] (caller) -- (prov);
+\draw[->] (prov) -- node[left,font=\small]{Sí} (azure);
+\draw[->] (prov) -- node[right,font=\small]{No} (github);
+\end{tikzpicture}
+\caption{Selección dinámica de proveedor LLM en \texttt{llm.js}. \texttt{callOpenAI} actúa como punto de entrada único e independiente del \textit{backend}.}
+\label{fig:anx2Arquitectura}
+\end{figure}
+
+Este diseño garantiza que el entorno de producción desplegado en Render.com utiliza siempre Azure OpenAI (donde las variables \texttt{AZURE\_OPENAI\_KEY} y \texttt{AZURE\_OPENAI\_ENDPOINT} están configuradas como secretos), mientras que un entorno de desarrollo con solo un \texttt{GITHUB\_TOKEN} sigue funcionando con GitHub Models sin necesidad de modificar ningún fichero de código.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Comparativa de proveedores}
+\label{sec:anx2-comparativa}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La tabla~\ref{tab:comparativaProveedores} resume las diferencias entre GitHub Models y Azure OpenAI en los aspectos más relevantes para el proyecto.
+
+\begin{table}[H]
+\centering
+\caption{Comparativa entre GitHub Models y Azure OpenAI Service en el contexto del proyecto.}
+\label{tab:comparativaProveedores}
+\begin{tabular}{@{} p{3.8cm} p{4.8cm} p{4.8cm} @{}}
+\hline
+\rule{0pt}{10pt}\textbf{Criterio} & \textbf{GitHub Models} & \textbf{Azure OpenAI Service} \\
+\hline
+\rule{0pt}{10pt}Autenticación         & \textit{Personal Access Token} de GitHub & Clave de API + \textit{endpoint} del recurso \\[4pt]
+Modelos disponibles      & gpt-4.1, gpt-4o, gpt-4o-mini, gpt-4.1-mini, gpt-4.1-nano, Phi-4 & \textit{Deployment} configurable (gpt-4o en este proyecto) \\[4pt]
+Coste                    & Gratuito (\textit{preview}) & De pago (por tokens consumidos) \\[4pt]
+\textit{Rate limit}      & Estricto por modelo y token & Según el nivel de cuota contratado \\[4pt]
+Parámetro de tokens máx. & \texttt{max\_tokens} & \texttt{max\_completion\_tokens} \\[4pt]
+Estabilidad del servicio & Baja (modelos retirados sin aviso) & Alta (\textit{SLA} garantizado) \\[4pt]
+Estrategia de \textit{retry} & Rotación automática entre 6 modelos & No necesaria \\[4pt]
+Uso en el proyecto       & Desarrollo (Sprint~0--6) & Producción (Sprint~7 en adelante) \\[4pt]
+\hline
+\end{tabular}
+\end{table}
+
+La migración a Azure OpenAI resolvió los problemas de disponibilidad que habían aparecido durante las sesiones de evaluación y permitió completar el estudio empírico TAM sin interrupciones. La estrategia de doble proveedor adoptada representa, además, una lección de diseño: la dependencia de servicios LLM gratuitos en fase de \textit{preview} puede ser adecuada durante el desarrollo iterativo, pero introduce un riesgo de disponibilidad que debe gestionarse con anterioridad a la fase de evaluación con usuarios reales.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Final del Anexo II
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

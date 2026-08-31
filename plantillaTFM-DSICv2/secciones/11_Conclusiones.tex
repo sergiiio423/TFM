@@ -11,45 +11,31 @@ Este capítulo cierra la memoria recogiendo las principales conclusiones obtenid
 \section{Conclusiones}\label{sec:conclusiones}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-El presente trabajo ha abordado el diseño, la implementación y la evaluación de una herramienta que integra modelos de lenguaje de gran escala (LLMs) en el editor de procesos bpmn.io mediante el protocolo MCP (\textit{Model Context Protocol}). La herramienta permite generar diagramas BPMN en formato XML a partir de descripciones textuales o conversacionales, refinar el modelo de forma iterativa mediante lenguaje natural e identificar automáticamente los valores percibidos por el cliente según la clasificación PERVAL. A continuación se sintetizan las conclusiones en torno a los cinco objetivos secundarios definidos en el capítulo~\ref{cap:introduccion}.
+El presente trabajo ha abordado el diseño, la implementación y la evaluación de una herramienta que integra modelos de lenguaje de gran escala (LLMs) en el editor de procesos bpmn.io mediante el protocolo MCP (\textit{Model Context Protocol}). La herramienta permite generar diagramas BPMN a partir de descripciones textuales o conversacionales, refinar el modelo de forma iterativa mediante lenguaje natural e identificar automáticamente los valores percibidos por el cliente según la clasificación PERVAL.
 
-%%---------------------------------------------------------
-\subsection{Objetivo 1: diseño e implementación de la extensión}
-%%---------------------------------------------------------
+Los resultados obtenidos permiten concluir que el uso de LLMs para la generación y edición conversacional de modelos BPMN es viable y produce una percepción muy positiva por parte de usuarios con perfil técnico. La estrategia de \textit{guided and hybrid vibe modeling}, en la que el LLM guía la generación pero el usuario mantiene el control editorial sobre el diagrama, resulta más valorada que la generación completamente autónoma, como refleja la diferencia de puntuación entre los ítems PU7 ($\bar{x} = 5{,}82$) y PU10 ($\bar{x} = 6{,}64$) frente a la apreciación cualitativa de los participantes respecto a la necesidad de refinamiento manual posterior. El enfoque de \textit{iterative prompting with human-in-the-loop validation} ha demostrado ser apropiado para este dominio: la generación de  BPMN estructuralmente válido requiere un control semántico que los LLMs actuales no garantizan en todas las situaciones, por lo que la intervención humana en el bucle añade un valor real y apreciado por los usuarios.
 
-Se ha desarrollado una extensión funcional sobre bpmn.io que comunica el editor con un servidor MCP implementado en Node.js. El servidor expone nueve herramientas al LLM ---entre ellas la generación guiada paso a paso, la generación completa, la edición conversacional y la exportación en múltiples formatos--- y actúa como capa de orquestación entre las instrucciones del usuario, el modelo de lenguaje y el estado XML del diagrama. La arquitectura adoptada ---en la que el XML del modelo actúa como estado compartido entre el usuario y el LLM--- permite un flujo de trabajo híbrido en el que el usuario puede alternar libremente entre la interacción en lenguaje natural y la edición manual directa en el canvas de bpmn.io.
+A continuación se detalla en qué medida se ha dado cumplimiento a cada uno de los cinco objetivos secundarios definidos en el capítulo~\ref{cap:introduccion}:
 
-La decisión de basarse en el protocolo MCP ha demostrado ser acertada: la separación entre el cliente (bpmn.io) y el servidor de herramientas facilita la sustitución del modelo de lenguaje subyacente sin modificar la lógica de la interfaz, como quedó de manifiesto durante la migración de GitHub Models a Azure OpenAI Service descrita en el Anexo~\ref{anx:migracionLLM}.
+\begin{itemize}
 
-%%---------------------------------------------------------
-\subsection{Objetivo 2: identificación de valores PERVAL}
-%%---------------------------------------------------------
+  \item \textbf{Objetivo 1: diseñar e implementar una extensión funcional sobre bpmn.io que permita la generación iterativa de modelos BPMN mediante interacción en lenguaje natural con un LLM.}
+  Se ha desarrollado una extensión funcional sobre bpmn.io que comunica el editor con un servidor MCP implementado en Node.js. El servidor expone nueve herramientas al LLM y actúa como capa de orquestación entre las instrucciones del usuario, el modelo de lenguaje y el estado del diagrama. La arquitectura adoptada permite un flujo de trabajo híbrido en el que el usuario puede alternar libremente entre la interacción en lenguaje natural y la edición manual directa en el canvas de bpmn.io. La decisión de basarse en el protocolo MCP ha demostrado ser acertada: la separación entre el cliente (bpmn.io) y el servidor de herramientas facilita la sustitución del modelo de lenguaje subyacente sin modificar la lógica de la interfaz, como quedó de manifiesto durante la migración de GitHub Models a Azure OpenAI Service descrita en el Anexo~\ref{anx:migracionLLM}.
 
-La herramienta incorpora un módulo de análisis PERVAL que, a partir del XML del diagrama y de una descripción del contexto de negocio, clasifica los elementos del proceso según las dimensiones de valor funcional (calidad, precio y valor de conveniencia) y valor no funcional (valor emocional y valor social) de la taxonomía PERVAL. Los resultados de la evaluación TAM señalan que esta funcionalidad es la que obtiene la puntuación media más baja del bloque de utilidad percibida (PU9, $\bar{x} = 5{,}50$), lo que indica que los participantes la valoran pero perciben un margen de mejora en su integración en el flujo de trabajo habitual de modelado.
+  \item \textbf{Objetivo 2: incorporar en la herramienta la capacidad de identificar y clasificar los valores asociados al cliente según la clasificación PERVAL.}
+  La herramienta incorpora un módulo de análisis PERVAL que, a partir del diagrama y de una descripción del contexto de negocio, clasifica los elementos del proceso según las dimensiones de valor funcional y valor no funcional de la taxonomía PERVAL. Los resultados de la evaluación TAM señalan que esta funcionalidad es la que obtiene la puntuación media más baja del bloque de utilidad percibida (PU9, $\bar{x} = 5{,}55$), lo que indica que los participantes la valoran pero perciben un margen de mejora en su integración en el flujo de trabajo habitual de modelado.
 
-%%---------------------------------------------------------
-\subsection{Objetivo 3: diseño y ejecución de la encuesta TAM}
-%%---------------------------------------------------------
+  \item \textbf{Objetivo 3: diseñar y llevar a cabo una encuesta basada en el modelo TAM con un grupo de aproximadamente quince usuarios para evaluar la utilidad percibida, la facilidad de uso percibida y la intención de uso del sistema.}
+  Se diseñó un cuestionario TAM adaptado al dominio del modelado de procesos de negocio asistido por LLMs, estructurado en cinco bloques, todos ellos medidos en escala de Likert de 7 puntos. El cuestionario fue respondido por 11 participantes con perfil de estudiante de máster.
 
-Se diseñó un cuestionario TAM adaptado al dominio del modelado de procesos de negocio asistido por LLMs, estructurado en cinco bloques: datos demográficos y experiencia previa (Bloque~A), utilidad percibida ---PU, 11 ítems--- (Bloque~B), facilidad de uso percibida ---PEOU, 12 ítems--- (Bloque~C), intención de uso ---ITU, 5 ítems--- (Bloque~D) y valoración de funcionalidades específicas ---SP, 11 ítems--- (Bloque~E), todos ellos medidos en escala de Likert de 7 puntos. El cuestionario fue respondido por $n = 10$ participantes con perfil de estudiante de máster con conocimiento medio-alto de BPMN y uso habitual o diario de herramientas de IA generativa, durante el período comprendido entre el 22 de julio y el 23 de agosto de 2026.
+  \item \textbf{Objetivo 4: analizar los resultados de la encuesta TAM y evaluar el grado de aceptación de la herramienta por parte de los usuarios.}
+  El análisis de los resultados se llevó a cabo en el capítulo ~\ref{cap:resultados}, donde se muestra un nivel de aceptación muy alto en los tres constructos TAM. La utilidad percibida ($\bar{x}_{\text{PU}} = 6{,}19$, equivalente al $88{,}4$\,\% de la puntuación máxima) y la facilidad de uso percibida ($\bar{x}_{\text{PEOU}} = 6{,}17$, equivalente al $88{,}1$\,\% del máximo) se sitúan muy por encima del punto medio de la escala, mientras que la intención de uso ($\bar{x}_{\text{ITU}} = 5{,}65$) indica una disposición clara hacia el uso continuado de la herramienta. Las tres escalas presentan una consistencia interna calificada como «buena» en la literatura psicométrica.
 
-%%---------------------------------------------------------
-\subsection{Objetivo 4: análisis de los resultados TAM}
-%%---------------------------------------------------------
+  \item \textbf{Objetivo 5: extraer conclusiones sobre la viabilidad y las limitaciones del uso de LLMs para el modelado de procesos de negocio orientado al valor.} 
+  Este objetivo se aborda de forma transversal a lo largo del presente capítulo, tanto en las conclusiones expuestas anteriormente como en las secciones de limitaciones y trabajo futuro que se desarrollan a continuación.
 
-El análisis de los resultados muestra un nivel de aceptación muy alto en los tres constructos TAM. La utilidad percibida ($\bar{x}_{\text{PU}} = 6{,}26$, $SD = 0{,}57$, equivalente al $89{,}4$\,\% de la puntuación máxima) y la facilidad de uso percibida ($\bar{x}_{\text{PEOU}} = 6{,}18$, equivalente al $88{,}3$\,\% del máximo) se sitúan muy por encima del punto medio de la escala, mientras que la intención de uso ($\bar{x}_{\text{ITU}} = 5{,}74$) indica una disposición clara hacia el uso continuado de la herramienta. Las tres escalas presentan una consistencia interna de $\alpha = 0{,}87$, calificada como «buena» en la literatura psicométrica.
 
-Las correlaciones de Pearson entre constructos confirman las relaciones teóricas del modelo TAM: la correlación PU--PEOU es muy alta ($r = 0{,}94$, $p < 0{,}001$), la correlación PU--ITU es alta ($r = 0{,}89$, $p < 0{,}001$) y la correlación PEOU--ITU es moderada--alta ($r = 0{,}75$, $p < 0{,}05$). Este patrón indica que la utilidad percibida es el predictor más fuerte de la intención de uso, en línea con los hallazgos de la literatura TAM en contextos de software de productividad.
-
-A nivel de ítem, la velocidad de creación de diagramas (PU1, $\bar{x} = 6{,}80$) y la calidad del lenguaje natural en la interacción (PEOU1, $\bar{x} = 6{,}60$) son los atributos mejor valorados. En el extremo opuesto, el análisis PERVAL (PU9, $\bar{x} = 5{,}50$) y la detección de errores en descripciones ambiguas (PEOU7, $\bar{x} = 3{,}80$) señalan las áreas con mayor potencial de mejora.
-
-%%---------------------------------------------------------
-\subsection{Objetivo 5: viabilidad del uso de LLMs para el modelado de procesos}
-%%---------------------------------------------------------
-
-Los resultados obtenidos permiten concluir que el uso de LLMs para la generación y edición conversacional de modelos BPMN es viable y produce una percepción muy positiva por parte de usuarios con perfil técnico. La estrategia de \textit{guided and hybrid vibe modeling} ---en la que el LLM guía la generación pero el usuario mantiene el control editorial sobre el diagrama--- resulta más valorada que la generación completamente autónoma, como refleja la diferencia de puntuación entre los ítems PU7 ($\bar{x} = 6{,}30$) y PU10 ($\bar{x} = 6{,}60$) frente a la apreciación cualitativa de los participantes respecto a la necesidad de refinamiento manual posterior.
-
-El enfoque de \textit{iterative prompting with human-in-the-loop validation} ha demostrado ser apropiado para este dominio: la generación de XML BPMN estructuralmente válido requiere un control semántico que los LLMs actuales no garantizan en todas las situaciones, por lo que la intervención humana en el bucle añade un valor real y apreciado por los usuarios.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Limitaciones del estudio}\label{sec:limitaciones}
@@ -58,13 +44,13 @@ El enfoque de \textit{iterative prompting with human-in-the-loop validation} ha 
 Los resultados descritos deben interpretarse teniendo en cuenta las siguientes limitaciones:
 
 \begin{itemize}
-  \item \textbf{Tamaño de la muestra.} Con $n = 10$ participantes, el estudio tiene carácter piloto. Las estimaciones de media y correlación son estadísticamente frágiles y no permiten generalizar los resultados a la población de usuarios profesionales de herramientas de modelado de procesos. Un estudio confirmatorio con $n \geq 50$ participantes permitiría calcular intervalos de confianza más estrechos y aplicar análisis factoriales confirmatorios.
+  \item \textbf{Tamaño de la muestra.} Con $n = 11$ participantes, el estudio tiene carácter piloto. Las estimaciones de media y correlación son estadísticamente frágiles y no permiten generalizar los resultados a la población de usuarios profesionales de herramientas de modelado de procesos. Un estudio confirmatorio con $n \geq 50$ participantes permitiría calcular intervalos de confianza más estrechos y aplicar análisis factoriales confirmatorios.
 
   \item \textbf{Homogeneidad del perfil.} Todos los participantes son estudiantes de máster de la misma institución, con edades comprendidas entre 20 y 29 años y un conocimiento previo de BPMN similar. Esta homogeneidad reduce la varianza observada y puede sesgar al alza las puntuaciones de facilidad de uso percibida en comparación con perfiles menos técnicos.
 
   \item \textbf{Dependencia de un único proveedor LLM.} Durante la fase de evaluación, la herramienta utilizó exclusivamente el modelo \texttt{gpt-4o} de Azure OpenAI. La calidad de los diagramas generados y, por tanto, las puntuaciones de utilidad percibida están ligadas a las capacidades de ese modelo en el momento de la evaluación. Futuros cambios en el modelo o la sustitución por otro proveedor podrían alterar los resultados.
 
-  \item \textbf{Ausencia de grupo de control.} El estudio no incluye un grupo de control que utilice herramientas de modelado tradicionales (p.~ej., bpmn.io sin asistencia LLM o Camunda Modeler). Sin esta comparación, no es posible cuantificar la ganancia real en productividad o calidad de los modelos generados.
+  \item \textbf{Ausencia de grupo de control.} El estudio no incluye un grupo de control que utilice herramientas de modelado tradicionales. Sin esta comparación, no es posible cuantificar la ganancia real en productividad o calidad de los modelos generados.
 
   \item \textbf{Validez ecológica.} Las sesiones de evaluación se realizaron con procesos de negocio propuestos por el investigador, no con procesos reales de las organizaciones de los participantes. La percepción de utilidad podría diferir en un contexto de uso profesional con procesos más complejos o con restricciones de confidencialidad.
 
@@ -78,10 +64,10 @@ Los resultados descritos deben interpretarse teniendo en cuenta las siguientes l
 A partir de las conclusiones y limitaciones identificadas, se proponen las siguientes líneas de investigación y desarrollo para trabajos futuros:
 
 %%---------------------------------------------------------
-\subsection{Estudio empírico a mayor escala}
+\subsection{Validación a mayor escala}
 %%---------------------------------------------------------
 
-El paso natural después de un estudio piloto es replicarlo con una muestra más amplia y diversificada. Un estudio confirmatorio con $n \geq 50$ participantes de distintos perfiles profesionales (analistas de negocio, consultores de procesos, ingenieros de software) permitiría: (i) verificar la estructura factorial del instrumento TAM adaptado mediante análisis factorial confirmatorio (AFC); (ii) analizar si la experiencia previa en BPMN o el nivel de familiaridad con IA moderan las relaciones entre constructos; y (iii) generalizar los resultados a la población de usuarios potenciales.
+El paso natural después de un estudio piloto es replicarlo con una muestra más amplia y diversificada. Un estudio confirmatorio con $n \geq 50$ participantes de distintos perfiles profesionales permitiría:(i) analizar si la experiencia previa en BPMN o el nivel de familiaridad con IA moderan las relaciones entre constructos; y (ii) generalizar los resultados a la población de usuarios potenciales.
 
 %%---------------------------------------------------------
 \subsection{Validación objetiva de la calidad de los diagramas}
@@ -93,7 +79,7 @@ Complementar el estudio TAM con métricas objetivas de calidad de los modelos BP
 \subsection{Soporte multi-modelo y comparativa entre LLMs}
 %%---------------------------------------------------------
 
-La arquitectura de doble proveedor desarrollada en este proyecto (véase Anexo~\ref{anx:migracionLLM}) establece la base para extender la herramienta a múltiples modelos de lenguaje de forma transparente. Una línea de trabajo futura consistiría en comparar sistemáticamente el rendimiento de distintos modelos ---GPT-4o, Claude~3.5, Gemini~1.5~Pro, Llama~3--- en la generación de BPMN válido, utilizando un conjunto de procesos de referencia y evaluadores humanos ciegos para puntuar los resultados. Esta comparativa aportaría evidencia sobre qué características del modelo (tamaño, capacidad de razonamiento estructurado, ventana de contexto) predicen mejor la calidad del diagrama generado.
+La arquitectura de doble proveedor desarrollada en este proyecto (véase Anexo~\ref{anx:migracionLLM}) establece la base para extender la herramienta a múltiples modelos de lenguaje de forma transparente. Una línea de trabajo futura consistiría en comparar sistemáticamente el rendimiento de distintos modelo en la generación de BPMN válido, utilizando un conjunto de procesos de referencia y evaluadores humanos ciegos para puntuar los resultados. Esta comparativa aportaría evidencia sobre qué características del modelo (tamaño, capacidad de razonamiento estructurado, ventana de contexto) predicen mejor la calidad del diagrama generado.
 
 %%---------------------------------------------------------
 \subsection{Extensión de la funcionalidad PERVAL}
@@ -107,23 +93,17 @@ El módulo de análisis PERVAL fue el aspecto de la herramienta con más margen 
   \item Integrar el análisis PERVAL con herramientas de minería de procesos (\textit{process mining}) para contrastar el valor diseñado en el modelo BPMN con el valor efectivamente entregado según los registros de eventos (\textit{event logs}).
 \end{itemize}
 
-%%---------------------------------------------------------
-\subsection{Colaboración en tiempo real y edición multiusuario}
-%%---------------------------------------------------------
 
-La arquitectura actual soporta un único usuario por sesión. Una extensión natural sería habilitar la edición colaborativa en tiempo real ---varios analistas trabajando simultáneamente sobre el mismo diagrama, cada uno pudiendo interactuar con el LLM--- mediante la sincronización del estado XML a través de un canal de eventos compartido (p.~ej., WebSockets o CRDT). Esta funcionalidad acercaría la herramienta a entornos de trabajo en equipo propios del análisis de procesos empresariales.
 
-%%---------------------------------------------------------
-\subsection{Integración con repositorios de procesos y estándares de gestión}
-%%---------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Reflexión académica}\label{sec:reflexion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Conectar la herramienta con repositorios de modelos BPMN empresariales (Camunda, Signavio, IBM Blueworks) o con plataformas de gestión de procesos de negocio (BPM) permitiría reutilizar modelos existentes como contexto para la generación, reducir el esfuerzo de modelado desde cero y mantener la trazabilidad entre los modelos generados por el LLM y los procesos operativos en producción. Esta integración requeriría definir mecanismos de versionado y control de cambios compatibles con las prácticas habituales de gobierno de modelos en organizaciones.
+La realización de este Trabajo de Fin de Máster no habría sido posible sin los fundamentos teóricos y las competencias técnicas adquiridos a lo largo del Máster Universitario impartido por el Departamento de Sistemas Informáticos y Computación (DSIC) de la Universitat Politècnica de València. El trabajo ha supuesto la convergencia de conocimientos procedentes de diversas áreas del programa, que han encontrado en este proyecto un contexto de aplicación real e integrado.
 
-%%---------------------------------------------------------
-\subsection{Ajuste fino del modelo para generación de BPMN}
-%%---------------------------------------------------------
+El diseño de la arquitectura del sistema, en particular, la definición del protocolo de comunicación entre el editor bpmn.io y el servidor MCP, la estructuración de las nueve herramientas expuestas al LLM y la gestión del estado compartido del diagrama, se sustentó directamente en los principios de diseño de software y arquitecturas de integración trabajados durante el máster. La distinción entre componentes, la separación de responsabilidades y la elección del protocolo MCP como mecanismo de desacoplamiento respondieron a criterios aprendidos en las asignaturas de ingeniería del software y diseño de sistemas distribuidos.
 
-Los LLMs de propósito general presentan limitaciones en la generación de XML BPMN semánticamente correcto, especialmente en procesos con colaboraciones entre múltiples \textit{pools}, eventos intermedios complejos o subprocesos anidados. Una línea de trabajo a largo plazo consistiría en desarrollar un conjunto de datos de entrenamiento de pares (descripción en lenguaje natural, XML BPMN validado) y utilizar técnicas de ajuste fino (\textit{fine-tuning}) o de aprendizaje por refuerzo con retroalimentación humana (RLHF) para especializar un modelo en esta tarea. Los datos generados durante el uso de la herramienta por participantes ---previa obtención del consentimiento informado--- podrían constituir la base de este corpus.
+El modelado de procesos de negocio con BPMN constituyó otro pilar fundamental del trabajo. Los conocimientos sobre la notación BPMN~2.0, los elementos del estándar y las buenas prácticas de modelado orientado al valor del cliente, incluida la taxonomía PERVAL, resultaron imprescindibles tanto para implementar el módulo de análisis PERVAL como para diseñar el caso de uso de la validación con suficiente riqueza semántica como para que los participantes pudieran evaluar la herramienta con criterio.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Final del capítulo de conclusiones y trabajo futuro

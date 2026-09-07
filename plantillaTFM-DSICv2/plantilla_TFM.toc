@@ -152,20 +152,21 @@
 \contentsline {subsection}{\numberline {10.3.2}Validación objetiva de la calidad de los diagramas}{120}{subsection.10.3.2}%
 \contentsline {subsection}{\numberline {10.3.3}Soporte multi-modelo y comparativa entre LLMs}{120}{subsection.10.3.3}%
 \contentsline {subsection}{\numberline {10.3.4}Extensión de la funcionalidad PERVAL}{120}{subsection.10.3.4}%
-\contentsline {chapter}{Bibliografía}{122}{chapter*.9}%
-\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{123}{appendix*.10}%
-\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{123}{section.Alph0.1}%
-\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{124}{section.Alph0.2}%
-\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{124}{subsection.Alph0.2.1}%
-\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{124}{subsection.Alph0.2.2}%
-\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{124}{subsection.Alph0.2.3}%
-\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{125}{section.Alph0.3}%
-\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{125}{section.Alph0.4}%
-\contentsline {chapter}{Migración del proveedor LLM: de GitHub Models a Azure OpenAI}{127}{appendix*.11}%
-\contentsline {section}{\numberline {.5}GitHub Models como proveedor inicial}{127}{section.Alph0.5}%
-\contentsline {section}{\numberline {.6}Limitaciones del servicio y gestión de la cuota}{128}{section.Alph0.6}%
-\contentsline {section}{\numberline {.7}Degradación del servicio y decisión de migrar}{128}{section.Alph0.7}%
-\contentsline {section}{\numberline {.8}Integración de Azure OpenAI Service}{129}{section.Alph0.8}%
-\contentsline {section}{\numberline {.9}Diferencias técnicas detectadas y adaptaciones}{129}{section.Alph0.9}%
-\contentsline {section}{\numberline {.10}Arquitectura final de doble proveedor}{130}{section.Alph0.10}%
-\contentsline {section}{\numberline {.11}Comparativa de proveedores}{131}{section.Alph0.11}%
+\contentsline {section}{\numberline {10.4}Reflexión académica}{120}{section.10.4}%
+\contentsline {chapter}{Bibliografía}{124}{chapter*.9}%
+\contentsline {chapter}{Aplicación de la herramienta a su propio proceso de uso}{125}{appendix*.10}%
+\contentsline {section}{\numberline {.1}Descripción del proceso modelado}{125}{section.Alph0.1}%
+\contentsline {section}{\numberline {.2}Instrucciones proporcionadas al sistema}{126}{section.Alph0.2}%
+\contentsline {subsection}{\numberline {.2.1}Descripción inicial del proceso}{126}{subsection.Alph0.2.1}%
+\contentsline {subsection}{\numberline {.2.2}Validación de la estructura de participantes}{126}{subsection.Alph0.2.2}%
+\contentsline {subsection}{\numberline {.2.3}Especificación del punto de inicio y activación del modo completo}{126}{subsection.Alph0.2.3}%
+\contentsline {section}{\numberline {.3}Resultado: diagrama BPMN generado}{127}{section.Alph0.3}%
+\contentsline {section}{\numberline {.4}Observaciones sobre el ejercicio}{127}{section.Alph0.4}%
+\contentsline {chapter}{Migración del proveedor LLM: de GitHub Models a Azure OpenAI}{129}{appendix*.11}%
+\contentsline {section}{\numberline {.5}GitHub Models como proveedor inicial}{129}{section.Alph0.5}%
+\contentsline {section}{\numberline {.6}Limitaciones del servicio y gestión de la cuota}{130}{section.Alph0.6}%
+\contentsline {section}{\numberline {.7}Degradación del servicio y decisión de migrar}{130}{section.Alph0.7}%
+\contentsline {section}{\numberline {.8}Integración de Azure OpenAI Service}{131}{section.Alph0.8}%
+\contentsline {section}{\numberline {.9}Diferencias técnicas detectadas y adaptaciones}{131}{section.Alph0.9}%
+\contentsline {section}{\numberline {.10}Arquitectura final de doble proveedor}{132}{section.Alph0.10}%
+\contentsline {section}{\numberline {.11}Comparativa de proveedores}{133}{section.Alph0.11}%

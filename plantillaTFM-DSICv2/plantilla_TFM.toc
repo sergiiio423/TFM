@@ -170,3 +170,7 @@
 \contentsline {section}{\numberline {.9}Diferencias técnicas detectadas y adaptaciones}{131}{section.Alph0.9}%
 \contentsline {section}{\numberline {.10}Arquitectura final de doble proveedor}{132}{section.Alph0.10}%
 \contentsline {section}{\numberline {.11}Comparativa de proveedores}{133}{section.Alph0.11}%
+\contentsline {chapter}{Guía para continuar el desarrollo del proyecto}{135}{appendix*.12}%
+\contentsline {section}{\numberline {.12}Acceso al repositorio}{135}{section.Alph0.12}%
+\contentsline {section}{\numberline {.13}Estructura del repositorio}{135}{section.Alph0.13}%
+\contentsline {section}{\numberline {.14}Configuración del entorno de desarrollo}{136}{section.Alph0.14}%

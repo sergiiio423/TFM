@@ -1,0 +1,140 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Anexo III — Guía para continuar el desarrollo del proyecto
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Guía para continuar el desarrollo del proyecto}
+\label{anx:guiaDesarrollo}
+
+Este anexo está dirigido a cualquier persona que desee continuar el desarrollo de la herramienta presentada en este trabajo. Recoge los pasos necesarios para obtener el código fuente, comprender la estructura del repositorio y poner en marcha el entorno de desarrollo local.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Acceso al repositorio}
+\label{sec:anx3-repo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+El código fuente completo está disponible públicamente en GitHub:
+
+\begin{lstlisting}[style=promptbox]
+https://github.com/sergiiio423/TFM
+\end{lstlisting}
+
+Para clonar el repositorio en local:
+
+\begin{lstlisting}[style=promptbox]
+git clone https://github.com/sergiiio423/TFM.git
+cd TFM
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Estructura del repositorio}
+\label{sec:anx3-estructura}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Todo el código de la herramienta reside bajo \texttt{bpmn-js-examples/modeler/}, que es el directorio de trabajo principal del proyecto. Su estructura es la siguiente:
+
+\begin{lstlisting}[style=promptbox]
+bpmn-js-examples/modeler/
+  mcp-server/           <- servidor MCP (Node.js / Express)
+    index.js            <- punto de entrada del servidor
+    .env.example        <- plantilla de variables de entorno
+    src/
+      llm.js            <- logica de llamadas al LLM
+      registerTools.js  <- registro de herramientas MCP
+      prompts.js        <- prompts del sistema
+      helpers.js        <- funciones auxiliares
+      httpServer.js     <- configuracion del servidor HTTP
+      diagramRenderer.js
+      constants.js
+      stepUtils.js
+      tools/            <- una herramienta MCP por archivo
+        identifyStructure.js
+        renderDiagram.js
+        refineDiagram.js
+        analyzePerval.js
+        suggestNextStep.js
+        suggestBranchStep.js
+        suggestFlowStart.js
+        suggestGatewayBranches.js
+        modifyStructure.js
+  src/                  <- cliente web (bpmn.io + panel conversacional)
+    app.js              <- logica principal de la interfaz
+    mcpClient.js        <- cliente HTTP que llama al servidor MCP
+    style.css           <- estilos del panel conversacional
+    index.html          <- pagina de entrada
+    i18n.js             <- soporte multilingue
+  public/               <- salida de webpack (frontend compilado)
+  webpack.config.cjs    <- configuracion de webpack
+  package.json          <- dependencias y scripts npm
+\end{lstlisting}
+
+En la raíz del repositorio también se encuentra el fichero \texttt{render.yaml}, que define los dos servicios desplegados en Render.com: el servidor MCP (\texttt{tfm-bpmn-mcp-server}) y el frontend estático (\texttt{tfm-bpmn-frontend}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Configuración del entorno de desarrollo}
+\label{sec:anx3-entorno}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Los requisitos previos son:
+
+\begin{itemize}
+  \item \textbf{Node.js} versión 18 o superior y \textbf{npm}.
+  \item Un \textit{token} personal de \textbf{GitHub Models}, o credenciales de \textbf{Azure OpenAI Service} con un \textit{deployment} de \texttt{gpt-4o} activo (véase el Anexo~\ref{anx:migracionLLM} para los detalles de cada proveedor).
+  \item Un navegador moderno (Chrome, Edge o Firefox).
+\end{itemize}
+
+Los pasos para poner en marcha el entorno son:
+
+\begin{enumerate}
+
+  \item \textbf{Acceder al directorio principal:}
+  \begin{lstlisting}[style=promptbox]
+cd bpmn-js-examples/modeler
+  \end{lstlisting}
+
+  \item \textbf{Instalar las dependencias:}
+  \begin{lstlisting}[style=promptbox]
+npm install
+  \end{lstlisting}
+
+  \item \textbf{Configurar las variables de entorno.}
+  Copiar la plantilla que se encuentra en \texttt{mcp-server/.env.example} y guardarla como \texttt{.env} en \texttt{bpmn-js-examples/modeler/} (junto a \texttt{package.json}):
+  \begin{lstlisting}[style=promptbox]
+cp mcp-server/.env.example .env
+  \end{lstlisting}
+  Editar el fichero \texttt{.env} con las credenciales del proveedor elegido:
+  \begin{lstlisting}[style=promptbox]
+# Opcion A: GitHub Models (entorno de desarrollo)
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Opcion B: Azure OpenAI (produccion, recomendado)
+AZURE_OPENAI_KEY=<clave-del-recurso-azure>
+AZURE_OPENAI_ENDPOINT=https://<nombre>.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=gpt-4o
+
+# Puerto del servidor MCP (por defecto 3001)
+MCP_PORT=3001
+  \end{lstlisting}
+
+  \item \textbf{Arrancar el entorno completo} (servidor MCP + frontend en modo desarrollo):
+  \begin{lstlisting}[style=promptbox]
+npm start
+  \end{lstlisting}
+  Este comando ejecuta en paralelo \texttt{npm run mcp-server} (que arranca \texttt{mcp-server/index.js} en el puerto \texttt{MCP\_PORT}) y \texttt{npm run dev} (que lanza el servidor webpack con recarga automática). La interfaz queda disponible en \texttt{http://localhost:8080} por defecto.
+
+  \item \textbf{Modificar el servidor MCP.}
+  Cualquier cambio en la lógica del LLM debe realizarse en \texttt{mcp-server/src/llm.js}. Las herramientas individuales del agente se encuentran cada una en su propio fichero dentro de \texttt{mcp-server/src/tools/}; añadir una nueva herramienta requiere crear su fichero en esa carpeta y registrarla en \texttt{mcp-server/src/registerTools.js}.
+
+  \item \textbf{Modificar el cliente web.}
+  Los cambios en la interfaz conversacional se hacen en \texttt{src/app.js} (lógica de la interfaz) y \texttt{src/mcpClient.js} (comunicación con el servidor MCP). Para modificar los estilos del panel, editar \texttt{src/style.css}. Tras cualquier cambio en \texttt{src/}, el servidor webpack recargará la página automáticamente en modo desarrollo.
+
+  \item \textbf{Generar la versión de producción.}
+  Para compilar el frontend y dejarlo listo para despliegue en \texttt{public/}:
+  \begin{lstlisting}[style=promptbox]
+npm run build
+  \end{lstlisting}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Final del Anexo III
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
